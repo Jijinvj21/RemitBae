@@ -39,6 +39,7 @@ function SalesPage() {
       <Box
         sx={{ border: "1px solid #bbbdbf", width: "100%", my: 1, borderRadius: 2 }}
       >
+        
         <Box
           sx={{
             margin: "2px",
