@@ -3,6 +3,7 @@ import "./SalesPage.scss";
 import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
 import {
   Box,
+  Button,
   FormControl,
   IconButton,
   Input,
@@ -147,7 +148,9 @@ function SalesPage() {
           </Box>
          
         </Box>
-
+<Button>
+Save and Print Bill
+</Button>
 
       </Box>
     </div>
