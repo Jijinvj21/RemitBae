@@ -26,6 +26,8 @@ const randomRole = () => {
   return randomArrayItem(roles);
 };
 
+
+
 const initialRows = Array.from({ length: 5 }, () => ({
   id: randomId(),
   itemCode: Math.floor(Math.random() * 50) + 18,
@@ -39,28 +41,45 @@ const initialRows = Array.from({ length: 5 }, () => ({
 }));
 
 function EditToolbar(props) {
-//   const { setRows, setRowModesModel } = props;
+  const { setRows, setRowModesModel } = props;
 
-//   const handleClick = () => {
-//     const id = randomId();
-//     setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
-//     setRowModesModel((oldModel) => ({
-//       ...oldModel,
-//       [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-//     }));
-//   };
+  const handleClick = () => {
+    const id = randomId();
+    setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+    }));
+  };
 
-//   return (
-//     <GridToolbarContainer>
-//       <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-//         Add record
-//       </Button>
-//     </GridToolbarContainer>
-//   );
+  // return (
+  //   <GridToolbarContainer>
+  //     <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+  //       Add record
+  //     </Button>
+  //   </GridToolbarContainer>
+  // );
 }
 
-export default function FullFeaturedCrudGrid() {
-  const [rows, setRows] = React.useState(initialRows);
+export default function FullFeaturedCrudGrid({selectedProductData }) {
+  // const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState([]);
+
+
+
+  React.useEffect(() => {
+    if (selectedProductData) {
+      const newRow = {
+        id: randomId(), // You may need to generate a unique ID for the new row
+        itemCode: selectedProductData.itemCode,
+        name: selectedProductData.name,
+        unit: selectedProductData.unit,
+        rate: selectedProductData.rate,
+      };
+
+      setRows((prevRows) => [...prevRows, newRow]);
+    }
+  }, [selectedProductData]);
   const [rowModesModel, setRowModesModel] = React.useState({});
 
   const handleRowEditStop = (params, event) => {
@@ -104,9 +123,9 @@ export default function FullFeaturedCrudGrid() {
   };
 
   const columns = [
-    { field: 'itemCode', headerName: 'Item Code', width: 130, editable: true},
+    { field: 'id', headerName: 'Item Code', width: 130, editable: true},
     {
-      field: 'itemName',
+      field: 'name',
       headerName: 'Item Name',
       type: 'number',
       width: 80,
@@ -132,7 +151,7 @@ export default function FullFeaturedCrudGrid() {
         
       },
       {
-        field: 'price',
+        field: 'rate',
         headerName: 'price',
         width: 80,
         editable: true,
@@ -160,7 +179,12 @@ export default function FullFeaturedCrudGrid() {
       type: 'number',
       headerName: 'Total',
       width: 120,
-      cellClassName: 'actions',
+      renderCell: (params) => {
+        const quantity = params.row.qty || 0; // Default to 0 if quantity is not provided
+        const rate = params.row.rate || 0; // Default to 0 if rate is not provided
+        const total = quantity * rate;
+        return <div>{total}</div>;      },
+
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -257,6 +281,7 @@ bgcolor:"#f3f6f9 !important"
             '& .MuiDataGrid-footerContainer':{
               display: 'none !important'
             },
+            overflow:"auto"
            
           }}
       />

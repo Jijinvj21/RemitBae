@@ -117,9 +117,16 @@ function ManageProductsPage() {
 
       inputOrSelect:"select",
       options: [
-        { value: 'option1', label: 'Option 1' },
-        { value: 'option2', label: 'Option 2' },
-        { value: 'option3', label: 'Option 3' }
+        { value: 'none', label: 'None' },
+        { value: 'IGST @ 0%', label: 'IGST @ 0%' },
+        { value: 'CGST @ 0%', label: 'CGST @ 0%' },
+        { value: '0.25%', label: '0.25%' },
+        { value: '3%', label: '3%' },
+        { value: '5%', label: '5%' },
+        { value: '12%', label: '12%' },
+        { value: '18%', label: '18%' },
+        { value: '28%', label: '28%' },
+
       ],    },
     {
       handleChange: handleChange,
