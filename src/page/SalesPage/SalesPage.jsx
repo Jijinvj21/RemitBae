@@ -149,7 +149,7 @@ function SalesPage() {
          
         </Box>
 <Button>
-Save and Print Bill
+Save and Print Bill 
 </Button>
 
       </Box>
