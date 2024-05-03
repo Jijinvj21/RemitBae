@@ -24,14 +24,14 @@ function Sidebar() {
         </MenuItem>
         {/* Business */}
         <MenuItem className="sub_menus">Business </MenuItem>
-        <NavLink to="/admin/dashboaed">
+        <NavLink className="navelink" className="navelink" to="/admin/dashboaed">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
             Dashboard
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/stocks">
+        <NavLink className="navelink" to="/admin/stocks">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
@@ -40,21 +40,21 @@ function Sidebar() {
         </NavLink> 
       
 
-        <NavLink to="/admin/sales">
+        <NavLink className="navelink" to="/admin/sales">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
             Sales
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/clients">
+        <NavLink className="navelink" to="/admin/clients">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
             Clients
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/quotation-generator">
+        <NavLink className="navelink" to="/admin/quotation-generator">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
@@ -64,7 +64,7 @@ function Sidebar() {
         
         {/* Accounts */}
         <MenuItem className="sub_menus">Accounts </MenuItem>
-        <NavLink to="/admin/dash2">
+        <NavLink className="navelink" to="/admin/dash2">
           <MenuItem
             icon={<PeopleAltOutlinedIcon style={{ fontSize: "20px" }} />}
           >
@@ -72,40 +72,40 @@ function Sidebar() {
             Dashboard
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/holidays">
+        <NavLink className="navelink" to="/admin/holidays">
           <MenuItem icon={<GridViewRoundedIcon style={{ fontSize: "20px" }} />}>
           Vouchers
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/leaderboard">
+        <NavLink className="navelink" to="/admin/leaderboard">
           <MenuItem icon={<GridViewRoundedIcon style={{ fontSize: "20px" }} />}>
           Reports
           </MenuItem>
         </NavLink>
         {/* Human resources */}
         <MenuItem className="sub_menus">Human resources </MenuItem>
-        <NavLink to="/admin/dash3">
+        <NavLink className="navelink" to="/admin/dash3">
           <MenuItem icon={<GridViewRoundedIcon style={{ fontSize: "20px" }} />}>
             
           Dashboard
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/employees">
+        <NavLink className="navelink" to="/admin/employees">
           <MenuItem icon={<GridViewRoundedIcon style={{ fontSize: "20px" }} />}>
           Employes
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/customers">
+        <NavLink className="navelink" to="/admin/customers">
           <MenuItem icon={<HiOutlineUserGroup style={{ fontSize: "20px" }} />}>
           Attendance
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/forex">
+        <NavLink className="navelink" to="/admin/forex">
           <MenuItem icon={<GridViewRoundedIcon style={{ fontSize: "20px" }} />}>
           Salary
           </MenuItem>
         </NavLink>
-        <NavLink to="/admin/forex2">
+        <NavLink className="navelink" to="/admin/forex2">
           <MenuItem icon={<GridViewRoundedIcon style={{ fontSize: "20px" }} />}>
           Holidays
           </MenuItem>

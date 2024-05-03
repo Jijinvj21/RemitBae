@@ -65,6 +65,7 @@
         color:"white" !important;
       
       }
+      
       a{
         &:hover {
           background: transparent !important;
@@ -73,6 +74,13 @@
           color: white;
         }
 
+      }
+    }
+    .navelink{
+      &:hover {
+        color: white !important;
+        border-radius: 35px;
+        cursor: default;
       }
     }
   }

@@ -19,6 +19,7 @@ import {
   randomId,
   randomArrayItem
 } from '@mui/x-data-grid-generator';
+import { Autocomplete } from '@mui/material';
 
 const roles = ['Market', 'Finance', 'Development'];
 
@@ -61,26 +62,44 @@ function EditToolbar(props) {
   // );
 }
 
-export default function FullFeaturedCrudGrid({selectedProductData }) {
+export default function FullFeaturedCrudGrid({selectedProductData,totalValues,setTotalValues }) {
   // const [rows, setRows] = React.useState(initialRows);
   const [rows, setRows] = React.useState([]);
 
 
 
+
+  const [rowModesModel, setRowModesModel] = React.useState({});
+
   React.useEffect(() => {
     if (selectedProductData) {
       const newRow = {
-        id: randomId(), // You may need to generate a unique ID for the new row
+        id: randomId(),
         itemCode: selectedProductData.itemCode,
         name: selectedProductData.name,
         unit: selectedProductData.unit,
         rate: selectedProductData.rate,
       };
-
       setRows((prevRows) => [...prevRows, newRow]);
     }
   }, [selectedProductData]);
-  const [rowModesModel, setRowModesModel] = React.useState({});
+
+  React.useEffect(() => {
+    const updatedTotalValues = rows.map((row) => {
+      const quantity = parseInt(row.qty) || 0;
+      const rate = parseInt(row.rate) || 0;
+      const discount = parseFloat(row.discount) || 0;
+      const total = quantity * rate;
+      let discountedTotal = quantity ? total : rate;
+
+      if (quantity > 0 && discount > 0) {
+        discountedTotal = total-((total * discount) / 100);
+      }
+      return discountedTotal;
+    });
+    let total = updatedTotalValues.reduce((sum, value) => sum + value, 0);
+    setTotalValues(total);
+  }, [rows]);
 
   const handleRowEditStop = (params, event) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
@@ -113,6 +132,8 @@ export default function FullFeaturedCrudGrid({selectedProductData }) {
   };
 
   const processRowUpdate = (newRow) => {
+
+    console.log(newRow)
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
@@ -122,22 +143,23 @@ export default function FullFeaturedCrudGrid({selectedProductData }) {
     setRowModesModel(newRowModesModel);
   };
 
+  
+
   const columns = [
-    { field: 'id', headerName: 'Item Code', width: 130, editable: true},
+    { field: 'id', headerName: 'Item Code', width: 60, editable: false},
     {
       field: 'name',
       headerName: 'Item Name',
       type: 'number',
-      width: 80,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
+      width: 100,
+    
+      editable: false,
     },
   
     {
       field: 'qty',
       headerName: 'Qty',
-      width: 80,
+      width: 50,
       editable: true,
       type: 'number',
       
@@ -146,21 +168,47 @@ export default function FullFeaturedCrudGrid({selectedProductData }) {
         field: 'unit',
         headerName: 'Unit',
         width: 80,
-        editable: true,
+        editable: false,
         type: 'number',
         
       },
       {
         field: 'rate',
-        headerName: 'price',
+        headerName: 'rate',
         width: 80,
-        editable: true,
+        editable: false,
         type: 'number',
         
       },
       {
+        field: 'price',
+        headerName: 'price(without tax)',
+        width: 80,
+        editable: false,
+        type: 'number',
+        renderCell: (params) => {
+          const quantity = parseInt(params.row.qty) || 0; // Default to 0 if quantity is not provided
+          const rate = parseInt(params.row.rate) || 0; // Default to 0 if rate is not provided
+          const discount = parseFloat(params.row.discount) || 0; // Default to 0 if discount is not provided
+        
+          const total = quantity * rate; // Calculate total without discount
+          let discountedTotal = quantity?total:rate; // Initialize discounted total with total
+          // setTotalValues((pre)=>[...pre,discountedTotal])
+  
+          // Check if quantity is provided and discount is applicable
+          if (quantity > 0 && discount > 0) {
+            // Calculate discounted total
+                      discountedTotal =  total-((total * discount) / 100) ;
+  
+          }
+        
+          return discountedTotal; // Display the discounted total
+        }
+        
+      },
+      {
         field: 'discount',
-        headerName: 'Discount',
+        headerName: 'Discount %',
         width: 120,
         editable: true,
         type: 'number',
@@ -171,7 +219,82 @@ export default function FullFeaturedCrudGrid({selectedProductData }) {
         headerName: 'Tax Applied',
         width: 120,
         editable: true,
-        type: 'number',
+        type: 'text',
+        valueOptions: ['Credit card', 'Wire transfer', 'Cash'],
+        renderCell: (params) => (
+          
+
+            <Autocomplete
+            className='tabel-autocomplete'
+
+              sx={{
+                display: "inline-block",
+                "& input": {
+                  width: "100%",
+                  fontSize:"14px",
+                  border: "none",
+                  bgcolor: "transprant",
+                  color: (theme) =>
+                    theme.palette.getContrastText(
+                      theme.palette.background.paper
+                    ),
+                },
+
+                
+              }}
+              id="custom-input-demo"
+              options={[
+                { value: 'none', label: 'None' },
+                { value: '0', label: 'IGST @0%' },
+                { value: '0', label: 'CGST @0%' },
+                { value: '0.25', label: 'IGST @0.25%' },
+                { value: '0.25', label: 'CGST @0.25%' },
+                { value: '3', label: 'IGST @3%' },
+                { value: '3', label: 'CGST @3%' },
+                { value: '5', label: 'IGST @5%' },
+                { value: '5', label: 'CGST @5%' },
+                { value: '12', label: 'IGST @12%' },
+                { value: '12', label: 'CGST @12%' },
+                { value: '18', label: 'IGST @18%' },
+                { value: '18', label: 'CGST @18%' },
+                { value: '28', label: 'IGST @28%' },
+                { value: '28', label: 'CGST @28%' },
+        
+        
+              ]}
+
+            
+              componentsProps={{
+                paper: {
+                  sx: {
+                    width: 150,
+                    fontSize:"14px"
+                  }
+                },
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [-45, -20],
+                      },
+                    },
+                  ],
+                },
+
+                
+              }}
+              renderInput={(params) => (
+                <div ref={params.InputProps.ref}>
+                  <input
+                    type="text"
+                    {...params.inputProps}
+                    style={{ height: "10xp",bgcolor:"transprant !imporatant" }}
+                  />
+                </div>
+              )}
+            />
+        ),
         
       },
     {
@@ -179,56 +302,9 @@ export default function FullFeaturedCrudGrid({selectedProductData }) {
       type: 'number',
       headerName: 'Total',
       width: 120,
-      renderCell: (params) => {
-        const quantity = params.row.qty || 0; // Default to 0 if quantity is not provided
-        const rate = params.row.rate || 0; // Default to 0 if rate is not provided
-        const total = quantity * rate;
-        return <div>{total}</div>;      },
-
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key={`save-${id}`}
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key={`cancel-${id}`}
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            key={`edit-${id}`}
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key={`delete-${id}`}
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
+     
+      
+      }
   ];
 
   return (
@@ -259,8 +335,9 @@ export default function FullFeaturedCrudGrid({selectedProductData }) {
             },
             "& .css-yrdy0g-MuiDataGrid-columnHeaderRow" :{
 bgcolor:"#f3f6f9 !important"
-            }
-
+            },
+            
+            
       }}
     >
       <DataGrid
@@ -281,8 +358,9 @@ bgcolor:"#f3f6f9 !important"
             '& .MuiDataGrid-footerContainer':{
               display: 'none !important'
             },
-            overflow:"auto"
-           
+            "& .css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper ": {
+              maxHeightheight: "calc(5% - 96px) !important"
+           }
           }}
       />
     </Box>

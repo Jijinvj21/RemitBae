@@ -138,7 +138,16 @@ function QuotationGeneratorPage() {
     // doc.setFont("bold");
     doc.setTextColor("#a2846b");
     doc.setFontSize(30);
-    doc.text("BILTREE", 15, 20);
+    // doc.text("BILTREE", 15, 20);
+    const imageWidth = 100; // Width in millimeters
+const imageHeight = 30; // Height in millimeters
+    doc.addImage(
+      "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+    
+      1,0,
+      imageWidth, // Width
+      imageHeight // Height
+    );
     doc.setFont(undefined, "normal"); // Set font to bold
     doc.setTextColor("BLACK");
     doc.setFontSize(12);

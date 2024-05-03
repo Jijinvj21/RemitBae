@@ -20,6 +20,9 @@ function SalesPage() {
   const [productOptions, setProductOptions] = useState([]);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
   const[myArray ,setMyArray]=useState([])
+  const [totalValues, setTotalValues] = useState([]);
+  const [inputData,setInputData]=useState(0)
+
 
   const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
 
@@ -75,6 +78,9 @@ console.log(selectedProductData)
       setTableRows([...tableRows, newRow]);
     }
   };
+  const handleChangeAmout=(e)=>{
+    setInputData(e.target.value)
+  }
 
   return (
     <div className="sales-table-container">
@@ -138,12 +144,19 @@ console.log(selectedProductData)
               )}
             />
           </Box>
-        <Box>
-        <SalesTable selectedProductData={selectedProductDetails}/> {/* Pass tableRows as props to SalesTable */}
+          <div style={{overflow:"auto"}}>
+               
+
+        <Box >
+        <SalesTable selectedProductData={selectedProductDetails}
+        setTotalValues={setTotalValues}
+        totalValues={totalValues}
+        /> {/* Pass tableRows as props to SalesTable */}
         </Box>
+        </div>
       </Box>
       <Box
-        sx={{ border: "1px solid #bbbdbf", width: "100%", my: 1, borderRadius: 2 }}
+        sx={{ border: "1px solid #bbbdbf", width: "100%", mt: 4, borderRadius: 2 }}
       >
         
         <Box
@@ -180,7 +193,7 @@ console.log(selectedProductData)
           <p className="head-p-tag">Bill Details</p>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <p>sub Total:</p>
-            <p> &#8377;6,800.00</p>
+            <p> &#8377; {totalValues}</p>
           </Box>
           <hr style={{
             margin:"8px",
@@ -194,9 +207,10 @@ console.log(selectedProductData)
             }}
           >
             <p className="head-p-tag">
-              Total amount <span style={{fontWeight:"lighter", fontSize:"12px"}}>(items:2,Quantity:2)</span>:
+              Total amount :
+               {/* <span style={{fontWeight:"lighter", fontSize:"12px"}}>(items:2,Quantity:2)</span>: */}
             </p>
-            <p> &#8377;6,800.00</p>
+            <p> &#8377; {totalValues}</p>
           </Box>
         </Box>
 
@@ -214,17 +228,18 @@ console.log(selectedProductData)
           <Box sx={{ display: "flex", justifyContent: "space-between",my:1,alignItems:"center" }}>
             <p>Payment Method:</p>
             <select style={{ width: "50%" }}>
-            {Array(5)
-              .fill()
+            {/* {
               .map((_, index) => {
                 const option = { value: index, label: `Option ${index}` }; // Define your options here
-                return (
-                  <option key={index} value={option.value} label={option.label}>
-                    {option.label}
-                  </option>
-                );
-              })}
-          </select>
+                return ( */}
+                  <option value="none" label="None"></option>
+                  <option value="cash" label="Cash"></option>
+                  <option value="upi" label="UPI"></option>
+
+
+              {/* {/* //   ); */}
+              {/* // })} */}
+          </select> 
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between",alignItems:"center",my:1 }}>
             <p>Amount Received:</p>
@@ -232,6 +247,7 @@ console.log(selectedProductData)
           sx={{ my: 1, width: "50%", background: "#F3F6F9", borderRadius: 2 }}
         >
           <OutlinedInput
+          onChange={handleChangeAmout}
             sx={{
               p: "0 !important",
             }}
@@ -248,7 +264,7 @@ console.log(selectedProductData)
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between",my:1 }}>
             <p>Change to Return:</p>
-            <p>&#8377;0.00</p>
+            <p>&#8377;{totalValues-inputData }</p>
 
           </Box>
          
