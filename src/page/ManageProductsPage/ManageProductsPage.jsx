@@ -27,6 +27,8 @@ function ManageProductsPage() {
     unit:"",
     rate:"",})
     const [selectedValue, setSelectedValue] = useState('');
+    const [taxRateValue, setTaxRateValue] = useState({});
+
   const [ProductFormData, setProductFormData] = useState({
     name:"",
     qate:"",
@@ -42,6 +44,40 @@ function ManageProductsPage() {
     setSelectedValue(event.target.value);
     console.log(event.target.value)
   };
+
+  // const handleTaxRateChange = (event) => {
+  //   setTaxRateValue(event.target.value);
+  //   console.log(event.targe.value);
+  // };
+
+
+  const options = [
+    { value: 'none', label: 'None' },
+    { value: '0_igst', label: 'IGST @0%' },
+    { value: '0_cgst', label: 'CGST @0%' },
+    { value: '0.25_igst', label: 'IGST @0.25%' },
+    { value: '0.25_cgst', label: 'CGST @0.25%' },
+    { value: '3_igst', label: 'IGST @3%' },
+    { value: '3_cgst', label: 'CGST @3%' },
+    { value: '5_igst', label: 'IGST @5%' },
+    { value: '5_cgst', label: 'CGST @5%' },
+    { value: '12_igst', label: 'IGST @12%' },
+    { value: '12_cgst', label: 'CGST @12%' },
+    { value: '18_igst', label: 'IGST @18%' },
+    { value: '18_cgst', label: 'CGST @18%' },
+    { value: '28_igst', label: 'IGST @28%' },
+    { value: '28_cgst', label: 'CGST @28%' },
+  ];
+  const handleTaxRateChange = (event) => {
+    const selectedValue = event.target.value;
+    // setTaxRateValue(selectedValue);
+    const selectedOptionObject = options.find(option => option.value === selectedValue);
+    setTaxRateValue(selectedOptionObject);
+
+    console.log('Selected Label:', selectedOptionObject.label);
+    console.log('Selected Value:', selectedOptionObject.value);
+  };
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -110,31 +146,14 @@ function ManageProductsPage() {
       value:updateData.qty||ProductFormData.quantity
     },
     {
-      handleChange: handleChange,
+      handleChange:handleTaxRateChange,
       intputName: "taxrate",
       label: "Tax Rate",
       // type: "number",
+      value:taxRateValue.value,
 
       inputOrSelect:"select",
-      options: [
-        { value: 'none', label: 'None' },
-        { value: '0', label: 'IGST @0%' },
-        { value: '0', label: 'CGST @0%' },
-        { value: '0.25', label: 'IGST @0.25%' },
-        { value: '0.25', label: 'CGST @0.25%' },
-        { value: '3', label: 'IGST @3%' },
-        { value: '3', label: 'CGST @3%' },
-        { value: '5', label: 'IGST @5%' },
-        { value: '5', label: 'CGST @5%' },
-        { value: '12', label: 'IGST @12%' },
-        { value: '12', label: 'CGST @12%' },
-        { value: '18', label: 'IGST @18%' },
-        { value: '18', label: 'CGST @18%' },
-        { value: '28', label: 'IGST @28%' },
-        { value: '28', label: 'CGST @28%' },
-
-
-      ],    },
+      options:options    },
     {
       handleChange: handleChange,
       intputName: "taxvalue",
@@ -216,27 +235,31 @@ function ManageProductsPage() {
   
 
   const handleAdd = () => {
-    const dataToStore = { ...ProductFormData, unit: selectedValue };
+    console.log(taxRateValue)
+    const dataToStore = { ...ProductFormData, unit: selectedValue, taxrate: taxRateValue };
   
     const existingProducts = JSON.parse(localStorage.getItem("products")) || [];
   
     const updatedProducts = [...existingProducts, dataToStore];
   
     localStorage.setItem("products", JSON.stringify(updatedProducts));
-    
+  
+    // Reset form fields and selected values
     setProductFormData({
-      name:"",
-      qate:"",
-      quantity:"",
-      rate:"",
-      taxvalue:"",
-      hsn:"",
-      // unit:"",
-    })
-    setSelectedValue("")
+      name: "",
+      qate: "",
+      quantity: "",
+      rate: "",
+      taxvalue: "",
+      hsn: "",
+    });
+    setSelectedValue("");
+    setTaxRateValue(""); // Reset the tax rate value
+  
     alert("Product added successfully");
-    getArrayFromLocalStorage()
+    getArrayFromLocalStorage();
   };
+  
   
   return (
     <div className="manage-prodect-page">

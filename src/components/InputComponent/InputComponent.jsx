@@ -79,9 +79,8 @@ function InputComponent({
           <div className="select-label">
             <label htmlFor="dropdown">{label}</label>
 
-            <select value={value} onChange={handleSelectChange}>
+            <select value={value} onChange={handleChange}>
   {options.map((option, index) => {
-    console.log(option);
     return (
       <option
         key={index}

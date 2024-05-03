@@ -13,7 +13,6 @@ import {
   OutlinedInput,
 } from "@mui/material";
 
-import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 
 function SalesPage() {
@@ -39,16 +38,15 @@ function SalesPage() {
     getArrayFromLocalStorage()
     // Retrieve products array from local storage
     const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
+    console.log(selectedProduct)
 
     // Extract product names from the products array
     const productNames = storedProducts.map((product) => product.name);
-
     // Generate options using the product names
     const options = productNames.map((name, index) => ({
       value: `option${index + 1}`,
       label: name,
     }));
-
     // Set the options state
     setProductOptions(options);
   }, []);
