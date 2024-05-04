@@ -1,6 +1,5 @@
-
 import SalesTable from "../../components/SalesTable/SalesTable";
-import "./SalesPage.scss";
+import "./PurchasePage.scss";
 import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
 import {
   Autocomplete,
@@ -31,8 +30,7 @@ const style = {
     boxShadow: 24,
     p: 4,
   };
-
-function SalesPage() {
+function PurchasePage() {
 
 
   const [productOptions, setProductOptions] = useState([]);
@@ -42,12 +40,17 @@ function SalesPage() {
   const [inputData,setInputData]=useState(0)
 
 
+
   const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
 
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [inputValue, setInputValue] = useState(""); // State to hold the value of the new input
   const [open, setOpen] = useState(false);
-  const handleClose = () => setOpen(false);
+
+  // Function to handle changes in the new input value
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
 
   const handleOptionSelect = (e) => {
     console.log(e.target.value)
@@ -58,9 +61,6 @@ function SalesPage() {
         setOpen(false)
       // Handle selection of other options
     }
-  };
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
   };
 
 
@@ -116,7 +116,7 @@ console.log(selectedProductData)
   const handleChangeAmout=(e)=>{
     setInputData(e.target.value)
   }
-
+  const handleClose = () => setOpen(false);
   return (
     <div className="sales-table-container">
       <Box sx={{ width: "75%", mx: 1 }}>
@@ -188,11 +188,11 @@ console.log(selectedProductData)
             border: "1px solid #bbbdbf",
           }}
         >
-          <p className="head-p-tag">Customer Details</p>
+          <p className="head-p-tag">Party Details</p>
           <select style={{ width: "100%" }} onChange={handleOptionSelect}>
           <option value="select">Select</option>
 
-<option value="addNew">Add New</option>
+          <option value="addNew">Add New</option>
 
             {Array(5)
               .fill()
@@ -204,8 +204,10 @@ console.log(selectedProductData)
                   </option>
                 );
               })}
+
           </select>
         </Box>
+         
         <Box
           sx={{
             margin: "2px",
@@ -318,7 +320,7 @@ Save and Print Bill
         <Box sx={style}>
             <Box sx={{display:"flex",justifyContent:"center",mb:4}}>
 
-            <h4 > Customer Details</h4 > 
+            <h4 > Add new Party</h4 > 
             </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", my: 1 }}>
             <InputComponent
@@ -336,4 +338,4 @@ Save and Print Bill
   );
 }
 
-export default SalesPage;
+export default PurchasePage;

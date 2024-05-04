@@ -10,6 +10,7 @@ import EmployesPage from "./page/EmployeesPage/EmployeesPage";
 import QuotationGeneratorPage from "./page/QuotationGeneratorPage/QuotationGeneratorPage";
 import StockJournalPage from "./page/StockJournalPage/StockJournalPage";
 import SalesPage from "./page/SalesPage/SalesPage";
+import PurchasePage from "./page/PurchasePage/PurchasePage";
 
 function App() {
   return (
@@ -22,6 +23,9 @@ function App() {
           <Route path="clients" element={<ClientsPage/>} />
           <Route path="employees" element={<EmployesPage/>} />
           <Route path="sales" element={<SalesPage/>} />
+          <Route path="purchase" element={<PurchasePage/>} />
+
+
 
 
 

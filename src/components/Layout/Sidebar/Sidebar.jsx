@@ -47,6 +47,13 @@ function Sidebar() {
             Sales
           </MenuItem>
         </NavLink>
+        <NavLink className="navelink" to="/admin/purchase">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+            Purchase 
+          </MenuItem>
+        </NavLink>
         <NavLink className="navelink" to="/admin/clients">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}

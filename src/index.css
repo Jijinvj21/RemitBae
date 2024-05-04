@@ -108,3 +108,35 @@ body > section:nth-child(2) {
     white-space: nowrap;
     
 }
+
+
+/* Media query for screens smaller than 600px */
+/* @media (max-width: 600px) {
+  * {
+   
+font-size: 2vh !important;
+  }
+} */
+
+/* Media query for screens between 601px and 900px */
+@media (min-width: 1020px) and (max-width: 1080px) {
+  * {
+   font-size: 1.5vh !important;
+   
+  }
+  input{
+    height: 10px !important;
+  }
+  button{
+    height: 35px !important;
+    padding: 10px !important;
+
+  }
+}
+
+/* Media query for screens larger than 900px */
+/* @media (min-width: 901px) {
+  * {
+   font-size: 2vh !important;
+  }
+} */

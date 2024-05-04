@@ -33,24 +33,24 @@ export default function FullFeaturedCrudGrid({
   
   React.useEffect(() => {
     const updatedRows = rows.map((row) => {
-      const quantity = parseInt(row.qty) || 0;
-      const rate = parseInt(row.rate) || 0;
-      const discount = parseFloat(row.discount) || 0;
-      const taxApplied = typeof row.taxApplied === 'string' ? parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0 : 0;
-      
-      // Calculate total amount without tax
-      const totalWithoutTax = quantity * rate;
-      
-      // Calculate discounted total
-      let discountedTotal = quantity > 0 && discount > 0 ? 
-                           totalWithoutTax - (totalWithoutTax * discount) / 100 :
-                           totalWithoutTax;
-      
-      // Calculate total amount including tax
-      const totalWithTax = discountedTotal + (discountedTotal * taxApplied) / 100;
-      
-      // Update total field in the row
-      return { ...row, total: totalWithTax };
+        const quantity = parseInt(row.qty) || 0;
+        const rate = parseInt(row.rate) || 0;
+        const discount = parseFloat(row.discount) || 0;
+        const taxApplied = parseFloat(row.taxApplied?.split("@")[1].replace("%", ""))  || 0;
+
+        // Calculate total amount without tax
+        const totalWithoutTax = quantity * rate;
+
+        // Apply discount if applicable
+        let discountedTotal = totalWithoutTax;
+        if (quantity > 0 && discount > 0) {
+            discountedTotal -= (totalWithoutTax * discount) / 100;
+        }
+
+        // Apply tax
+        const totalWithTax = discountedTotal + (discountedTotal * taxApplied) / 100;
+
+        return { ...row, total: totalWithTax };
     });
 
     // Update the rows with calculated totals
@@ -61,7 +61,10 @@ export default function FullFeaturedCrudGrid({
 
     // Update the total values
     setTotalValues(totalWithTaxSum);
-}, [rows]);
+}, []);//add rows in the array !important and check the error 
+
+
+
 
 
 
