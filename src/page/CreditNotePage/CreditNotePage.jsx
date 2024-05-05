@@ -3,6 +3,9 @@ import "./CreditNotePage.scss"
 import InputComponent from "../../components/InputComponent/InputComponent";
 import { useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg"
+import { AiOutlineFileAdd } from "react-icons/ai";
+import TransactionTable from "../../components/TransactionTable/TransactionTable";
+
 
 function CreditNotePage() {
     const [partyOptions, setPartytOptions] = useState([]);
@@ -44,9 +47,9 @@ function CreditNotePage() {
     ]
   return (
     <div className="creaditnotepage">
-        <h2>Creadit Not</h2>
+        <h2>Creadit Note</h2>
         <div className="inner-section">
-        <div style={{display:"flex", flexDirection:"column" ,gap: "84px",padding:"20px"}}>
+        <div style={{display:"flex", flexDirection:"column",gap:10 ,padding:"20px"}}>
 <div className="top-section" style={{ width:"100%",display:"flex",justifyContent:"space-between", gap:10}}>
 
 <div className="right" >
@@ -142,7 +145,7 @@ function CreditNotePage() {
 </div>
 </div>
 <div className="center-section">
-
+<TransactionTable />
 </div>
 <div className="bottom-section" style={{display:"flex",justifyContent:"space-between"}}>
     <div className="left" style={{display:"flex", flexDirection:"column",width:"50%",gap:1,alignItems:"flex-start"}}>
@@ -172,10 +175,11 @@ function CreditNotePage() {
             component="label"
             >
             
-             <img src={ImageAdd} alt="add img"  />
+             {/* <img src={ImageAdd} alt="add img"  /> */}
+             <AiOutlineFileAdd  size="25px"/>
             <Typography variant="string" style={{
               pl:1
-            }}>Add Photo</Typography>
+            }}>Add Description</Typography>
             <input type="file" hidden 
             // onChange={handleImageChange}
              />

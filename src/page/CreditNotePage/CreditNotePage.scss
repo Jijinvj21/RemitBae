@@ -3,9 +3,17 @@
         padding-bottom: 20px;
         padding-top: 10px;
     }
+    border-radius: 10px;
+
+    height: 90%;
+    overflow: auto;
+    &::-webkit-scrollbar {
+        display: none;
+   
+      }
     .inner-section{
-        background: var(--bgwhite);
         border-radius: 10px;
+        background: var(--bgwhite);
         margin-top: 10px;
         .party-name{
             color: rgba(0, 0, 0, 0.6);
