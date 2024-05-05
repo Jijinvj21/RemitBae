@@ -20,7 +20,7 @@ function AddClientPage() {
     pinCode: "",
     worktype: "",
     country: "",
-    product:"",
+    project:"",
   });
   const [img, setImg] = useState(null);
   const [toggle, setToggle] = useState(true);
@@ -82,10 +82,10 @@ function AddClientPage() {
   const arrOfInputs = [
     {
       handleChange: handleChange,
-      intputName: "product",
-      label: "Product Name",
+      intputName: "project",
+      label: "Project Name",
       type: "text",
-      value:formData.product
+      value:formData.project
     },
     {
       handleChange: handleChange,
@@ -180,7 +180,7 @@ function AddClientPage() {
       pinCode: "",
       worktype: "",
       country: "",
-      product: "",
+      project: "",
     });
     setImg(null);
     setToggle(true);
@@ -234,7 +234,7 @@ function AddClientPage() {
               </Grid>
             )})}
             <Grid item xs={6} md={6}>
-              <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{display:"flex", flexDirection:"column",alignItems:"start"}}>
                 <div >
                   <h5> Has plan given?</h5>
                   <ToggleButtonGroup

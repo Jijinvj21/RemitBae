@@ -50,14 +50,14 @@ export default function FullFeaturedCrudGrid({
         // Apply tax
         const totalWithTax = discountedTotal + (discountedTotal * taxApplied) / 100;
 
-        return { ...row, total: totalWithTax };
+        return { ...row, total:row.amountafterdescount?row.amountafterdescount: totalWithTax };
     });
 
     // Update the rows with calculated totals
     setRows(updatedRows);
 
     // Sum up all totalWithTax values
-    const totalWithTaxSum = updatedRows.reduce((sum, row) => sum + row.total, 0);
+    const totalWithTaxSum = updatedRows.reduce((sum, row) => sum + row.amountafterdescount?row.amountafterdescount: row.total, 0);
 
     // Update the total values
     setTotalValues(totalWithTaxSum);
@@ -66,7 +66,7 @@ export default function FullFeaturedCrudGrid({
 
 
 
-
+ 
 
 
   const handleRowEditStop = (params, event) => {
@@ -109,6 +109,30 @@ export default function FullFeaturedCrudGrid({
     setRowModesModel(newRowModesModel);
   };
 
+  const handleValueChange = (id, field, value) => {
+
+    const updatedRows = rows.map(row => {
+      const quantity = parseInt(row.qty) || 0;
+        const rate = parseInt(row.rate) || 0;
+      const totalWithoutTax = quantity * rate;
+
+      if (row.id === id) {
+        let updatedRow = { ...row, [field]: value };
+        if (field === 'descountvalue') {
+          // Calculate amount after discount
+          console.log(totalWithoutTax)
+          updatedRow.amountafterdescount = totalWithoutTax-((totalWithoutTax * value)/100);
+        } else if (field === 'amountafterdescount') {
+          // Calculate discount value
+          updatedRow.descountvalue = 100-((value/totalWithoutTax )*100);
+        }
+        return updatedRow;
+      }
+      return row;
+    });
+    setRows(updatedRows);
+  };
+
   const columns = [
     { field: "id", headerName: "Item Code", width: 60, editable: false },
     {
@@ -143,7 +167,7 @@ export default function FullFeaturedCrudGrid({
     },
     {
       field: "price",
-      headerName: "price(without tax)",
+      headerName: "price (without tax)",
       width: 80,
       editable: false,
       type: "number",
@@ -177,9 +201,43 @@ export default function FullFeaturedCrudGrid({
     {
       field: "discount",
       headerName: "Discount %",
-      width: 120,
-      editable: true,
+      width: 200,
+      editable: false,
+      hideable: false,
+      sortable: false,
+      filterable: false,
+      flex: 1,
       type: "number",
+      renderHeader: () => (
+        <div style={{ width: '100%', display:"flex",flexDirection:"column" }}>
+          <div style={{margin:"auto"}}>Discount %</div>
+          <hr style={{ width: '100%' }} />
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'space-evenly' }}>
+            <div >%</div>
+            
+            <div >Amount</div>
+          </div>
+        </div>
+      ),
+      renderCell: (params) => (
+        <div style={{ display: 'flex',gap:10, justifyContent: "space-evenly"}}>
+          <input
+          
+            style={{width:"100%",bgcolor:"transparent",outline:"none",border:"none",paddingBottom:"20px",paddingTop:"20px"}}
+            type="text"
+            value={params.row.descountvalue}
+            onChange={(e) => handleValueChange(params.row.id, 'descountvalue', e.target.value)}
+          />
+          <input
+          
+            style={{width:"100%",bgcolor:"transparent",outline:"none",border:"none",paddingBottom:"20px",paddingTop:"20px"}}
+            type="text"
+            value={params.row.amountafterdescount}
+            onChange={(e) => handleValueChange(params.row.id, 'amountafterdescount', e.target.value)}
+          />
+        </div>
+      ),
+     
     },
     {
       field: "taxApplied",
@@ -300,15 +358,17 @@ export default function FullFeaturedCrudGrid({
         "& .css-yrdy0g-MuiDataGrid-columnHeaderRow": {
           bgcolor: "#f3f6f9 !important",
         },
-        // "& .css-1oudwrl": {
-        //   left: 0,
-        // },
+        "& .css-boxz2p-MuiDataGrid-root .MuiDataGrid-columnHeaderTitleContainerContent  ": {
+          width:"100%",
+        },
+       
       }}
     >
       <DataGrid
         rows={rows}
         columns={columns}
         editMode="row"
+        disableColumnMenu
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
@@ -323,6 +383,7 @@ export default function FullFeaturedCrudGrid({
           "& .css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper ": {
             maxHeightheight: "calc(5% - 96px) !important",
           },
+          
         }}
       />
     </Box>

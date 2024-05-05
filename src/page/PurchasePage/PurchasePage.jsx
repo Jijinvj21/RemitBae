@@ -177,7 +177,7 @@ console.log(selectedProductData)
         </div>
       </Box>
       <Box
-        sx={{ border: "1px solid #bbbdbf", width: "100%", mt: 4, borderRadius: 2, }}
+        sx={{ border: "1px solid #bbbdbf", width: "30%", mt: 4, borderRadius: 2, }}
       >
         
         <Box
@@ -255,17 +255,12 @@ console.log(selectedProductData)
           <Box sx={{ display: "flex", justifyContent: "space-between",my:1,alignItems:"center" }}>
             <p>Payment Method:</p>
             <select style={{ width: "50%" }}>
-            {/* {
-              .map((_, index) => {
-                const option = { value: index, label: `Option ${index}` }; // Define your options here
-                return ( */}
+            
                   <option value="none" label="None"></option>
                   <option value="cash" label="Cash"></option>
                   <option value="upi" label="UPI"></option>
 
 
-              {/* {/* //   ); */}
-              {/* // })} */}
           </select> 
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between",alignItems:"center",my:1 }}>

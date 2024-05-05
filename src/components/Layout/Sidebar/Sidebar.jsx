@@ -68,6 +68,28 @@ function Sidebar() {
             Quotation
           </MenuItem>
         </NavLink>
+        <NavLink className="navelink" to="/admin/projects">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+            Projects
+          </MenuItem>
+        </NavLink>
+        <NavLink className="navelink" to="/admin/payment-in">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+            Payment
+          </MenuItem>
+        </NavLink>
+        
+        <NavLink className="navelink" to="/admin/creadit-note">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+            Creadit
+          </MenuItem>
+        </NavLink>
         
         {/* Accounts */}
         <MenuItem className="sub_menus">Accounts </MenuItem>

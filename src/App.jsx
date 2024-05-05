@@ -11,6 +11,9 @@ import QuotationGeneratorPage from "./page/QuotationGeneratorPage/QuotationGener
 import StockJournalPage from "./page/StockJournalPage/StockJournalPage";
 import SalesPage from "./page/SalesPage/SalesPage";
 import PurchasePage from "./page/PurchasePage/PurchasePage";
+import ProjectPage from "./page/ProjectPage/ProjectPage";
+import PaymenyIn from "./page/PaymenyIn/PaymenyIn";
+import CreditNotePage from "./page/CreditNotePage/CreditNotePage";
 
 function App() {
   return (
@@ -24,6 +27,13 @@ function App() {
           <Route path="employees" element={<EmployesPage/>} />
           <Route path="sales" element={<SalesPage/>} />
           <Route path="purchase" element={<PurchasePage/>} />
+          <Route path="projects" element={<ProjectPage/>} />
+          <Route path="payment-in" element={<PaymenyIn/>} />
+          <Route path="creadit-note" element={<CreditNotePage/>} />
+          
+
+
+
 
 
 
