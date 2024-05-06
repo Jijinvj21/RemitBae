@@ -1,5 +1,5 @@
 import { Button, Grid, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import "./AddClientPage.scss";
+import "./AddProjectsPage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import { useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 
 
-function AddClientPage() {
+function AddProjectsPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -328,4 +328,4 @@ function AddClientPage() {
   );
 }
 
-export default AddClientPage;
+export default AddProjectsPage;

@@ -7,34 +7,58 @@ import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer
 import AddSquare from "../../assets/products/AddSquare.svg";
 import { Link } from "react-router-dom";
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
+import { gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI } from "../../service/api/admin";
 
 function ManageProductsPage() {
   const [myArray, setMyArray] = useState([]);
   const [searchQuery, setSearchQuery] = useState(''); // Initialize searchQuery as an empty string
+const [taxOptions,setTaxOptions]=useState([])
+const [updatetrue,setUpdateTrue]=useState(false)
+  const getDataFromAPI = () => {
+    productGetAPI().then((data)=>{
+      if(data.satuscode==200){
 
-  const getArrayFromLocalStorage = () => {
-    const storedArray = localStorage.getItem('products');
-    if (storedArray) {
-      setMyArray(JSON.parse(storedArray));
-    }
+        setMyArray(data.responseData);
+      }
+
+    }).catch((err)=>{
+      console.log(err)
+    })
   };
+  const getTaxOptionsFormAPI = () => {
+    gstOptionsGetAPI().then((data) => {
+      console.log("tax:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const transformedData = data.map(entry => ({
+        value: entry.percentage,
+        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
+        taxlabel: entry.percentage
+
+      }));
+      setTaxOptions(transformedData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
   useEffect(() => {
-    // Function to retrieve array from local storage
-    getArrayFromLocalStorage(); 
+    getDataFromAPI()
+    getTaxOptionsFormAPI()
   }, []);
-  const [updateData,setUpdateData]=useState({ heading:"",
+  const [updateData,setUpdateData]=useState({ name:"",
     qty:"",
     unit:"",
-    rate:"",})
+    hsn:"",
+    rate:0,
+  })
     const [selectedValue, setSelectedValue] = useState('');
     const [taxRateValue, setTaxRateValue] = useState({});
 
   const [ProductFormData, setProductFormData] = useState({
     name:"",
-    qate:"",
     quantity:"",
-    rate:"",
-    taxvalue:"",
+    rate:0,
     hsn:"",
     // unit:"",
   });
@@ -45,39 +69,21 @@ function ManageProductsPage() {
     console.log(event.target.value)
   };
 
-  // const handleTaxRateChange = (event) => {
-  //   setTaxRateValue(event.target.value);
-  //   console.log(event.targe.value);
-  // };
+ 
 
 
-  const options = [
-    { value: 'none', label: 'None' },
-    { value: '0_igst', label: 'IGST @0%' },
-    { value: '0_cgst', label: 'CGST @0%' },
-    { value: '0.25_igst', label: 'IGST @0.25%' },
-    { value: '0.25_cgst', label: 'CGST @0.25%' },
-    { value: '3_igst', label: 'IGST @3%' },
-    { value: '3_cgst', label: 'CGST @3%' },
-    { value: '5_igst', label: 'IGST @5%' },
-    { value: '5_cgst', label: 'CGST @5%' },
-    { value: '12_igst', label: 'IGST @12%' },
-    { value: '12_cgst', label: 'CGST @12%' },
-    { value: '18_igst', label: 'IGST @18%' },
-    { value: '18_cgst', label: 'CGST @18%' },
-    { value: '28_igst', label: 'IGST @28%' },
-    { value: '28_cgst', label: 'CGST @28%' },
-  ];
   const handleTaxRateChange = (event) => {
-    const selectedValue = event.target.value;
-    // setTaxRateValue(selectedValue);
-    const selectedOptionObject = options.find(option => option.value === selectedValue);
-    setTaxRateValue(selectedOptionObject);
-
-    console.log('Selected Label:', selectedOptionObject.label);
-    console.log('Selected Value:', selectedOptionObject.value);
+    console.log(event.target.value)
+    const selectedOptionObject = taxOptions.find(option => option.taxlabel == event.target.value);
+    console.log(selectedOptionObject);
+    // setTaxRateValue({
+    //   label: selectedOptionObject ? selectedOptionObject.label : "", // Handle case where selectedOptionObject is undefined
+    //   value: event.target.value
+    // });
+    setTaxRateValue(selectedOptionObject)
   };
-
+  
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -127,7 +133,7 @@ function ManageProductsPage() {
       intputName: "name",
       label: " Product Name",
       type: "text",
-      value:updateData?.heading||ProductFormData.name
+      value:updateData?.name||ProductFormData.name
       
       
     },
@@ -150,16 +156,17 @@ function ManageProductsPage() {
       intputName: "taxrate",
       label: "Tax Rate",
       // type: "number",
-      value:taxRateValue.value,
+      // value:taxRateValue.label,
 
       inputOrSelect:"select",
-      options:options    },
+      options:taxOptions    },
     {
-      handleChange: handleChange,
       intputName: "taxvalue",
       label: " Tax Value",
-      type: "number",
-      value:""
+      // type: "number",
+      value:taxRateValue.value,
+      disabled:"disabled"
+      
     },
     {
       handleChange: handleChange,
@@ -202,31 +209,42 @@ function ManageProductsPage() {
   
   const handleUpdate = (data) => {
     console.log("Updating data:", data);
+    setUpdateTrue(true)
     setUpdateData(data)
     toggleDrawer("right", true)(); // Check if "right" is the correct anchor value
-    // alert("You clicked the main div!");
+  alert("update")
   };
-  
+   const handleUpdateData=()=>{
+    alert("update")
+    const productUpdate={
+      name:updateData.name,
+      hsn:updateData.hsn,
+      rate: parseInt(updateData.rate),
+      quantity: parseInt(updateData.qty),
+      unit:selectedValue,
+      taxvalue: taxRateValue?.label
+    }
+    productUpdateAPI(productUpdate).then((data)=>{
+console.log(data)
+setUpdateTrue(false)
+getDataFromAPI()
+    }).catch((err)=>{
+      console.log(err)
+    })
+   }
   
 
   const handleDelete = (event, indexToDelete) => {
     event.stopPropagation(); // Prevent the click event from bubbling up to the main div
-    console.log("Deleting item at index:", indexToDelete);
     
     try {
-      const existingProducts = JSON.parse(localStorage.getItem("products")) || [];
-      console.log("Existing products:", existingProducts);
-  
-      // Remove the item at the specified index
-      existingProducts.splice(indexToDelete, 1);
-      console.log("Updated products:", existingProducts);
-  
-      // Update local storage with the modified array
-      localStorage.setItem("products", JSON.stringify(existingProducts));
-  
-      // Update state or perform any other necessary actions
-      // For example, if you're displaying the products in a list, you may want to update the list state here
-      getArrayFromLocalStorage();
+     productDeleteAPI(indexToDelete).then((res)=>{
+        if(res.status==200){
+
+          getDataFromAPI();
+          console.log("deleted")
+        }
+      })
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -235,29 +253,38 @@ function ManageProductsPage() {
   
 
   const handleAdd = () => {
-    console.log(taxRateValue)
-    const dataToStore = { ...ProductFormData, unit: selectedValue, taxrate: taxRateValue };
-  
-    const existingProducts = JSON.parse(localStorage.getItem("products")) || [];
-  
-    const updatedProducts = [...existingProducts, dataToStore];
-  
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-  
+   
+    const productadd={
+      name:ProductFormData.name,
+      hsn:ProductFormData.hsn,
+      rate: parseInt(ProductFormData.rate),
+      quantity: parseInt(ProductFormData.quantity),
+      unit:selectedValue,
+      taxvalue: taxRateValue?.label
+    }
+    // console.log(taxRateValue)
+    productAddAPI(productadd).then((data)=>{
+      if(data.status==200){
+        setProductFormData({
+          name: "",
+          qate: "",
+          quantity: "",
+          rate: "",
+          taxvalue: "",
+          hsn: "",
+        });
+        setSelectedValue("");
+        setTaxRateValue(""); // Reset the tax rate value
+      
+        alert("Product added successfully");
+        getDataFromAPI();
+      }
+    })
+    .catch((err)=>{console.log(err)})
+    alert("problem in add product");
+
     // Reset form fields and selected values
-    setProductFormData({
-      name: "",
-      qate: "",
-      quantity: "",
-      rate: "",
-      taxvalue: "",
-      hsn: "",
-    });
-    setSelectedValue("");
-    setTaxRateValue(""); // Reset the tax rate value
   
-    alert("Product added successfully");
-    getArrayFromLocalStorage();
   };
   
   
@@ -357,12 +384,13 @@ function ManageProductsPage() {
             flexWrap: "wrap",
      }}
         >
-          {myArray.length===0 ?
+          {myArray?.length===0 ?
           <Box sx={{my:2, mx:"auto",display:"flex",flexDirection:"column",
           alignItems:"center"}}>
           <PlaylistAddRoundedIcon sx={{mx:"auto"}} style={{fontSize:"40px"}}/>
           <p style={{textAlign:"center"}}>No products available</p>
-          </Box>:myArray.map((data, index) => (
+          </Box>:myArray?.map((data, index) => {
+            return(
             <Box
               item
               key={index}
@@ -376,7 +404,7 @@ function ManageProductsPage() {
             >
               <ProductDataCard
                 handleUpdate={handleUpdate}
-                handleDelete={ (e)=>handleDelete(e,index)}
+                handleDelete={ (e)=>handleDelete(e,data.id)}
                 heading={data.name}
                 image={data.img}
                 qty={data.quantity}
@@ -385,7 +413,7 @@ function ManageProductsPage() {
                 amount={data.amount}
               />
             </Box>
-          ))}
+          )})}
         </Box>
         <Box
           sx={{
@@ -415,6 +443,9 @@ function ManageProductsPage() {
         ProductFormData={ProductFormData}
         handleImageChange={handleImageChange}
         handleAdd={handleAdd}
+        updatetrue={updatetrue}
+        handleUpdateData={handleUpdateData}
+        
         // updateData={updateData}
       />
     </div>

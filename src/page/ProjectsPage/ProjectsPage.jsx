@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import "./ClientsPage.scss";
+import "./ProjectsPage.scss";
 import { Link } from "react-router-dom";
 import AddSquare from "../../assets/products/AddSquare.svg";
 import { Box } from "@mui/material";
 import UserDataCard from "../../components/UserDataCard/UserDataCard";
 
-function ClientsPage() {
+function ProjectsPage() {
   // State to hold client data
   const [clientsData, setClientsData] = useState([]);
 
@@ -18,13 +18,13 @@ function ClientsPage() {
   return (
     <div className="client-page-section">
       <div className="link-div">
-        <Link to="/admin/clients/add-client" className="link-to-manage-products">
+        <Link to="/admin/projects/add-projects" className="link-to-manage-products">
           <img src={AddSquare} alt="AddSquare" />
-          Add Client
+          Add Project
         </Link>
       </div>
       <div className="client-inner-section">
-        <h2> Clients </h2>
+        <h2> Project </h2>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3, justifyContent: "flex-start" }}>
           {/* Iterate over each client and render a UserDataCard component */}
           {clientsData.map((client, index) => (
@@ -42,4 +42,4 @@ function ClientsPage() {
   );
 }
 
-export default ClientsPage;
+export default ProjectsPage;

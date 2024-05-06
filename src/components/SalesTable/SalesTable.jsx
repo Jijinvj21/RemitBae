@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import { DataGrid, GridRowEditStopReasons } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 import { Autocomplete } from "@mui/material";
+import { gstOptionsGetAPI } from "../../service/api/admin";
 
 export default function FullFeaturedCrudGrid({
   selectedProductData,
@@ -14,17 +15,40 @@ export default function FullFeaturedCrudGrid({
   const [rows, setRows] = React.useState([]);
 
   const [rowModesModel, setRowModesModel] = React.useState({});
+  const [taxOptions,setTaxOptions]=React.useState([])
+
+
+  const getTaxOptionsFormAPI = () => {
+    gstOptionsGetAPI().then((data) => {
+      console.log("tax:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const transformedData = data.map(entry => ({
+        value: entry.percentage,
+        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
+        taxlabel: entry.percentage
+
+      }));
+      setTaxOptions(transformedData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
+  React.useEffect(() => {
+    getTaxOptionsFormAPI()
+  }, []);
 
   React.useEffect(() => {
     if (selectedProductData) {
-      console.log(selectedProductData.taxrate.label);
+      console.log(selectedProductData.taxrate?.label);
       const newRow = {
         id: randomId(),
         itemCode: selectedProductData.itemCode,
         name: selectedProductData.name,
         unit: selectedProductData.unit,
         rate: selectedProductData.rate,
-        taxApplied: selectedProductData.taxrate.label,
+        taxApplied: selectedProductData.taxrate?.label,
         qty: 1, // Set quantity to 1 every time a new product is selected
       };
       setRows((prevRows) => [...prevRows, newRow]);
@@ -69,39 +93,41 @@ export default function FullFeaturedCrudGrid({
  
 
 
-  const handleRowEditStop = (params, event) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
+// const handleRowEditStop = (params, event) => {
+//   if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+//     event.defaultMuiPrevented = true;
+//   }
 
-    const updatedRows = rows.map((row) => {
-      if (row.id === params.id) {
-        const quantity = parseInt(params.row.qty) || 0;
-        const rate = parseInt(params.row.rate) || 0;
-        const discount = parseFloat(params.row.discount) || 0;
-        const taxApplied =
-          parseFloat(params.row.taxApplied.split("@")[1].replace("%", "")) || 0;
-        console.log(quantity);
-        const totalWithoutTax = quantity * rate;
-        const discountedTotal =
-          quantity > 0 && discount > 0
-            ? totalWithoutTax - (totalWithoutTax * discount) / 100
-            : totalWithoutTax;
-        const totalWithTax =
-          discountedTotal + (discountedTotal * taxApplied) / 100;
-        setTotalValues(totalWithTax);
-        return { ...row, total: totalWithTax };
-      }
-      return row;
-    });
+//   const updatedRows = rows.map((row) => {
+//     if (row.id === params.id) {
+//       const quantity = parseInt(params.row.qty) || 0;
+//       const rate = parseInt(params.row.rate) || 0;
+//       const discount = parseFloat(params.row.discount) || 0;
+//       const taxApplied =
+//         parseFloat(params.row.taxApplied.split("@")[1].replace("%", "")) || 0;
+//       console.log(quantity);
+//       const totalWithoutTax = quantity * rate;
+//       const discountedTotal =
+//         quantity > 0 && discount > 0
+//           ? totalWithoutTax - (totalWithoutTax * discount) / 100
+//           : totalWithoutTax;
+//       const totalWithTax =
+//         discountedTotal + (discountedTotal * taxApplied) / 100;
+//       setTotalValues(totalWithTax);
+//       return { ...row, total: totalWithTax, qty: quantity }; // Update qty here
+//     }
+//     return row;
+//   });
 
-    setRows(updatedRows);
-  };
+//   setRows(updatedRows);
+// };
+
 
   const processRowUpdate = (newRow) => {
     console.log(newRow);
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+    
     return updatedRow;
   };
 
@@ -168,9 +194,18 @@ export default function FullFeaturedCrudGrid({
     {
       field: "price",
       headerName: "price (without tax)",
-      width: 80,
+      width: 120,
       editable: false,
       type: "number",
+      renderHeader: () => (
+        <div style={{ width: '100%', display:"flex",flexDirection:"column",}}>
+          <div style={{display:"flex",justifyContent:"center"}}>
+            <p>price</p>
+          </div>
+          <hr style={{ width: '100%' }} />
+            <div style={{ fontWeight: 'bold' }}>(without tax)</div>
+        </div>
+      ),
       renderCell: (params) => {
         const quantity = parseInt(params.row.qty) || 0;
         const rate = parseInt(params.row.rate) || 0;
@@ -201,7 +236,7 @@ export default function FullFeaturedCrudGrid({
     {
       field: "discount",
       headerName: "Discount %",
-      width: 200,
+      width: 180,
       editable: false,
       hideable: false,
       sortable: false,
@@ -242,7 +277,7 @@ export default function FullFeaturedCrudGrid({
     {
       field: "taxApplied",
       headerName: "Tax Applied",
-      width: 120,
+      width: 140,
       // editable: true,
       type: "text",
       // valueOptions: ["Credit card", "Wire transfer", "Cash"],
@@ -274,23 +309,7 @@ export default function FullFeaturedCrudGrid({
               },
             }}
             id="custom-input-demo"
-            options={[
-              { value: "none", label: "None" },
-              { value: "0_igst", label: "IGST @0%" },
-              { value: "0_cgst", label: "CGST @0%" },
-              { value: "0.25_igst", label: "IGST @0.25%" },
-              { value: "0.25_cgst", label: "CGST @0.25%" },
-              { value: "3_igst", label: "IGST @3%" },
-              { value: "3_cgst", label: "CGST @3%" },
-              { value: "5_igst", label: "IGST @5%" },
-              { value: "5_cgst", label: "CGST @5%" },
-              { value: "12_igst", label: "IGST @12%" },
-              { value: "12_cgst", label: "CGST @12%" },
-              { value: "18_igst", label: "IGST @18%" },
-              { value: "18_cgst", label: "CGST @18%" },
-              { value: "28_igst", label: "IGST @28%" },
-              { value: "28_cgst", label: "CGST @28%" },
-            ]}
+            options={taxOptions }
             componentsProps={{
               paper: {
                 sx: {
@@ -327,6 +346,16 @@ export default function FullFeaturedCrudGrid({
       type: "number",
       headerName: "Total",
       width: 120,
+      renderCell: (params) => {
+        // Calculate total based on quantity and rate
+        const quantity = parseInt(params.row.qty) || 0;
+        const rate = parseInt(params.row.rate) || 0;
+        const discount= params.row.amountafterdescount||0
+        console.log(parseFloat(params.row.taxApplied?.value.replace("%", "")));
+        const tax=parseFloat(params.row.taxApplied?.value.replace("%", "")) ||0
+        setTotalValues(((quantity * rate)-discount)+tax)
+        return ((quantity * rate)-discount)+tax;
+      },
     },
   ];
 
@@ -371,7 +400,7 @@ export default function FullFeaturedCrudGrid({
         disableColumnMenu
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
+        // onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         slotProps={{
           toolbar: { setRows, setRowModesModel },

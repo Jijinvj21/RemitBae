@@ -57,7 +57,7 @@ function ProductInputCard({
           </Box>
           <img src={Deleteicon} alt="Delete" onClick={handleDelete} />
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "flex-start" }}>
           <Box
             sx={{
               px: 2,

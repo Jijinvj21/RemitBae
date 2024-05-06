@@ -3,9 +3,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import RigthSideLayout from "./components/RigthSideLayout/RigthSideLayout";
 import AddStaff from "./page/AddStaffPage/AddStaffPage";
-import AddClient from "./page/AddClientPage/AddClientPage";
+import AddClient from "./page/AddProjectsPage/AddProjectsPage";
 import ManageProductsPage from "./page/ManageProductsPage/ManageProductsPage";
-import ClientsPage from "./page/ClientsPage/ClientsPage";
+import ProjectsPage from "./page/ProjectsPage/ProjectsPage";
 import EmployesPage from "./page/EmployeesPage/EmployeesPage";
 import QuotationGeneratorPage from "./page/QuotationGeneratorPage/QuotationGeneratorPage";
 import StockJournalPage from "./page/StockJournalPage/StockJournalPage";
@@ -23,25 +23,19 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/admin" element={<RigthSideLayout />}>
           
-          <Route path="clients" element={<ClientsPage/>} />
+          {/* <Route path="projects" element={<ProjectsPage/>} /> */}
           <Route path="employees" element={<EmployesPage/>} />
           <Route path="sales" element={<SalesPage/>} />
           <Route path="purchase" element={<PurchasePage/>} />
-          <Route path="projects" element={<ProjectPage/>} />
+          <Route path="projects" element={<ProjectsPage/>} />
           <Route path="payment-in" element={<PaymenyIn/>} />
           <Route path="creadit-note" element={<CreditNotePage/>} />
+          <Route path="project-data" element={<p>project data</p>} />
+
+
           
-
-
-
-
-
-
-
-
-
             <Route path="employees/add-employes" element={<AddStaff />} />
-            <Route path="clients/add-client" element={<AddClient />} />
+            <Route path="projects/add-projects" element={<AddClient />} />
             <Route path="stocks" element={<ManageProductsPage />} />
             <Route path="quotation-generator" element={<QuotationGeneratorPage/>} />
             <Route path="stock-journal" element={<StockJournalPage/>} />

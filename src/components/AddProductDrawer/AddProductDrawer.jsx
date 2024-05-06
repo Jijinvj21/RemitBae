@@ -15,7 +15,9 @@ function AddProductDrawer({
   updateData,
   handleImageChange,
   handleAdd,
-  handleSelectChange
+  handleSelectChange,
+  updatetrue,
+  handleUpdateData
 }) {
   // draw
 
@@ -33,7 +35,6 @@ function AddProductDrawer({
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           {arrOfInputs?.map((input, index) => {
-            console.log(input);
             return (
               <Grid item key={index} xs={6} md={6}>
                 <InputComponent
@@ -46,6 +47,7 @@ function AddProductDrawer({
   inputOrSelect={input.inputOrSelect}
   options={input.options}
   value={input.value}
+  disabled={input.disabled}
 />
 
               </Grid>
@@ -71,6 +73,21 @@ function AddProductDrawer({
             <input type="file" hidden onChange={handleImageChange} />
           </Button>
         </Grid>
+        { updatetrue ?<Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{
+            mt: "2rem",
+            fontWeight: "bold",
+            textTransform: "none",
+            bgcolor: "var(--black-button)",
+          }}
+          onClick={handleUpdateData}
+        >
+          Update Product
+        </Button>
+:
         <Button
           type="submit"
           variant="contained"
@@ -84,7 +101,10 @@ function AddProductDrawer({
           onClick={handleAdd}
         >
           Add Product
-        </Button>
+        </Button>}
+
+
+
         <Button
           disableRipple
           sx={{

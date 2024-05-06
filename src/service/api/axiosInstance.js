@@ -1,14 +1,14 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: `add base url here`,
+  baseURL: `http://192.168.0.100:8085`,
   withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(
   (config) => {
     // take token form the local storage 
-    const token = localStorage.getItem("Admintoken") || localStorage.getItem("token");
+    const token = false;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

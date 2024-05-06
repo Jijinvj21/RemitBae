@@ -24,7 +24,7 @@ function Sidebar() {
         </MenuItem>
         {/* Business */}
         <MenuItem className="sub_menus">Business </MenuItem>
-        <NavLink className="navelink" className="navelink" to="/admin/dashboaed">
+        <NavLink className="navelink"  to="/admin/dashboaed">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
@@ -54,13 +54,13 @@ function Sidebar() {
             Purchase 
           </MenuItem>
         </NavLink>
-        <NavLink className="navelink" to="/admin/clients">
+        {/* <NavLink className="navelink" to="/admin/clients">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
             Clients
           </MenuItem>
-        </NavLink>
+        </NavLink> */}
         <NavLink className="navelink" to="/admin/quotation-generator">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}

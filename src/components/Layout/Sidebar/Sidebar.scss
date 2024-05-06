@@ -9,6 +9,11 @@
         // color:var(--sidebar-hovertext) !important;
         color:var(--sidebar-hovertext) !important;
         background:var(--custom-green) !important;
+        &:hover {
+          background:var(--custom-green) !important;
+          border-radius: 35px;
+          color:var(--sidebar-hovertext) !important;
+        }
       }
     }
     .menu1 {
@@ -45,11 +50,13 @@
           min-width: 20px ;
           padding-left: 5px;
       }
+      
       &:hover {
-        background:var(--custom-green) !important;
+        background:transparent !important;
         border-radius: 35px;
-        color: var(--sidebar-hovertext) !important;
+        color: var(--custom-green) !important;
       }
+      
       
       
       

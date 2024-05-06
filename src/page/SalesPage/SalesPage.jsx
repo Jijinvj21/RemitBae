@@ -1,7 +1,6 @@
-
 import SalesTable from "../../components/SalesTable/SalesTable";
 import "./SalesPage.scss";
-import CurrencyRupeeOutlinedIcon from '@mui/icons-material/CurrencyRupeeOutlined';
+import CurrencyRupeeOutlinedIcon from "@mui/icons-material/CurrencyRupeeOutlined";
 import {
   Autocomplete,
   Box,
@@ -15,32 +14,29 @@ import {
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
-import Modal from '@mui/material/Modal';
+import Modal from "@mui/material/Modal";
 import InputComponent from "../../components/InputComponent/InputComponent";
-
+import { productGetAPI } from "../../service/api/admin";
 
 const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    // border: '2px solid #000',
-    borderRadius:"10px",
-    boxShadow: 24,
-    p: 4,
-  };
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  // border: '2px solid #000',
+  borderRadius: "10px",
+  boxShadow: 24,
+  p: 4,
+};
 
 function SalesPage() {
-
-
   const [productOptions, setProductOptions] = useState([]);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
-  const[myArray ,setMyArray]=useState([])
+  const [myArray, setMyArray] = useState([]);
   const [totalValues, setTotalValues] = useState([]);
-  const [inputData,setInputData]=useState(0)
-
+  const [inputData, setInputData] = useState(0);
 
   const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
 
@@ -50,12 +46,12 @@ function SalesPage() {
   const handleClose = () => setOpen(false);
 
   const handleOptionSelect = (e) => {
-    console.log(e.target.value)
+    console.log(e.target.value);
     const selectedOption = e.target.value;
     if (selectedOption === "addNew") {
-        setOpen(true)
+      setOpen(true);
     } else {
-        setOpen(false)
+      setOpen(false);
       // Handle selection of other options
     }
   };
@@ -63,42 +59,48 @@ function SalesPage() {
     setInputValue(e.target.value);
   };
 
-
-  const getArrayFromLocalStorage = () => {
-    const storedArray = localStorage.getItem('products');
-    if (storedArray) {
-      setMyArray(JSON.parse(storedArray));
-    }
-  };
+  // const getArrayFromLocalStorage = () => {
+  //   const storedArray = localStorage.getItem('products');
+  //   if (storedArray) {
+  //     setMyArray(JSON.parse(storedArray));
+  //   }
+  // };
 
   useEffect(() => {
-    getArrayFromLocalStorage()
-    // Retrieve products array from local storage
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-    console.log(selectedProduct)
-
-    // Extract product names from the products array
-    const productNames = storedProducts.map((product) => product.name);
-    // Generate options using the product names
-    const options = productNames.map((name, index) => ({
-      value: `option${index + 1}`,
-      label: name,
-    }));
-    // Set the options state
-    setProductOptions(options);
+    const fetchData = async () => {
+      const response = await productGetAPI();
+      const products = response.responseData;
+      const productNames = products.map((product) => product.name);
+      const options = productNames.map((name, index) => ({
+        value: `option${index + 1}`,
+        label: name,
+      }));
+      setProductOptions(options);
+    };
+    fetchData();
   }, []);
 
-  const handleSelectedProductChange = (event, newValue) => {
+  const handleSelectedProductChange = async (event, newValue) => {
+    if (!newValue) {
+      // Handle the case where newValue is not defined
+      return;
+    }
+  
     setSelectedProduct(newValue);
-
+    
     if (newValue) {
+      console.log(newValue.label);
       // Set the amount based on the selected product
-      const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-      const selectedProductData = storedProducts.find(
-        (product) => product.name === newValue.label
+      const response = await productGetAPI();
+      console.log(response)
+      const products = response.responseData;
+  
+      const selectedProductData = products.find(
+        (product) => product.name === newValue?.label
       );
+      console.log(selectedProductData)
       setSelectedProductDetails(selectedProductData);
-console.log(selectedProductData)
+      console.log(selectedProductData);
       // Add selected product to the table rows
       const newRow = {
         id: 1,
@@ -113,73 +115,70 @@ console.log(selectedProductData)
       setTableRows([...tableRows, newRow]);
     }
   };
-  const handleChangeAmout=(e)=>{
-    setInputData(e.target.value)
-  }
+  
+  
+
+
+  const handleChangeAmout = (e) => {
+    setInputData(e.target.value);
+  };
 
   return (
     <div className="sales-table-container">
       <Box sx={{ width: "75%", mx: 1 }}>
+        <Box sx={{ width: "100%", marginBottom: "10px" }}>
+          <p className="product-name">products</p>
 
-
-<Box sx={{ width: "100%",marginBottom:"10px" }}>
-            <p className="product-name">products</p>
-
-            <Autocomplete
-              sx={{
-                display: "inline-block",
-                "& input": {
-                  width: "100%",
-                  border: "none",
-                  bgcolor: "var(--inputbg-color)",
-                  color: (theme) =>
-                    theme.palette.getContrastText(
-                      theme.palette.background.paper
-                    ),
-                },
-              }}
-              id="custom-input-demo"
-              options={productOptions}
-              value={selectedProduct}
-              onChange={handleSelectedProductChange}
-              componentsProps={{
-                popper: {
-                  modifiers: [
-                    {
-                      name: "offset",
-                      options: {
-                        offset: [0, -20],
-                      },
+          <Autocomplete
+            sx={{
+              display: "inline-block",
+              "& input": {
+                width: "100%",
+                border: "none",
+                bgcolor: "var(--inputbg-color)",
+                color: (theme) =>
+                  theme.palette.getContrastText(theme.palette.background.paper),
+              },
+            }}
+            id="custom-input-demo"
+            options={productOptions}
+            value={selectedProduct}
+            onChange={handleSelectedProductChange}
+            componentsProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: [0, -20],
                     },
-                  ],
-                },
-              }}
-              renderInput={(params) => (
-                <div ref={params.InputProps.ref}>
-                  <input
-                    type="text"
-                    {...params.inputProps}
-                    style={{ height: "10xp" }}
-                  />
-                </div>
-              )}
-            />
-          </Box>
-          <div style={{overflow:"auto"}}>
-               
-
-        <Box >
-        <SalesTable selectedProductData={selectedProductDetails}
-        setTotalValues={setTotalValues}
-        totalValues={totalValues}
-        /> {/* Pass tableRows as props to SalesTable */}
+                  },
+                ],
+              },
+            }}
+            renderInput={(params) => (
+              <div ref={params.InputProps.ref}>
+                <input
+                  type="text"
+                  {...params.inputProps}
+                  style={{ height: "10xp" }}
+                />
+              </div>
+            )}
+          />
         </Box>
+        <div style={{ overflow: "auto" }}>
+          <Box>
+            <SalesTable
+              selectedProductData={selectedProductDetails}
+              setTotalValues={setTotalValues}
+              totalValues={totalValues}
+            />{" "}
+            {/* Pass tableRows as props to SalesTable */}
+          </Box>
         </div>
       </Box>
-      <Box
-        sx={{ border: "1px solid #bbbdbf", width: "100%", mt: 4, borderRadius: 2, }}
-      >
-        
+      <Box sx={{ border: "1px solid #bbbdbf", mt: 4, borderRadius: 2 }}>
         <Box
           sx={{
             margin: "2px",
@@ -190,9 +189,9 @@ console.log(selectedProductData)
         >
           <p className="head-p-tag">Customer Details</p>
           <select style={{ width: "100%" }} onChange={handleOptionSelect}>
-          <option value="select">Select</option>
+            <option value="select">Select</option>
 
-<option value="addNew">Add New</option>
+            <option value="addNew">Add New</option>
 
             {Array(5)
               .fill()
@@ -220,10 +219,12 @@ console.log(selectedProductData)
             <p>sub Total:</p>
             <p> &#8377; {totalValues}</p>
           </Box>
-          <hr style={{
-            margin:"8px",
-            color:"#bbbdbf"
-          }} />
+          <hr
+            style={{
+              margin: "8px",
+              color: "#bbbdbf",
+            }}
+          />
           <Box
             sx={{
               display: "flex",
@@ -233,12 +234,11 @@ console.log(selectedProductData)
           >
             <p className="head-p-tag">
               Total amount :
-               {/* <span style={{fontWeight:"lighter", fontSize:"12px"}}>(items:2,Quantity:2)</span>: */}
+              {/* <span style={{fontWeight:"lighter", fontSize:"12px"}}>(items:2,Quantity:2)</span>: */}
             </p>
             <p> &#8377; {totalValues}</p>
           </Box>
         </Box>
-
 
         <Box
           sx={{
@@ -250,88 +250,110 @@ console.log(selectedProductData)
           }}
         >
           <p className="head-p-tag">Cash/UPI</p>
-          <Box sx={{ display: "flex", justifyContent: "space-between",my:1,alignItems:"center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              my: 1,
+              alignItems: "center",
+            }}
+          >
             <p>Payment Method:</p>
             <select style={{ width: "50%" }}>
-            {/* {
+              {/* {
               .map((_, index) => {
                 const option = { value: index, label: `Option ${index}` }; // Define your options here
                 return ( */}
-                  <option value="none" label="None"></option>
-                  <option value="cash" label="Cash"></option>
-                  <option value="upi" label="UPI"></option>
-
+              <option value="none" label="None"></option>
+              <option value="cash" label="Cash"></option>
+              <option value="upi" label="UPI"></option>
 
               {/* {/* //   ); */}
               {/* // })} */}
-          </select> 
+            </select>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between",alignItems:"center",my:1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              my: 1,
+            }}
+          >
             <p>Amount Received:</p>
             <FormControl
-          sx={{ my: 1, width: "50%", background: "#F3F6F9", borderRadius: 2 }}
-        >
-          <OutlinedInput
-          onChange={handleChangeAmout}
-            sx={{
-              p: "0 !important",
-            }}
-            id="standard-adornment-password"
-            
-            endAdornment={
-              <InputAdornment position="end">
-                
-                <CurrencyRupeeOutlinedIcon />
-              </InputAdornment>
-            }
-          />
-        </FormControl>
-          </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between",my:1 }}>
-            <p>Change to Return:</p>
-            <p>&#8377;{totalValues-inputData }</p>
-
-          </Box>
-         
-        </Box>
-        <Box sx={{display:"flex",justifyContent:"center",mt:1}}>
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          sx={{ fontWeight: "bold",textTransform:"none", bgcolor:"var(--black-button)","&:hover": {
-            background: "var(--button-hover)",}}}
+              sx={{
+                my: 1,
+                width: "50%",
+                background: "#F3F6F9",
+                borderRadius: 2,
+              }}
             >
-Save and Print Bill 
-</Button>
+              <OutlinedInput
+                onChange={handleChangeAmout}
+                sx={{
+                  p: "0 !important",
+                }}
+                id="standard-adornment-password"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <CurrencyRupeeOutlinedIcon />
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", my: 1 }}>
+            <p>Change to Return:</p>
+            <p>&#8377;{totalValues - inputData}</p>
+          </Box>
         </Box>
-
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "none",
+              bgcolor: "var(--black-button)",
+              "&:hover": {
+                background: "var(--button-hover)",
+              },
+            }}
+          >
+            Save and Print Bill
+          </Button>
+        </Box>
       </Box>
       <div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-            <Box sx={{display:"flex",justifyContent:"center",mb:4}}>
-
-            <h4 > Customer Details</h4 > 
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
+              <h4> Customer Details</h4>
             </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", my: 1 }}>
-            <InputComponent
-            label="Add new "
-             value={inputValue}
-             handleChange={handleInputChange}
-            />
-
-           
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                my: 1,
+              }}
+            >
+              <InputComponent
+                label="Add new "
+                value={inputValue}
+                handleChange={handleInputChange}
+              />
+            </Box>
           </Box>
-        </Box>
-      </Modal>
-    </div>
+        </Modal>
+      </div>
     </div>
   );
 }

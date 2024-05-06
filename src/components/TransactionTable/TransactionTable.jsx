@@ -1,4 +1,4 @@
-import { Box } from "@mui/material"
+import { Box, Button } from "@mui/material"
 import { DataGrid } from "@mui/x-data-grid"
 import { useState } from "react";
 const other = {
@@ -17,14 +17,24 @@ function TransactionTable() {
         const totals = rows.reduce((acc, row) => {
           for (const key in row) {
             if (key !== 'id' && !isNaN(row[key])) {
-              acc[key] = (acc[key] || 0) + row[key];
+              acc[key] = (parseInt(acc[key]) || 0) + parseInt(row[key]);
             }
           }
           // Calculate the amount for each row based on qty, price, discount, and tax
-          row.amount = (row.qty * row.price) - row.discount + row.tax;
+
+
+          row.amount = row.qty?(row.qty * row.price) - row.discount + row.tax:row.price;
+
+          
           acc.amount = (acc.amount || 0) + row.amount;
+          acc.discountAmount = (acc.discountAmount || 0) + parseInt(row.discountamount||0);
+          acc.taxValue = (acc.taxValue || 0) + parseInt(row.taxvalue||0);
+
+
+
           return acc;
         }, {});
+        
         return { id: 'total', ...totals };
       };
     
@@ -36,15 +46,14 @@ function TransactionTable() {
           qty: 0, 
           price: 0, 
           discount: 0, 
-          tax: 0, 
+          tax: null, 
           amount:0 , 
           unit: 'nos' 
         };
-        setRows([newRow, ...rows]);
+        setRows([...rows, newRow]);
       };
       // Handle cell edits
       const handleEdit = (newRow) => {
-        console.log("first")
         const updatedRows = rows.map((row) => {
           if (row.id === newRow.id) {
             // Recalculate amount if qty, price, discount, or tax are edited
@@ -55,6 +64,7 @@ function TransactionTable() {
               row.tax !== newRow.tax
             ) {
               newRow.amount = (newRow.qty * newRow.price) - newRow.discount + newRow.tax;
+              
             }
             return newRow;
           }
@@ -64,13 +74,59 @@ function TransactionTable() {
         setRows(updatedRows);
       };
       
-      const handleValueChange = (id, field, value) => {
-        console.log(id, field ,value)
-      }
+      const handleDiscountPercentageChange = (id, e) => {
+        const { name, value } = e;
+        setRows(prevRows =>
+          prevRows.map(row =>
+            row.id === id ? { ...row, [name]: value } : row
+          )
+        );
+      };
+      
+      const handleDiscountAmountChange = (id, e) => {
+        const { name, value } = e;
+        console.log(name)
+        setRows(prevRows =>
+          prevRows.map(row =>
+            row.id === id ? { ...row, [name]: value } : row
+          )
+        );
+      };
+      
+      const handleTaxValueChange = (id, e) => {
+        const { name, value } = e;
+        console.log(name)
+        setRows(prevRows =>
+          prevRows.map(row =>
+            row.id === id ? { ...row, [name]: value } : row
+          )
+        );
+      };
+      
+      const handleTaxPercentageChange = (id, e) => {
+        const { name, value } = e;
+        setRows(prevRows =>
+          prevRows.map(row =>
+            row.id === id ? { ...row, [name]: value } : row
+          )
+        );
+      };
+      
       
     const columns=[
-        { field: 'id', headerName: 'id', hideable: false, flex: 1 },
-        { field: 'item', headerName: 'Item', hideable: false, flex: 1, editable: true },
+        { field: 'id', headerName: 'id', hideable: false, flex: 1,renderCell: (params) => (
+          params.row.id === 'total' &&
+          <div style={{display:"flex"}}>
+            <button onClick={addNewRow}>
+              Add Row
+
+            </button>
+            <p>total</p>
+          </div>
+        )  },
+        { field: 'item', headerName: 'Item', hideable: false, flex: 1, editable: true,renderCell: (params) => (
+          params.row.id === 'total' && 
+          "") },
         { field: 'qty', headerName: 'Qty', hideable: false, flex: 1, editable: true },
         { field: 'unit', headerName: 'Unit', hideable: false, flex: 1 },
         { field: 'price', headerName: 'Price', hideable: false, flex: 1, editable: true, renderHeader: () => (
@@ -95,21 +151,23 @@ function TransactionTable() {
           ),
           renderCell: (params) => (
             params.row.id === 'total' ? 
-            <div>{params.row.discount}</div> : 
+            <div>{params.row.discountAmount}</div> : 
             <div style={{ display: 'flex', justifyContent: "space-evenly",gap:5}}>
               <input
                style={{width:"100%", outline:"none",border:"none", height: "50px",paddingLeft:"5px", bgcolor: "transprant !imporatant" }}
                 // style={{width:"100%"}}
                 type="text"
-                // value={params.row.discount}
-                // onChange={(e) => handleValueChange(params.row.id, 'discount', e.target.value)}
+                name="discountpercentage"
+                value={params.row.discountpercentage}
+                onChange={(e) => handleDiscountPercentageChange(params.row.id,  e.target)}
               />
               <input
                style={{width:"100%", outline:"none",border:"none", height: "50px",paddingLeft:"5px", bgcolor: "transprant !imporatant" }}
                 // style={{width:"100%"}}
                 type="text"
-                // value={params.row.amountafterdescount
-                // onChange={(e) => handleValueChange(params.row.id, 'amountafterdescount', e.target.value)}
+                name="discountamount"
+                value={params.row.discountamount}
+                onChange={(e) => handleDiscountAmountChange(params.row.id, e.target)}
               />
             </div>
           ), },
@@ -127,27 +185,29 @@ function TransactionTable() {
           ),
           renderCell: (params) => (
             params.row.id === 'total' ? 
-            <div>{params.row.tax}</div> : 
+            <div>{params.row.taxValue}</div> : 
             <div style={{ display: 'flex', justifyContent: "space-evenly",gap:5}}>
               <input
                style={{width:"100%", outline:"none",border:"none", height: "50px",paddingLeft:"5px", bgcolor: "transprant !imporatant" }}
                 // style={{width:"100%"}}
                 type="text"
-                // value={params.row.tax}
-                // onChange={(e) => handleValueChange(params.row.id, 'tax', e.target.value)}
+                name="taxpercentage"
+                value={params.row.taxpercentage}
+                onChange={(e) => handleTaxPercentageChange(params.row.id, e.target)}
               />
               <input
                style={{width:"100%", outline:"none",border:"none", height: "50px",paddingLeft:"5px", bgcolor: "transprant !imporatant" }}
                 // style={{width:"100%"}}
                 type="text"
-                // value={params.row.amountafterdescount
-                // onChange={(e) => handleValueChange(params.row.id, 'amountafterdescount', e.target.value)}
+                name="taxvalue"
+                value={params.row.taxvalue}
+                onChange={(e) => handleTaxValueChange(params.row.id, e.target)}
               />
             </div>
           ), },
         { field: 'amount', headerName: 'Amount', hideable: false, flex: 1 },
       ]
-
+      
   return (
     <Box
     sx={{

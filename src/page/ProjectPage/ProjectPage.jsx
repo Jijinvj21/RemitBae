@@ -4,6 +4,8 @@ import Modal from "@mui/material/Modal";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import { useState } from "react";
 import { Box } from "@mui/material";
+import {  useNavigate } from "react-router-dom";
+
 
 const style = {
   position: "absolute",
@@ -19,6 +21,8 @@ const style = {
 };
 
 function ProjectPage() {
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState({
     projectName: "", // Changed to camelCase convention
@@ -59,7 +63,7 @@ function ProjectPage() {
       <div className="project-inner-section">
         {
             Array(5).fill().map((data,index)=>(
-        <Box key={index} className="project-data-card">
+        <Box key={index} className="project-data-card" onClick={()=>navigate("/admin/project-data")}>
           <p>project name</p>
           <p>client name</p>
         </Box>

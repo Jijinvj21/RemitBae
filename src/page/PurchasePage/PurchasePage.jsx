@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import Modal from '@mui/material/Modal';
 import InputComponent from "../../components/InputComponent/InputComponent";
+import { productGetAPI } from "../../service/api/admin";
 
 
 const style = {
@@ -64,41 +65,50 @@ function PurchasePage() {
   };
 
 
-  const getArrayFromLocalStorage = () => {
-    const storedArray = localStorage.getItem('products');
-    if (storedArray) {
-      setMyArray(JSON.parse(storedArray));
-    }
-  };
+  // const getArrayFromLocalStorage = () => {
+  //   const storedArray = localStorage.getItem('products');
+  //   if (storedArray) {
+  //     setMyArray(JSON.parse(storedArray));
+  //   }
+  // };
 
+  
   useEffect(() => {
-    getArrayFromLocalStorage()
-    // Retrieve products array from local storage
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-    console.log(selectedProduct)
-
-    // Extract product names from the products array
-    const productNames = storedProducts.map((product) => product.name);
-    // Generate options using the product names
-    const options = productNames.map((name, index) => ({
-      value: `option${index + 1}`,
-      label: name,
-    }));
-    // Set the options state
-    setProductOptions(options);
+    const fetchData = async () => {
+      const response = await productGetAPI();
+      const products = response.responseData;
+      const productNames = products.map((product) => product.name);
+      const options = productNames.map((name, index) => ({
+        value: `option${index + 1}`,
+        label: name,
+      }));
+      setProductOptions(options);
+    };
+    fetchData();
   }, []);
 
-  const handleSelectedProductChange = (event, newValue) => {
-    setSelectedProduct(newValue);
 
+  const handleSelectedProductChange = async (event, newValue) => {
+    if (!newValue) {
+      // Handle the case where newValue is not defined
+      return;
+    }
+  
+    setSelectedProduct(newValue);
+    
     if (newValue) {
+      console.log(newValue.label);
       // Set the amount based on the selected product
-      const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-      const selectedProductData = storedProducts.find(
-        (product) => product.name === newValue.label
+      const response = await productGetAPI();
+      console.log(response)
+      const products = response.responseData;
+  
+      const selectedProductData = products.find(
+        (product) => product.name === newValue?.label
       );
+      console.log(selectedProductData)
       setSelectedProductDetails(selectedProductData);
-console.log(selectedProductData)
+      console.log(selectedProductData);
       // Add selected product to the table rows
       const newRow = {
         id: 1,

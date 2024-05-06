@@ -18,10 +18,11 @@ function PaymenyIn() {
       };
       const leftsideinput=[{
         intputName: "receiptno",
-        label: "Receipy No",
+        label: "Recipes No",
         type: "number",
       },
     {
+      label: "Date",
       type: "date",
     },
     {
@@ -91,7 +92,9 @@ function PaymenyIn() {
             options={[
                 { value: 'None', label: 'None' },
                 { value: 'Cash', label: 'Cash' },
-                { value: 'UPI', label: 'UPI' }
+                { value: 'UPI', label: 'UPI' },
+                { value: 'Account', label: 'Account' }
+
               ]}
 
             />
@@ -133,7 +136,7 @@ function PaymenyIn() {
 
 
 
-<Box sx={{width:"50%", display:"flex",flexDirection:"column"}} className="leftsectioninputs">
+<Box sx={{width:"50%", display:"flex",flexDirection:"column",alignItems:"flex-end"}} className="leftsectioninputs">
 <Box sx={{width:"50%", display:"flex",flexDirection:"column", gap:5}}>
 {
     leftsideinput.slice(0, 2).map((input, index) => {
