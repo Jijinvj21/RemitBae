@@ -186,12 +186,12 @@ setTotalValues(grandTotal)
     
     console.log(salesVoucher)
     console.log(rows)
-    // createVoucherAPI(salesVoucher).then((data)=>{
-    //   console.log(data)
-    // })
-    // .catch((err)=>{
-    //   console.log(err)
-    // })
+    createVoucherAPI(salesVoucher).then((data)=>{
+      console.log(data)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
   }
 
   return (

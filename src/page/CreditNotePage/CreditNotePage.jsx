@@ -9,6 +9,7 @@ import TransactionTable from "../../components/TransactionTable/TransactionTable
 function CreditNotePage() {
   const [partyOptions, setPartytOptions] = useState([]);
   const [textValue, setTextValue] = useState("");
+  
 
   const handleTextChange = (event) => {
     setTextValue(event.target.value);

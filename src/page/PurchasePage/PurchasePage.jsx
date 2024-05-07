@@ -16,8 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import Modal from '@mui/material/Modal';
 import InputComponent from "../../components/InputComponent/InputComponent";
-import { partyDataGetAPI, productGetAPI } from "../../service/api/admin";
-
+import { countryOptionsGetAPI, createPartyAPI, createPurchaseAPI, partyDataGetAPI, productGetAPI } from "../../service/api/admin";
 const style = {
     position: 'absolute',
     top: '50%',
@@ -50,9 +49,63 @@ function PurchasePage() {
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [inputValue, setInputValue] = useState(""); // State to hold the value of the new input
   const [open, setOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("none");
+  const [selectedCustomer, setSelectedCustomer] = useState("none");
+  const [contryOptions,setContryOptions]=useState([])
+  const [countryValue, setCountryValue] = useState(""); // State to hold the value of the new input
 
+
+  const [partydataData, setPartyData] = useState({
+    name: '',
+    phoneNumber: '',
+    email: '',
+    address1: '',
+    address2: '',
+    postalCode: '',
+  });
+
+  // Function to handle input change for all fields
+  const handlePartyFormChange = (e) => {
+    const { name, value } = e.target;
+    setPartyData({ ...partydataData, [name]: value });
+  };
+
+  const handleAddParty=()=>{
+
+const data={
+  name: partydataData.name,
+  phonenumber: partydataData.phoneNumber,
+  email: partydataData.email,
+  address1: partydataData.address1,
+  address2: partydataData.address2,
+  country:parseInt(countryValue),
+  postalCode: partydataData.postalCode,
+}
+console.log(data)
+    createPartyAPI(data).then((data)=>{
+console.log(data)
+    }).catch((err)=>{
+      console.log(err)
+    })
+
+  }
 
   useEffect(() => {
+    countryOptionsGetAPI().then((data) => {
+      // console.log("country:", data);
+  
+      const countryData = data.map(entry => ({
+        value: entry.id,
+        label: entry.name,
+  
+      }));
+      setContryOptions(countryData);
+    }).catch((err) => {
+      console.log(err);
+    });
+
+
+
   partyDataGetAPI().then((data) => {
     console.log("partyData:", data);
     // setTaxOptions(data);
@@ -68,6 +121,7 @@ function PurchasePage() {
   }).catch((err) => {
     console.log(err);
   });
+
 }, [])
 
   // Function to handle changes in the new input value
@@ -82,6 +136,7 @@ function PurchasePage() {
         setOpen(true)
     } else {
         setOpen(false)
+        setSelectedCustomer(e.target.value)
       // Handle selection of other options
     }
   };
@@ -166,62 +221,86 @@ function PurchasePage() {
   }
   const handleClose = () => setOpen(false);
 
-
-const handleAddParty=()=>{
-  const partyData={
-name:"",
-phonenumber:"",
-email:"",
-address1:"",
-address2:"",
-country:"",
-postal_code:""
-  }
-
+const hanldecountrychange=(e)=>{
+  setCountryValue(e.target.value)
+console.log(e.target.value)
 }
 
 const addPartyInputArrat=[
   {
+    handleChange:handlePartyFormChange,
     intputName: "name",
       label: "Name",
-      type: "test",
-      value:"",
+      type: "text",
+      
   },
   {
-    intputName: "phonenumber",
+    handleChange:handlePartyFormChange,
+    intputName: "phoneNumber",
       label: "Phone number",
-      type: "number",
-      value:"",
+      type: "text",
+      
   }, {
+    handleChange:handlePartyFormChange,
     intputName: "email",
       label: "Email",
-      type: "number",
-      value:"",
+      type: "text",
+      
   }, {
+    handleChange:handlePartyFormChange,
     intputName: "address1",
       label: "Address1",
-      type: "number",
-      value:"",
+      type: "text",
+      
   }, {
+    handleChange:handlePartyFormChange,
     intputName: "address2",
       label: "Address2",
-      type: "number",
-      value:"",
+      type: "text",
+      
   }, {
+    handleChange:hanldecountrychange,
     intputName: "country",
       label: "country",
-      type: "number",
-      value:"",
+      type: "text",
+      inputOrSelect:"select",
+      option:contryOptions,
+      
   },
   {
-    intputName: "postal_code",
+    handleChange:handlePartyFormChange,
+    intputName: "postalCode",
       label: "Pin code",
-      type: "number",
-      value:"",
+      type: "text",
+      
   },
 
 ]
-
+const handleAddVoucher= async()=>{
+    const newArray = await rows.map(item => ({
+      product_id: item.id,
+      quantity: item.qty,
+      Price: item.qty * item.rate ,
+      discount:item.amountafterdescount,
+    }));
+    const salesVoucher ={
+      credit_sale:false,
+      payment_type:selectedOption==="cash"?5:10,
+      billing_address:"",
+      customer:parseInt(selectedCustomer),
+      total:parseFloat(totalValues),
+      product_details:newArray
+    }
+    
+    console.log(salesVoucher)
+    console.log(rows)
+    createPurchaseAPI(salesVoucher).then((data)=>{
+      console.log(data)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  }
   return (
     <div className="sales-table-container">
       <Box sx={{ width: "75%", mx: 1 }}>
@@ -358,7 +437,7 @@ const addPartyInputArrat=[
           <p className="head-p-tag">Cash/UPI</p>
           <Box sx={{ display: "flex", justifyContent: "space-between",my:1,alignItems:"center" }}>
             <p>Payment Method:</p>
-            <select style={{ width: "50%" }}>
+            <select style={{ width: "50%" }} value={selectedOption} onChange={(e)=> setSelectedOption(e.target.value)}>
             
                   <option value="none" label="None"></option>
                   <option value="cash" label="Cash"></option>
@@ -403,6 +482,7 @@ const addPartyInputArrat=[
           color="primary"
           sx={{ fontWeight: "bold",textTransform:"none", bgcolor:"var(--black-button)","&:hover": {
             background: "var(--button-hover)",}}}
+            onClick={handleAddVoucher}
             >
 Save and Print Bill 
 </Button>
@@ -429,9 +509,11 @@ Save and Print Bill
              label={data.label}
              intputName={data.intputName}
              type={data.type}
-             value={data.value}
-              // value={inputValue}
-              // handleChange={handleInputChange}
+             value={partydataData[data.intputName]}
+             handleChange={data.handleChange}
+      inputOrSelect={data.inputOrSelect}
+      options={data.option}
+
              />
            ))
 }
@@ -441,6 +523,7 @@ Save and Print Bill
           color="primary"
           sx={{ mt:3, fontWeight: "bold",textTransform:"none", bgcolor:"var(--black-button)","&:hover": {
             background: "var(--button-hover)",}}}
+            onClick={handleAddParty}
             >
 Add party
 </Button>

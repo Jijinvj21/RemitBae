@@ -6,7 +6,7 @@ import axios from "axios";
 // };
 
 
-const BASE_URL = 'http://192.168.0.122:8085';
+const BASE_URL = 'http://192.168.0.103:8085';
 const MASRE_TABLE_BASE_URL = 'http://192.168.0.122:8088';
 
 
@@ -139,7 +139,29 @@ export const partyDataGetAPI = async () => {
 
 export const createPurchaseAPI = async (purchaseAdd) => {
   try {
-    const response = await axios.post(`${BASE_URL}/purchase/add`,purchaseAdd);
+    const response = await axios.post(`${BASE_URL}/voucher/purchase/add`,purchaseAdd);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const createPartyAPI = async (partyAdd) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/party/create`,partyAdd);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const projectDataByIdAPI = async (id) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/project/getbyid`,id);
     console.log(response)
     return response
   } catch (error) {

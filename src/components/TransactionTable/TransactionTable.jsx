@@ -22,10 +22,11 @@ function TransactionTable() {
           const response = await productGetAPI();
           console.log("response",response)
           const products = response.responseData;
-          const productNames = products.map((product) => product.name);
-          const options = productNames.map((name, index) => ({
-            value: `option${index + 1}`,
-            label: name,
+          const productNames = products.map((product) => product);
+          console.log(products)
+          const options = productNames.map((data, index) => ({
+            value:data.id,
+            label: data.name,
           }));
           console.log(options)
           setProductOptions(options);
@@ -33,60 +34,43 @@ function TransactionTable() {
         fetchData();
       }, []);
 
-      // useEffect(() => {
-      //   if (selectedProductDetails) {
-
-      //     console.log(selectedProductDetails);
-      //     const newRow = {
-      //       id: selectedProductDetails.id,
-      //       itemCode: selectedProductDetails.itemCode,
-      //       name: selectedProductDetails.name,
-      //       unit: selectedProductDetails.unit,
-      //       rate: selectedProductDetails.rate,
-      //       taxApplied: selectedProductDetails.taxrate?.label,
-      //       qty: 1, // Set quantity to 1 every time a new product is selected
-      //     };
-      //     setRows((prevRows) => [...prevRows, newRow]);
-      //   }
-      // }, [selectedProductDetails]);
-
+      
 
       const handleSelectedProductChange = async (event, newValue) => {
-        if (!newValue) {
-          // Handle the case where newValue is not defined
-          return;
-        }
-      
         setSelectedProduct(newValue);
-        
-        if (newValue) {
-          console.log(newValue.label);
-          // Set the amount based on the selected product
-          const response = await productGetAPI();
-          console.log(response)
-          const products = response.responseData;
       
-          const selectedProductData = products.find(
-            (product) => product.name === newValue?.label
-          );
-          console.log(selectedProductData)
-          setSelectedProductDetails(selectedProductData);
-          console.log(selectedProductData);
-          // Add selected product to the table rows
-          const newRow = {
-            id: selectedProductData.id,
-            itemName: selectedProductData.name,
-            qty: 1, // You can set default quantity here
-            unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
-            price: selectedProductData.price, // Assuming selectedProductData has a price property
-            discount: 0, // Assuming default discount is 0
-            taxApplied: 0, // Assuming default tax applied is 0
-            total: selectedProductData.price, // Assuming total is initially equal to price
-          };
-          setRows([...rows, newRow]);
+        const response = await productGetAPI();
+        const products = response.responseData;
+      
+        const selectedProductData = products.find(
+          (product) => product.id === newValue?.value
+        );
+      
+        const newRow = {
+          id: selectedProductData.id,
+          item: selectedProductData.name,
+          qty: 1,
+          unit: selectedProductData.unit,
+          rate: selectedProductData.rate,
+          price: selectedProductData.rate * 1,
+          tax: selectedProductData.tax, // Assuming selectedProductData contains tax information
+        };
+      
+        // Find the index of the row to update based on its id
+        const rowIndexToUpdate = rows.findIndex(row => row.id === selectedProductData.id);
+      
+        if (rowIndexToUpdate !== -1) {
+          // Update the existing row with the new data
+          const updatedRows = [...rows];
+          updatedRows[rowIndexToUpdate] = newRow;
+          setRows(updatedRows);
+        } else {
+          // Insert the new row at the end of the table
+          setRows(prevRows => [...prevRows, newRow]);
         }
       };
-
+      
+      
 
 
 
@@ -124,15 +108,22 @@ function TransactionTable() {
         const newRow = { 
           id: Math.floor(Math.random() * 1000000), 
           item: '', 
-          qty: 0, 
+          qty: 1, 
           price: 0, 
           discount: 0, 
           tax: null, 
           amount: 0, 
+          row: 0,
           unit: 'nos' 
         };
-        setRows(prevRows => [...prevRows, newRow]); // Use functional update to create a new array
+        
+        // Clear the selected product when adding a new row
+        setSelectedProduct(null);
+      
+        // Add the new row to the existing rows
+        setRows(prevRows => [...prevRows, newRow]);
       };
+      
       
       // Handle cell edits
       const handleEdit = (newRow) => {
@@ -201,7 +192,6 @@ function TransactionTable() {
           <div style={{display:"flex",alignItems:"center",gap:10,}}>
             <button style={{background:"var(--black-button)",color:"white",outline:"none",border:"none",padding:"10px",borderRadius:"10px"}} onClick={addNewRow}>
               Add Row
-
             </button>
             <p>Total</p>
           </div>
@@ -211,46 +201,47 @@ function TransactionTable() {
           "":
           <Box sx={{ width: "100%", marginBottom: "10px" }}>
 
-          <Autocomplete
-            sx={{
-              display: "inline-block",
-              "& input": {
-                width: "100%",
-                border: "none",
-                bgcolor: "var(--inputbg-color)",
-                color: (theme) =>
-                  theme.palette.getContrastText(theme.palette.background.paper),
-              },
-            }}
-            id="custom-input-demo"
-            options={productOptions}
-            value={selectedProduct}
-            onChange={handleSelectedProductChange}
-            componentsProps={{
-              popper: {
-                sx: {
-                  width:"20% !important"
-                },
-                modifiers: [
-                  {
-                    name: "offset",
-                    options: {
-                      offset: [0, -20],
-                    },
-                  },
-                ],
-              },
-            }}
-            renderInput={(params) => (
-              <div ref={params.InputProps.ref}>
-                <input
-                  type="text"
-                  {...params.inputProps}
-                  style={{ height: "50px",paddingLeft:"10px" }}
-                />
-              </div>
-            )}
-          />
+       <Autocomplete
+  sx={{
+    display: "inline-block",
+    "& input": {
+      width: "100%",
+      border: "none",
+      bgcolor: "var(--inputbg-color)",
+      color: (theme) =>
+        theme.palette.getContrastText(theme.palette.background.paper),
+    },
+  }}
+  id="custom-input-demo"
+  options={productOptions}
+  // value={selectedProduct} // Set the initial value based on selectedProduct state
+  onChange={handleSelectedProductChange}
+  componentsProps={{
+    popper: {
+      sx: {
+        width: "20% !important"
+      },
+      modifiers: [
+        {
+          name: "offset",
+          options: {
+            offset: [0, -20],
+          },
+        },
+      ],
+    },
+  }}
+  renderInput={(params) => (
+    <div ref={params.InputProps.ref}>
+      <input
+        type="text"
+        {...params.inputProps}
+        style={{ height: "50px", paddingLeft: "10px" }}
+      />
+    </div>
+  )}
+/>
+
         </Box>
         ) },
         { field: 'qty', headerName: 'Qty', hideable: false, flex: 1, editable: true },
@@ -262,6 +253,10 @@ function TransactionTable() {
                 <div style={{ fontWeight: 'bold', }}>without tax</div>
             </div>
           ),
+          renderCell: (params) => (
+            console.log(params)
+          )
+
 },
         { field: 'discount', headerName: 'Discount', hideable: false, flex: 1, editable: false, renderHeader: () => (
             <div style={{ width: '100%', display:"flex",flexDirection:"column",}}>
