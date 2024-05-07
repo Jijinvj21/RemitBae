@@ -9,10 +9,12 @@ import { gstOptionsGetAPI } from "../../service/api/admin";
 export default function FullFeaturedCrudGrid({
   selectedProductData,
   totalValues,
-  setTotalValues,
+  // setTotalValues,
+  setRows,
+  rows
 }) {
   // const [rows, setRows] = React.useState(initialRows);
-  const [rows, setRows] = React.useState([]);
+  // const [rows, setRows] = React.useState([]);
 
   const [rowModesModel, setRowModesModel] = React.useState({});
   const [taxOptions,setTaxOptions]=React.useState([])
@@ -43,7 +45,7 @@ export default function FullFeaturedCrudGrid({
     if (selectedProductData) {
       console.log(selectedProductData.taxrate?.label);
       const newRow = {
-        id: randomId(),
+        id: selectedProductData.id,
         itemCode: selectedProductData.itemCode,
         name: selectedProductData.name,
         unit: selectedProductData.unit,
@@ -84,7 +86,7 @@ export default function FullFeaturedCrudGrid({
     const totalWithTaxSum = updatedRows.reduce((sum, row) => sum + row.amountafterdescount?row.amountafterdescount: row.total, 0);
 
     // Update the total values
-    setTotalValues(totalWithTaxSum);
+    // setTotalValues(totalWithTaxSum);
 }, []);//add rows in the array !important and check the error 
 
 
@@ -353,7 +355,7 @@ export default function FullFeaturedCrudGrid({
         const discount= params.row.amountafterdescount||0
         console.log(parseFloat(params.row.taxApplied?.value.replace("%", "")));
         const tax=parseFloat(params.row.taxApplied?.value.replace("%", "")) ||0
-        setTotalValues(((quantity * rate)-discount)+tax)
+        // setTotalValues(((quantity * rate)-discount)+tax)
         return ((quantity * rate)-discount)+tax;
       },
     },

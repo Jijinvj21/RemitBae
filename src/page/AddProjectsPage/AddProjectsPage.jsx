@@ -1,12 +1,12 @@
-import { Button, Grid, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Autocomplete, Box, Button, Grid, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import "./AddProjectsPage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-
+import { countryOptionsGetAPI, projectCreateAPI, workTypeOptionsGetAPI } from "../../service/api/admin";
 
 function AddProjectsPage() {
   const navigate = useNavigate();
@@ -25,6 +25,44 @@ function AddProjectsPage() {
   const [img, setImg] = useState(null);
   const [toggle, setToggle] = useState(true);
   const [errors, setErrors] = useState({});
+  const [contryOptions,setContryOptions]=useState([])
+  const [workTypeOptions,setWorkTypeOptions]=useState([])
+  const [workTypeSelected,setWorkTypeSelected]=useState(null)
+  const [contrySelect,setContrySelect]=useState(null)
+
+const handleContrySelect=()=>{
+
+}
+
+useEffect(() => {
+  countryOptionsGetAPI().then((data) => {
+    // console.log("country:", data);
+
+    const countryData = data.map(entry => ({
+      value: entry.id,
+      label: entry.name,
+
+    }));
+    setContryOptions(countryData);
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  workTypeOptionsGetAPI().then((data) => {
+    console.log("work type:", data);
+
+    const workTypeData = data.map(entry => ({
+      value: entry.id,
+      label: entry.name,
+
+    }));
+    console.log(workTypeData)
+    setWorkTypeOptions(workTypeData);
+  }).catch((err) => {
+    console.log(err);
+  });
+}, [])
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -33,25 +71,27 @@ function AddProjectsPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(name,value)
     setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
   
-    // Show error message if the field is empty after change
-    if (value.trim() === "") {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        [name]: `${fieldDisplayNames[name]} is required`
-      }));
-    } else {
-      // Remove error message if the field is not empty
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        [name]: ''
-      }));
-    }
+    // // Show error message if the field is empty after change
+    // if (value.trim() === "") {
+    //   setErrors(prevErrors => ({
+    //     ...prevErrors,
+    //     [name]: `${fieldDisplayNames[name]} is required`
+    //   }));
+    // } else {
+    //   // Remove error message if the field is not empty
+    //   setErrors(prevErrors => ({
+    //     ...prevErrors,
+    //     [name]: ''
+    //   }));
+    // }
   };
+  
   
   const fieldDisplayNames = {
     name: "Name",
@@ -64,21 +104,42 @@ function AddProjectsPage() {
     country: "Country",
     product:"Product",
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = {};
-    Object.keys(formData).forEach(key => {
-      if (formData[key].trim() === "") {
-        validationErrors[key] = `${fieldDisplayNames[key]} is required`;
-      }
-    });
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-    } else {
-      // Submit form
-      console.log("Form submitted successfully!");
-    }
-  };
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     const projectAdd={
+//       Name:formData.project,         
+// 	ClientName:formData.name,  
+// 	WorkType:0,    
+// 	PhoneNumber:formData.mobile,  
+// 	Email:formData.email,        
+// 	Address1:formData.address1,     
+// 	Address2:formData.address2,     
+// 	Country:formData.country,      
+// 	PostalCode:formData.pinCode,   
+// 	HasPlanGiven:toggle, 
+
+//     }
+//     console.log(formData)
+// //     projectCreateAPI(projectAdd).then((data)=>{
+// // console.log(data)
+// //     })
+// //     .catch((err)=>{
+// // console.log(err)
+// //     })
+
+//     // const validationErrors = {};
+//     // Object.keys(formData).forEach(key => {
+//     //   if (formData[key].trim() === "") {
+//     //     validationErrors[key] = `${fieldDisplayNames[key]} is required`;
+//     //   }
+//     // });
+//     // if (Object.keys(validationErrors).length > 0) {
+//     //   setErrors(validationErrors);
+//     // } else {
+//     //   // Submit form
+//     //   console.log("Form submitted successfully!");
+//     // }
+//   };
   const arrOfInputs = [
     {
       handleChange: handleChange,
@@ -129,46 +190,71 @@ function AddProjectsPage() {
       type: "text",
       value:formData.pinCode
     },
-    {
-      handleChange: handleChange,
-      intputName: "worktype",
-      label: "Work Type",
-      type: "text",
-      value:formData.worktype
-    },
-    {
-      handleChange: handleChange,
-      intputName: "country",
-      label: "Country",
-      type: "text",
-      value:formData.country
-    },
+    // {
+    //   handleChange: handleChange,
+    //   intputName: "worktype",
+    //   label: "Work Type",
+    //   type: "text",
+    //   value:formData.worktype
+    // },
+    // {
+    //   handleChange: handleChange,
+    //   intputName: "country",
+    //   label: "Country",
+    //   type: "text",
+    //   value:formData.country
+    // },
   ];
   const handleAddClient = () => {
-    // Check if there are any validation errors
-    const hasErrors = Object.values(errors).some(error => error !== '');
+    // // Check if there are any validation errors
+    // const hasErrors = Object.values(errors).some(error => error !== '');
   
-    // If there are validation errors, do not proceed with adding the client
-    if (hasErrors) {
-      console.log("Validation errors. Client data not added.");
-      return;
+    // // If there are validation errors, do not proceed with adding the client
+    // if (hasErrors) {
+    //   console.log("Validation errors. Client data not added.");
+    //   return;
+    // }
+  
+    // // Create a new client object with form data
+    // const newClient = {
+    //   ...formData,
+    //   image: img, // Assuming you want to store the image as well
+    //   hasPlanGiven: toggle
+    // };
+  
+    // // Retrieve existing client data from local storage or initialize an empty array
+    // const existingClients = JSON.parse(localStorage.getItem("clients")) || [];
+  
+    // // Add the new client to the array
+    // const updatedClients = [...existingClients, newClient];
+  
+    // // Update local storage with the updated array of clients
+    // localStorage.setItem("clients", JSON.stringify(updatedClients));
+
+
+
+    const projectAdd={
+      name:formData.project,         
+      client_name:formData.name,  
+      work_type:workTypeSelected,    
+      phonenumber:formData.mobile,  
+      email:formData.email,        
+	address1:formData.address1,     
+	address2:formData.address2,     
+	country:contrySelect,      
+	postal_code:formData.pinCode,   
+	has_plan_given:toggle, 
+
     }
-  
-    // Create a new client object with form data
-    const newClient = {
-      ...formData,
-      image: img, // Assuming you want to store the image as well
-      hasPlanGiven: toggle
-    };
-  
-    // Retrieve existing client data from local storage or initialize an empty array
-    const existingClients = JSON.parse(localStorage.getItem("clients")) || [];
-  
-    // Add the new client to the array
-    const updatedClients = [...existingClients, newClient];
-  
-    // Update local storage with the updated array of clients
-    localStorage.setItem("clients", JSON.stringify(updatedClients));
+    console.log(projectAdd)
+    projectCreateAPI(projectAdd).then((data)=>{
+console.log(data)
+    })
+    .catch((err)=>{
+console.log(err)
+    })
+
+
   
     // Reset form data and state variables
     setFormData({
@@ -187,8 +273,8 @@ function AddProjectsPage() {
     setErrors({});
   
     // Log to console for verification
-    console.log("Client added:", newClient);
-    console.log("All clients:", updatedClients);
+    // console.log("Client added:", newClient);
+    // console.log("All clients:", updatedClients);
   };
   
   
@@ -212,9 +298,10 @@ function AddProjectsPage() {
         Back
       </Button>
       <div className="add-client-page">
-        <form onSubmit={handleSubmit}>
-          <h2>Add Client</h2>
-          <h4>Enter the product of Client and Project</h4>
+        {/* <form onSubmit={handleSubmit}> */}
+        {/* <form> */}
+          <h2>Add Project</h2>
+          {/* <h4>Enter the product of Client and Project</h4> */}
           <Grid container spacing={2}>
             {arrOfInputs.map((input, index) => {
               return(
@@ -233,6 +320,97 @@ function AddProjectsPage() {
 
               </Grid>
             )})}
+            <Grid xs={6} md={4} sx={{pt:"16px",pl:"16px",display:"flex",flexDirection:"column",justifyContent:"space-between" }}>
+            <p className="input-name">Work Type</p>
+
+            <Autocomplete
+              sx={{
+                display: "inline-block",
+                "& input": {
+                  width: "100%",
+                  
+                  border: "none",
+                  bgcolor: "var(--inputbg-color)",
+                  color: (theme) =>
+                    theme.palette.getContrastText(
+                      theme.palette.background.paper
+                    ),
+                },
+              }}
+              id="custom-input-demo"
+              options={workTypeOptions}
+            //   value={selectedProduct}
+            onChange={(e,newValue)=>setWorkTypeSelected(newValue.value)}
+            componentsProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, -20],
+                      },
+                    },
+                  ],
+                },
+              }}
+              renderInput={(params) => (
+                <div ref={params.InputProps.ref}>
+                  <input
+                    type="text"
+                    {...params.inputProps}
+                    style={{ height: "42px",borderRadius:10,width:"99%",paddingLeft:"10px"  }}
+                  />
+                </div>
+              )}
+            />
+          </Grid>
+
+
+          <Grid xs={6} md={4} sx={{pt:"16px",pl:"16px",display:"flex",flexDirection:"column",justifyContent:"space-between" }}>
+            <p className="input-name">Country</p>
+
+            <Autocomplete
+              sx={{
+                display: "inline-block",
+                "& input": {
+                  width: "100%",
+                  
+                  border: "none",
+                  bgcolor: "var(--inputbg-color)",
+                  color: (theme) =>
+                    theme.palette.getContrastText(
+                      theme.palette.background.paper
+                    ),
+                },
+              }}
+              id="custom-input-demo"
+              options={contryOptions}
+            //   value={selectedProduct}
+              onChange={(e,newValue)=>setContrySelect(newValue.value)}
+              componentsProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, -20],
+                      },
+                    },
+                  ],
+                },
+              }}
+              renderInput={(params) => (
+                <div ref={params.InputProps.ref}>
+                  <input
+                    type="text"
+                    {...params.inputProps}
+                    style={{ height: "42px",borderRadius:10,width:"99%",paddingLeft:"10px" }}
+                  />
+                </div>
+              )}
+            />
+          </Grid>
+
             <Grid item xs={6} md={6}>
               <div style={{display:"flex", flexDirection:"column",alignItems:"start"}}>
                 <div >
@@ -320,9 +498,9 @@ function AddProjectsPage() {
             }}
             onClick={handleAddClient}
           >
-            Add Client
+            Add Project
           </Button>
-        </form>
+        {/* </form> */}
       </div>
     </div>
   );

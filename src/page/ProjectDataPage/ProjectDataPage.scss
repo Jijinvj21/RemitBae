@@ -1,0 +1,43 @@
+.projectDatapage-section{
+    padding: 10px;
+    background: white;
+    display: flex;
+     border-radius: 30px;
+     overflow: auto;
+     &::-webkit-scrollbar {
+        display: none;
+       
+    
+        
+      }
+     .top-section{
+display: flex;
+gap: 10px;
+.data_show_card{
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--bgblue);
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    p{
+        font-weight: 700;
+        font-size: 20px;
+    }
+    h6{
+        font-size: 15px;
+    }
+}
+.toggle_button{
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--bgblue);
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}      }
+    }

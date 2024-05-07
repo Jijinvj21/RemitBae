@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import InputComponent from "../../components/InputComponent/InputComponent";
-import { productGetAPI } from "../../service/api/admin";
+import { clientDataGetAPI, createVoucherAPI, productGetAPI } from "../../service/api/admin";
 
 const style = {
   position: "absolute",
@@ -34,7 +34,6 @@ const style = {
 function SalesPage() {
   const [productOptions, setProductOptions] = useState([]);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
-  const [myArray, setMyArray] = useState([]);
   const [totalValues, setTotalValues] = useState([]);
   const [inputData, setInputData] = useState(0);
 
@@ -43,16 +42,61 @@ function SalesPage() {
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [inputValue, setInputValue] = useState(""); // State to hold the value of the new input
   const [open, setOpen] = useState(false);
+  const [clinedOptions,setClientOptions]=useState([])
+  const [selectedOption, setSelectedOption] = useState("none");
+  const [selectedCustomer, setSelectedCustomer] = useState("none");
+  const [rows, setRows] = useState([]);
+
+
+
+
   const handleClose = () => setOpen(false);
+
+
+  useEffect(() => {
+    clientDataGetAPI().then((data) => {
+      console.log("clientData:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const clientData = data.responseData.map(entry => ({
+        value: entry.ID,
+        label: entry.name,
+
+      }));
+      console.log(clientData)
+      setClientOptions(clientData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }, [])
+  
+useEffect(() => {
+  const calculateItemTotal = (item) => {
+    const { qty, rate, amountafterdescount, tax } = item;
+    console.log(qty, rate, amountafterdescount, tax )
+    const total = (qty * rate) - (amountafterdescount||0) + (tax || 0);
+    console.log(total)
+    return total;
+};
+const itemTotals = rows.map(calculateItemTotal);
+const grandTotal = itemTotals.reduce((acc, curr) => acc + curr, 0);
+
+setTotalValues(grandTotal)
+}, [rows])
+
+
 
   const handleOptionSelect = (e) => {
     console.log(e.target.value);
+    console.log(e.target.value)
     const selectedOption = e.target.value;
     if (selectedOption === "addNew") {
       setOpen(true);
     } else {
       setOpen(false);
       // Handle selection of other options
+      setSelectedCustomer(e.target.value)
     }
   };
   const handleInputChange = (e) => {
@@ -123,6 +167,33 @@ function SalesPage() {
     setInputData(e.target.value);
   };
 
+
+  const handleAddVoucher= async()=>{
+    const newArray = await rows.map(item => ({
+      product_id: item.id,
+      quantity: item.qty,
+      Price: item.qty * item.rate ,
+      discount:item.amountafterdescount,
+    }));
+    const salesVoucher ={
+      credit_sale:false,
+      payment_type:selectedOption==="cash"?5:10,
+      billing_address:"",
+      customer:parseInt(selectedCustomer),
+      total:parseFloat(totalValues),
+      product_details:newArray
+    }
+    
+    console.log(salesVoucher)
+    console.log(rows)
+    // createVoucherAPI(salesVoucher).then((data)=>{
+    //   console.log(data)
+    // })
+    // .catch((err)=>{
+    //   console.log(err)
+    // })
+  }
+
   return (
     <div className="sales-table-container">
       <Box sx={{ width: "75%", mx: 1 }}>
@@ -171,8 +242,10 @@ function SalesPage() {
           <Box>
             <SalesTable
               selectedProductData={selectedProductDetails}
-              setTotalValues={setTotalValues}
+              // setTotalValues={setTotalValues}
               totalValues={totalValues}
+              setRows={setRows}
+              rows={rows}
             />{" "}
             {/* Pass tableRows as props to SalesTable */}
           </Box>
@@ -193,10 +266,8 @@ function SalesPage() {
 
             <option value="addNew">Add New</option>
 
-            {Array(5)
-              .fill()
-              .map((_, index) => {
-                const option = { value: index, label: `Option ${index}` }; // Define your options here
+            {clinedOptions
+              .map((option, index) => {
                 return (
                   <option key={index} value={option.value} label={option.label}>
                     {option.label}
@@ -259,7 +330,7 @@ function SalesPage() {
             }}
           >
             <p>Payment Method:</p>
-            <select style={{ width: "50%" }}>
+            <select style={{ width: "50%" }} value={selectedOption} onChange={(e)=> setSelectedOption(event.target.value)}>
               {/* {
               .map((_, index) => {
                 const option = { value: index, label: `Option ${index}` }; // Define your options here
@@ -321,6 +392,7 @@ function SalesPage() {
                 background: "var(--button-hover)",
               },
             }}
+            onClick={handleAddVoucher}
           >
             Save and Print Bill
           </Button>

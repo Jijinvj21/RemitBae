@@ -16,8 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import Modal from '@mui/material/Modal';
 import InputComponent from "../../components/InputComponent/InputComponent";
-import { productGetAPI } from "../../service/api/admin";
-
+import { partyDataGetAPI, productGetAPI } from "../../service/api/admin";
 
 const style = {
     position: 'absolute',
@@ -39,6 +38,10 @@ function PurchasePage() {
   const[myArray ,setMyArray]=useState([])
   const [totalValues, setTotalValues] = useState([]);
   const [inputData,setInputData]=useState(0)
+  const [rows, setRows] = useState([]);
+  const [partyOptions,setPartyOptions]=useState([])
+
+
 
 
 
@@ -47,6 +50,25 @@ function PurchasePage() {
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [inputValue, setInputValue] = useState(""); // State to hold the value of the new input
   const [open, setOpen] = useState(false);
+
+
+  useEffect(() => {
+  partyDataGetAPI().then((data) => {
+    console.log("partyData:", data);
+    // setTaxOptions(data);
+
+    // Transform data and set it to state
+    const partyData = data.responseData.map(entry => ({
+      value: entry.id,
+      label: entry.name,
+
+    }));
+    console.log(partyData)
+    setPartyOptions(partyData);
+  }).catch((err) => {
+    console.log(err);
+  });
+}, [])
 
   // Function to handle changes in the new input value
   const handleInputChange = (e) => {
@@ -86,6 +108,22 @@ function PurchasePage() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const calculateItemTotal = (item) => {
+      const { qty, rate, amountafterdescount, tax } = item;
+      console.log(qty, rate, amountafterdescount, tax )
+      const total = (qty * rate) - (amountafterdescount||0) + (tax || 0);
+      console.log(total)
+      return total;
+  };
+  const itemTotals = rows.map(calculateItemTotal);
+  const grandTotal = itemTotals.reduce((acc, curr) => acc + curr, 0);
+  
+  setTotalValues(grandTotal)
+  }, [rows])
+
+
 
 
   const handleSelectedProductChange = async (event, newValue) => {
@@ -127,6 +165,63 @@ function PurchasePage() {
     setInputData(e.target.value)
   }
   const handleClose = () => setOpen(false);
+
+
+const handleAddParty=()=>{
+  const partyData={
+name:"",
+phonenumber:"",
+email:"",
+address1:"",
+address2:"",
+country:"",
+postal_code:""
+  }
+
+}
+
+const addPartyInputArrat=[
+  {
+    intputName: "name",
+      label: "Name",
+      type: "test",
+      value:"",
+  },
+  {
+    intputName: "phonenumber",
+      label: "Phone number",
+      type: "number",
+      value:"",
+  }, {
+    intputName: "email",
+      label: "Email",
+      type: "number",
+      value:"",
+  }, {
+    intputName: "address1",
+      label: "Address1",
+      type: "number",
+      value:"",
+  }, {
+    intputName: "address2",
+      label: "Address2",
+      type: "number",
+      value:"",
+  }, {
+    intputName: "country",
+      label: "country",
+      type: "number",
+      value:"",
+  },
+  {
+    intputName: "postal_code",
+      label: "Pin code",
+      type: "number",
+      value:"",
+  },
+
+]
+
   return (
     <div className="sales-table-container">
       <Box sx={{ width: "75%", mx: 1 }}>
@@ -180,8 +275,9 @@ function PurchasePage() {
 
         <Box >
         <SalesTable selectedProductData={selectedProductDetails}
-        setTotalValues={setTotalValues}
         totalValues={totalValues}
+        rows={rows}
+        setRows={setRows}
         /> {/* Pass tableRows as props to SalesTable */}
         </Box>
         </div>
@@ -204,10 +300,8 @@ function PurchasePage() {
 
           <option value="addNew">Add New</option>
 
-            {Array(5)
-              .fill()
-              .map((_, index) => {
-                const option = { value: index, label: `Option ${index}` }; // Define your options here
+            {partyOptions
+              .map((option, index) => {
                 return (
                   <option key={index} value={option.value} label={option.label}>
                     {option.label}
@@ -327,13 +421,29 @@ Save and Print Bill
 
             <h4 > Add new Party</h4 > 
             </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", my: 1 }}>
-            <InputComponent
-            label="Add new "
-             value={inputValue}
-             handleChange={handleInputChange}
-            />
+        <Box sx={{ display: "flex", flexDirection:"column", justifyContent: "space-between", alignItems: "center", my: 1, gap:1 }}>
+           {addPartyInputArrat.map((data,index)=>(
 
+             <InputComponent
+             key={index}
+             label={data.label}
+             intputName={data.intputName}
+             type={data.type}
+             value={data.value}
+              // value={inputValue}
+              // handleChange={handleInputChange}
+             />
+           ))
+}
+<Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ mt:3, fontWeight: "bold",textTransform:"none", bgcolor:"var(--black-button)","&:hover": {
+            background: "var(--button-hover)",}}}
+            >
+Add party
+</Button>
            
           </Box>
         </Box>

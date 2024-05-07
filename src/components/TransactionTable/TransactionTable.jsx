@@ -1,6 +1,7 @@
-import { Box, Button } from "@mui/material"
+import { Autocomplete, Box, Button } from "@mui/material"
 import { DataGrid } from "@mui/x-data-grid"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { productGetAPI } from "../../service/api/admin";
 const other = {
     autoHeight: true,
     showCellVerticalBorder: true,
@@ -11,7 +12,87 @@ function TransactionTable() {
         // { id: 0, item: "", qty: 0, unit: "", price: 0, discount: 0, tax: 0 },
        
       ]);
-    
+      const [productOptions, setProductOptions] = useState([]);
+      const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
+      const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
+
+
+      useEffect(() => {
+        const fetchData = async () => {
+          const response = await productGetAPI();
+          console.log("response",response)
+          const products = response.responseData;
+          const productNames = products.map((product) => product.name);
+          const options = productNames.map((name, index) => ({
+            value: `option${index + 1}`,
+            label: name,
+          }));
+          console.log(options)
+          setProductOptions(options);
+        };
+        fetchData();
+      }, []);
+
+      // useEffect(() => {
+      //   if (selectedProductDetails) {
+
+      //     console.log(selectedProductDetails);
+      //     const newRow = {
+      //       id: selectedProductDetails.id,
+      //       itemCode: selectedProductDetails.itemCode,
+      //       name: selectedProductDetails.name,
+      //       unit: selectedProductDetails.unit,
+      //       rate: selectedProductDetails.rate,
+      //       taxApplied: selectedProductDetails.taxrate?.label,
+      //       qty: 1, // Set quantity to 1 every time a new product is selected
+      //     };
+      //     setRows((prevRows) => [...prevRows, newRow]);
+      //   }
+      // }, [selectedProductDetails]);
+
+
+      const handleSelectedProductChange = async (event, newValue) => {
+        if (!newValue) {
+          // Handle the case where newValue is not defined
+          return;
+        }
+      
+        setSelectedProduct(newValue);
+        
+        if (newValue) {
+          console.log(newValue.label);
+          // Set the amount based on the selected product
+          const response = await productGetAPI();
+          console.log(response)
+          const products = response.responseData;
+      
+          const selectedProductData = products.find(
+            (product) => product.name === newValue?.label
+          );
+          console.log(selectedProductData)
+          setSelectedProductDetails(selectedProductData);
+          console.log(selectedProductData);
+          // Add selected product to the table rows
+          const newRow = {
+            id: selectedProductData.id,
+            itemName: selectedProductData.name,
+            qty: 1, // You can set default quantity here
+            unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
+            price: selectedProductData.price, // Assuming selectedProductData has a price property
+            discount: 0, // Assuming default discount is 0
+            taxApplied: 0, // Assuming default tax applied is 0
+            total: selectedProductData.price, // Assuming total is initially equal to price
+          };
+          setRows([...rows, newRow]);
+        }
+      };
+
+
+
+
+
+
+
       // Calculate totals
       const calculateTotals = () => {
         const totals = rows.reduce((acc, row) => {
@@ -47,11 +128,12 @@ function TransactionTable() {
           price: 0, 
           discount: 0, 
           tax: null, 
-          amount:0 , 
+          amount: 0, 
           unit: 'nos' 
         };
-        setRows([...rows, newRow]);
+        setRows(prevRows => [...prevRows, newRow]); // Use functional update to create a new array
       };
+      
       // Handle cell edits
       const handleEdit = (newRow) => {
         const updatedRows = rows.map((row) => {
@@ -116,17 +198,61 @@ function TransactionTable() {
     const columns=[
         { field: 'id', headerName: 'id', hideable: false, flex: 1,renderCell: (params) => (
           params.row.id === 'total' &&
-          <div style={{display:"flex"}}>
-            <button onClick={addNewRow}>
+          <div style={{display:"flex",alignItems:"center",gap:10,}}>
+            <button style={{background:"var(--black-button)",color:"white",outline:"none",border:"none",padding:"10px",borderRadius:"10px"}} onClick={addNewRow}>
               Add Row
 
             </button>
-            <p>total</p>
+            <p>Total</p>
           </div>
         )  },
-        { field: 'item', headerName: 'Item', hideable: false, flex: 1, editable: true,renderCell: (params) => (
-          params.row.id === 'total' && 
-          "") },
+        { field: 'item', headerName: 'Item', hideable: false, flex: 1, editable: false,renderCell: (params) => (
+          params.row.id === 'total' ?
+          "":
+          <Box sx={{ width: "100%", marginBottom: "10px" }}>
+
+          <Autocomplete
+            sx={{
+              display: "inline-block",
+              "& input": {
+                width: "100%",
+                border: "none",
+                bgcolor: "var(--inputbg-color)",
+                color: (theme) =>
+                  theme.palette.getContrastText(theme.palette.background.paper),
+              },
+            }}
+            id="custom-input-demo"
+            options={productOptions}
+            value={selectedProduct}
+            onChange={handleSelectedProductChange}
+            componentsProps={{
+              popper: {
+                sx: {
+                  width:"20% !important"
+                },
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: [0, -20],
+                    },
+                  },
+                ],
+              },
+            }}
+            renderInput={(params) => (
+              <div ref={params.InputProps.ref}>
+                <input
+                  type="text"
+                  {...params.inputProps}
+                  style={{ height: "50px",paddingLeft:"10px" }}
+                />
+              </div>
+            )}
+          />
+        </Box>
+        ) },
         { field: 'qty', headerName: 'Qty', hideable: false, flex: 1, editable: true },
         { field: 'unit', headerName: 'Unit', hideable: false, flex: 1 },
         { field: 'price', headerName: 'Price', hideable: false, flex: 1, editable: true, renderHeader: () => (
@@ -242,7 +368,7 @@ function TransactionTable() {
      
     }}
   >
-          <button onClick={addNewRow}>Add Row</button>
+          {/* <button onClick={addNewRow}>Add Row</button> */}
 
     <DataGrid
         rows={[...rows, calculateTotals()]}
