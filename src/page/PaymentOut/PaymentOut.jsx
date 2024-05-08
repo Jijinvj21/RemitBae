@@ -1,12 +1,12 @@
-import { Autocomplete, Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
-import "./PaymenyIn.scss";
+import { Autocomplete, Box, Button } from "@mui/material";
+import "./PaymentOut.scss";
 import { useEffect, useState } from "react";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useLocation } from "react-router-dom";
-import { partyDataGetAPI, paymentDataGetAPI, paymentInAPI } from "../../service/api/admin";
+import { partyDataGetAPI, paymentInAPI } from "../../service/api/admin";
 import { generateRandom6Digit } from "../../utils/randomWithDate";
-function PaymenyIn() {
+function PaymentOut() {
   const location = useLocation();
   const [textValue, setTextValue] = useState("");
   const [img, setImg] = useState(null);
@@ -16,27 +16,6 @@ function PaymenyIn() {
   const [date, setDate] = useState("");
   const [recived, setRecived] = useState("");
   const [ReceptNo, setReceptNo] = useState("");
-  const [toggle, setToggle] = useState(true);
-  const [paymentData, setPaymenData] = useState([]);
-
-
-  useEffect(() => {
-    const currentDate = new Date();
-    const random6Digit = generateRandom6Digit(currentDate);
-    console.log(random6Digit);
-    setReceptNo(random6Digit);
-
-    paymentDataGetAPI({mode:toggle ?"IN":"OUT"}).then((data)=>{
-console.log(data.data.responseData)
-setPaymenData(data.data.responseData)
-    })
-    .catch((err)=>{
-console.log(err)
-    })
-
-
-
-  }, [toggle]);
 
 
   useEffect(() => {
@@ -57,6 +36,16 @@ console.log(err)
         console.log(err);
       });
   }, []);
+
+
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const random6Digit = generateRandom6Digit(currentDate);
+    console.log(random6Digit)
+    setReceptNo(random6Digit);
+  }, []);
+  
 
   const handleTextChange = (event) => {
     setTextValue(event.target.value);
@@ -85,8 +74,8 @@ console.log(err)
       intputName: "receiptno",
       label: "Recipes No",
       type: "text",
-      value: ReceptNo,
-      disabled: "disabled",
+      value:ReceptNo,
+      disabled:"disabled"
     },
     {
       handleChange: handleDate,
@@ -106,9 +95,9 @@ console.log(err)
       payment_type: parseInt(paymentSelect),
       customer: partySelect,
       amount: parseInt(recived),
-      payment_mode:toggle ?"IN":"OUT",
+      payment_mode: "OUT",
       description: textValue,
-      ref_no: ReceptNo,
+      ref_no:ReceptNo,
     };
     console.log(data);
     paymentInAPI(data)
@@ -121,66 +110,11 @@ console.log(err)
   };
   return (
     <div className="payment-in-section">
-      {toggle ? (
+      {location.pathname === "/admin/payment-in" ? (
         <h2>Payment In</h2>
       ) : (
         <h2>Payment Out</h2>
       )}
-
-
-<div className="toggle_button ">
-        
-
-            <ToggleButtonGroup
-              value={toggle ? "true" : "false"}
-              exclusive
-              onChange={(e, value) => setToggle(value === "true")}
-              aria-label="text alignment"
-            >
-              <ToggleButton
-                value="true"
-                aria-label="left aligned"
-                sx={{
-                  fontSize: "12px",
-                  borderRadius: "35px",
-                  width: "90px",
-                  height: "35px",
-                  textAlign: "center",
-                  marginTop: "5px",
-                  marginLeft: "10px",
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    color: "white",
-                    backgroundColor: "#8cdb7e",
-                  },
-                }}
-              >
-                <p>IN</p>
-              </ToggleButton>
-              <ToggleButton
-                value="false"
-                aria-label="centered"
-                sx={{
-                  fontSize: "12px",
-                  borderRadius: "35px",
-                  width: "90px",
-                  height: "35px",
-                  textAlign: "center",
-                  marginTop: "5px",
-                  marginLeft: "10px",
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    color: "white",
-                    backgroundColor: "#8cdb7e",
-                  },
-                }}
-              >
-                <p>Out</p>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </div>
-
-
-
-
       <div className="inner-section">
         <div style={{ display: "flex", gap: "84px", padding: "20px" }}>
           <Box sx={{ width: "50%" }}>
@@ -312,6 +246,7 @@ console.log(err)
                     inputOrSelect={input.inputOrSelect}
                     value={input.value}
                     disabled={input.disabled}
+
                   />
                 );
               })}
@@ -361,34 +296,8 @@ console.log(err)
           </Button>
         </div>
       </div>
-      <div className="table">
-      <TableContainer component={Paper} id="pdf-content">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Data</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Amount</TableCell>
-                   
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paymentData?.map((row, index) => (
-                  <TableRow key={index + 1}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{new Date(row.date).toLocaleDateString()}ro</TableCell>
-                    <TableCell>{row.description}</TableCell>
-                      <TableCell>{row.amount}</TableCell>
-                     
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-      </div>
     </div>
   );
 }
 
-export default PaymenyIn;
+export default PaymentOut;

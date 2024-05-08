@@ -7,7 +7,7 @@ import axios from "axios";
 
 
 const BASE_URL = 'http://192.168.0.103:8085';
-const MASRE_TABLE_BASE_URL = 'http://192.168.0.122:8088';
+// const MASRE_TABLE_BASE_URL = 'http://192.168.0.103:8088';
 
 
 export const productAddAPI = async (productAdd) => {
@@ -54,7 +54,7 @@ export const productUpdateAPI = async (productUpdate) => {
 
 export const gstOptionsGetAPI = async () => {
   try {
-    const response = await axios.get(`${MASRE_TABLE_BASE_URL}/master/taxrate/get`,);
+    const response = await axios.get(`${BASE_URL}/master/taxrate/get`,);
     console.log(response)
     return response.data.responseData
   } catch (error) {
@@ -86,7 +86,7 @@ export const projectGetAPI = async () => {
 
 export const countryOptionsGetAPI = async () => {
   try {
-    const response = await axios.get(`${MASRE_TABLE_BASE_URL}/master/country/list`,);
+    const response = await axios.get(`${BASE_URL}/master/country/list`,);
     console.log(response)
     return response.data.responseData
   } catch (error) {
@@ -137,6 +137,8 @@ export const partyDataGetAPI = async () => {
   }
 };
 
+
+
 export const createPurchaseAPI = async (purchaseAdd) => {
   try {
     const response = await axios.post(`${BASE_URL}/voucher/purchase/add`,purchaseAdd);
@@ -162,6 +164,41 @@ export const createPartyAPI = async (partyAdd) => {
 export const projectDataByIdAPI = async (id) => {
   try {
     const response = await axios.post(`${BASE_URL}/project/getbyid`,id);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const paymentInAPI = async (paymentIn) => {
+  try {
+    console.log(paymentIn)
+    const response = await axios.post(`${BASE_URL}/voucher/payment/add`,paymentIn);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const unitsDataGetAPI = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/master/unit/get`,);
+    return response.data
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+
+export const paymentDataGetAPI = async (paymentMode) => {
+  try {
+    console.log(paymentMode)
+    const response = await axios.post(`${BASE_URL}/voucher/payment/getall`,paymentMode);
     console.log(response)
     return response
   } catch (error) {

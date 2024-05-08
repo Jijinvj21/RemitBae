@@ -15,6 +15,7 @@ import PurchasePage from "./page/PurchasePage/PurchasePage";
 import PaymenyIn from "./page/PaymenyIn/PaymenyIn";
 import CreditNotePage from "./page/CreditNotePage/CreditNotePage";
 import ProjectDataPage from "./page/ProjectDataPage/ProjectDataPage";
+import PaymenyOut from "./page/PaymentOut/PaymentOut";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="purchase" element={<PurchasePage/>} />
           <Route path="projects" element={<ProjectsPage/>} />
           <Route path="payment-in" element={<PaymenyIn/>} />
+          <Route path="payment-out" element={<PaymenyOut/>} />
           <Route path="creadit-note" element={<CreditNotePage/>} />
           <Route path="project-data" element={<ProjectDataPage />} />
 

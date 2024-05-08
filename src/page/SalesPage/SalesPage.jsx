@@ -34,7 +34,7 @@ const style = {
 function SalesPage() {
   const [productOptions, setProductOptions] = useState([]);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
-  const [totalValues, setTotalValues] = useState([]);
+  const [totalValues, setTotalValues] = useState(0);
   const [inputData, setInputData] = useState(0);
 
   const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
@@ -60,8 +60,8 @@ function SalesPage() {
 
       // Transform data and set it to state
       const clientData = data.responseData.map(entry => ({
-        value: entry.ID,
-        label: entry.name,
+        value: entry.id,
+        label: `${entry.project_name} ( ${entry.name} )`,
 
       }));
       console.log(clientData)
@@ -73,23 +73,40 @@ function SalesPage() {
   
 useEffect(() => {
   const calculateItemTotal = (item) => {
-    const { qty, rate, amountafterdescount, tax } = item;
-    console.log(qty, rate, amountafterdescount, tax )
-    const total = (qty * rate) - (amountafterdescount||0) + (tax || 0);
-    console.log(total)
+    console.log("item",item)
+    const { qty, rate, amountafterdescount, taxAppliedamount ,} = item;
+    console.log(qty, rate, amountafterdescount, taxAppliedamount )
+    const total = (qty * rate) - (amountafterdescount||0) + (taxAppliedamount || 0);
+    console.log("total",taxAppliedamount)
+    
+   
+    
+
+
+
+
+
+
     return total;
 };
 const itemTotals = rows.map(calculateItemTotal);
 const grandTotal = itemTotals.reduce((acc, curr) => acc + curr, 0);
+
+
+
+
+
 
 setTotalValues(grandTotal)
 }, [rows])
 
 
 
+
+
   const handleOptionSelect = (e) => {
     console.log(e.target.value);
-    console.log(e.target.value)
+    console.log(e.target)
     const selectedOption = e.target.value;
     if (selectedOption === "addNew") {
       setOpen(true);
@@ -242,7 +259,7 @@ setTotalValues(grandTotal)
           <Box>
             <SalesTable
               selectedProductData={selectedProductDetails}
-              // setTotalValues={setTotalValues}
+              setTotalValues={setTotalValues}
               totalValues={totalValues}
               setRows={setRows}
               rows={rows}
@@ -268,6 +285,7 @@ setTotalValues(grandTotal)
 
             {clinedOptions
               .map((option, index) => {
+                console.log(option)
                 return (
                   <option key={index} value={option.value} label={option.label}>
                     {option.label}

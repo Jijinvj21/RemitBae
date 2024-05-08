@@ -7,23 +7,78 @@ import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer
 import AddSquare from "../../assets/products/AddSquare.svg";
 import { Link } from "react-router-dom";
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
-import { gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI } from "../../service/api/admin";
+import { gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 
 function ManageProductsPage() {
   const [myArray, setMyArray] = useState([]);
   const [searchQuery, setSearchQuery] = useState(''); // Initialize searchQuery as an empty string
 const [taxOptions,setTaxOptions]=useState([])
 const [updatetrue,setUpdateTrue]=useState(false)
-  const getDataFromAPI = () => {
-    productGetAPI().then((data)=>{
-      if(data.satuscode==200){
+const [unitOptions,setUnitOptions]=useState([])
+const [projectOptions,setProjectOptions]=useState([])
 
-        setMyArray(data.responseData);
-      }
 
-    }).catch((err)=>{
-      console.log(err)
+
+
+
+const getUnitOptionsFormAPI = () => {
+  unitsDataGetAPI()
+    .then((data) => {
+      console.log("units:", data);
+      
+      // Transform data and set it to state
+      const unitsdData = data?.responseData.map(entry => ({
+        value: entry.id,
+        label: entry.name ,
+        
+      }));
+      console.log(unitsdData);
+      setUnitOptions(unitsdData);
     })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+
+const getClientOptionsFormAPI = () => {
+  projectGetAPI()
+    .then((data) => {
+      console.log("projects:", data);
+      
+      // Transform data and set it to state
+      const projectdData = data?.responseData.map(entry => ({
+        value: entry.id,
+        label:`${entry.name} ( ${entry.client_name} )`,
+        
+      }));
+      console.log(projectdData);
+      setProjectOptions(projectdData);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+
+  const getDataFromAPI = () => {
+    productGetAPI().then((data) => {
+      console.log("tax:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const transformedData = data.map(entry => ({
+        value: entry.percentage,
+        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
+        taxlabel: entry.percentage,
+        id:entry.id
+
+      }));
+      console.log(transformedData)
+      setTaxOptions(transformedData);
+    }).catch((err) => {
+      console.log(err);
+    });
   };
   const getTaxOptionsFormAPI = () => {
     gstOptionsGetAPI().then((data) => {
@@ -34,15 +89,20 @@ const [updatetrue,setUpdateTrue]=useState(false)
       const transformedData = data.map(entry => ({
         value: entry.percentage,
         label: entry.name?`${entry.name} ${entry.percentage}` :"none",
-        taxlabel: entry.percentage
+        taxlabel: entry.percentage,
+        id:entry.id
 
       }));
+      console.log(transformedData)
       setTaxOptions(transformedData);
     }).catch((err) => {
       console.log(err);
     });
   }
   useEffect(() => {
+    getClientOptionsFormAPI()
+    getUnitOptionsFormAPI()
+    getUnitOptionsFormAPI()
     getDataFromAPI()
     getTaxOptionsFormAPI()
   }, []);
@@ -53,6 +113,8 @@ const [updatetrue,setUpdateTrue]=useState(false)
     rate:0,
   })
     const [selectedValue, setSelectedValue] = useState('');
+    const [projectValue, setProjectValue] = useState('');
+
     const [taxRateValue, setTaxRateValue] = useState({});
 
   const [ProductFormData, setProductFormData] = useState({
@@ -66,6 +128,11 @@ const [updatetrue,setUpdateTrue]=useState(false)
   // const [selectTabs, setSelectTabs] = useState("add");
   const handleSelectChange = (event) => {
     setSelectedValue(event.target.value);
+    console.log(event.target.value)
+  };
+
+  const handleSelectProject = (event) => {
+    setProjectValue(event.target.value);
     console.log(event.target.value)
   };
 
@@ -164,7 +231,7 @@ const [updatetrue,setUpdateTrue]=useState(false)
       intputName: "taxvalue",
       label: " Tax Value",
       // type: "number",
-      value:taxRateValue.value,
+      value: (((parseFloat(ProductFormData.rate || 0)) * parseFloat(ProductFormData.quantity || 0)) * (parseFloat(taxRateValue.value?.replace("%", "")) || 0) / 100),
       disabled:"disabled"
       
     },
@@ -173,7 +240,6 @@ const [updatetrue,setUpdateTrue]=useState(false)
       intputName: "hsn",
       label: "HSN",
       type: "text",
-      value:""
     },
     {
       handleChange: handleSelectChange,
@@ -183,14 +249,23 @@ const [updatetrue,setUpdateTrue]=useState(false)
       value:selectedValue,
 
       inputOrSelect:"select",
-      options: [
-        { value: 'option1', label: 'Option 1' },
-        { value: 'option2', label: 'Option 2' },
-        { value: 'option3', label: 'Option 3' }
-      ],
+      options: unitOptions,
       
       
     },
+    {
+      handleChange: handleSelectProject,
+      intputName: "project",
+      label: "Projects",
+      // type: "text",
+      // value:selectedValue,
+
+      inputOrSelect:"select",
+      options: projectOptions,
+      
+      
+    },
+    
   ];
 
   // draw
@@ -253,18 +328,20 @@ getDataFromAPI()
   
 
   const handleAdd = () => {
-   
-    const productadd={
-      name:ProductFormData.name,
-      hsn:ProductFormData.hsn,
+    const productadd = {
+      name: ProductFormData.name,
+      hsn: ProductFormData.hsn,
       rate: parseInt(ProductFormData.rate),
       quantity: parseInt(ProductFormData.quantity),
-      unit:selectedValue,
-      taxvalue: taxRateValue?.label
-    }
-    // console.log(taxRateValue)
-    productAddAPI(productadd).then((data)=>{
-      if(data.status==200){
+      unit: selectedValue,
+      projectValue:parseInt(projectValue),
+      // gst: ((parseInt(ProductFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100
+      tax_rate:{
+        id:taxRateValue?.id
+      }
+    };
+    productAddAPI(productadd).then((data) => {
+      if (data.status === 200) {
         setProductFormData({
           name: "",
           qate: "",
@@ -274,17 +351,13 @@ getDataFromAPI()
           hsn: "",
         });
         setSelectedValue("");
-        setTaxRateValue(""); // Reset the tax rate value
-      
+        setTaxRateValue("");
         alert("Product added successfully");
         getDataFromAPI();
       }
     })
-    .catch((err)=>{console.log(err)})
+      .catch((err) => { console.log(err) });
     alert("problem in add product");
-
-    // Reset form fields and selected values
-  
   };
   
   

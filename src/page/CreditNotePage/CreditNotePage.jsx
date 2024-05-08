@@ -113,7 +113,7 @@ function CreditNotePage() {
                       </div>
                     )}
                   />
-                  <p
+                  {/* <p
                     style={{
                       color: "red",
                       fontSize: "12px",
@@ -121,7 +121,7 @@ function CreditNotePage() {
                     }}
                   >
                     BAL: 63660
-                  </p>
+                  </p> */}
                 </div>
 
                 <InputComponent

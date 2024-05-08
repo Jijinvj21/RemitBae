@@ -5,6 +5,8 @@ import "./AddProductDrawer.scss";
 // import { FormControl } from "@mui/base/FormControl";
 import bulkUpload from "../../assets/products/bulkUpload.svg";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
+import { useEffect, useState } from "react";
+
 
 function AddProductDrawer({
   handleSubmit,
@@ -20,6 +22,9 @@ function AddProductDrawer({
   handleUpdateData
 }) {
   // draw
+
+
+  
 
   const list = (anchor) => (
     <Box

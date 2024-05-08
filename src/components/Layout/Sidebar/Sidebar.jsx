@@ -82,12 +82,18 @@ function Sidebar() {
             Payment
           </MenuItem>
         </NavLink>
-        
+        {/* <NavLink className="navelink" to="/admin/payment-out">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+            Payment out
+          </MenuItem>
+        </NavLink> */}
         <NavLink className="navelink" to="/admin/creadit-note">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
-            Creadit
+            Credit Note
           </MenuItem>
         </NavLink>
         
