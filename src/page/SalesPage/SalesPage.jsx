@@ -70,35 +70,48 @@ function SalesPage() {
       console.log(err);
     });
   }, [])
+  useEffect(() => {
+    const updatedRows = rows.map((row) => {
+      const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
+      const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
+      const discount = parseFloat(row.amountafterdescount) || 0; // Parsing discount to float, defaulting to 0 if NaN
+      const taxApplied = parseFloat(row.taxApplied?.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
   
-useEffect(() => {
-  const calculateItemTotal = (item) => {
-    console.log("item",item)
-    const { qty, rate, amountafterdescount, taxAppliedamount ,} = item;
-    console.log(qty, rate, amountafterdescount, taxAppliedamount )
-    const total = (qty * rate) - (amountafterdescount||0) + (taxAppliedamount || 0);
-    console.log("total",taxAppliedamount)
-    
-   
-    
+      // Calculate total amount without tax
+      const totalWithoutTax = quantity * rate;
+  
+      // Apply discount if applicable
+      // let discountedTotal = totalWithoutTax; // Commented out as it's not used
+  
+      // Apply tax
+      const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
+  
+      let taxAppliedamount = 0; // Initializing taxAppliedamount variable
+      if (row.taxAppliedamount) {
+        taxAppliedamount = parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
+      } else if (row.taxApplied?.value) {
+        taxAppliedamount = parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
+      } else if (row.taxApplied) {
+        taxAppliedamount = parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
+      }
+  
+      // Calculate total with tax
+      const total = (((totalWithTax * taxAppliedamount) / 100) + totalWithTax).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
+  
+      return {
+        ...row,
+        total: total, // Setting the total property of the row
+      };
+    });
+  
+    // Sum up all total values
+    const grandTotal = updatedRows.reduce((sum, row) => sum + parseFloat(row.total), 0); // Summing up all row totals
+  
+    // Update the grand total value
+    setTotalValues(grandTotal);
+  }, [rows]); // Update when rows change
+  
 
-
-
-
-
-
-    return total;
-};
-const itemTotals = rows.map(calculateItemTotal);
-const grandTotal = itemTotals.reduce((acc, curr) => acc + curr, 0);
-
-
-
-
-
-
-setTotalValues(grandTotal)
-}, [rows])
 
 
 

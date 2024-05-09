@@ -418,8 +418,8 @@ export default function FullFeaturedCrudGrid({
         const quantity = parseInt(params.row.qty) || 0;
         const rate = parseInt(params.row.rate) || 0;
         const discount = parseFloat(params.row.discount) || 0;
+        
         let taxAppliedamount = 0;
-    
         if (params.row.taxAppliedamount) {
           taxAppliedamount = parseFloat(params.row.taxAppliedamount.replace("%", "")) || 0;
         } else if (params.row.taxApplied?.value) {
@@ -427,14 +427,15 @@ export default function FullFeaturedCrudGrid({
         } else if (params.row.taxApplied) {
           taxAppliedamount = parseFloat(params.row.taxApplied.split("@")[1].replace("%", "")) || 0;
         }
-    
+        
         const totalWithoutTax = quantity * rate;
-        const discountedTotal = totalWithoutTax - (totalWithoutTax * discount) / 100;
-        const totalWithTax = discountedTotal + (discountedTotal * taxAppliedamount) / 100;
+        // let discountedTotal = totalWithoutTax;
     
-      
-    
-        return totalWithTax.toFixed(2);
+        // if (quantity > 0 && discount > 0) {
+        //   discountedTotal -= (totalWithoutTax * discount) / 100;
+        // }
+        const dis=totalWithoutTax-(params.row.amountafterdescount||0)
+        return (((dis*taxAppliedamount)/100)+dis).toFixed(2);
       },
     }
     
