@@ -172,7 +172,10 @@ export default function FullFeaturedCrudGrid({
       flex: 1,
       editable: false,
       type: "number",
-      renderHeader: () => (
+      renderHeader: () => {
+
+        
+        return(
         <div
           style={{ width: "100%", display: "flex", flexDirection: "column" }}
         >
@@ -182,13 +185,15 @@ export default function FullFeaturedCrudGrid({
           <hr style={{ width: "100%" }} />
           <div style={{ fontWeight: "bold" }}>(without tax)</div>
         </div>
-      ),
+      )},
       renderCell: (params) => {
+        
         const quantity = parseInt(params.row.qty) || 0;
         const rate = parseInt(params.row.rate) || 0;
         const discount = parseFloat(params.row.discount) || 0;
         const taxrat = params.row.taxApplied;
-
+        
+        
         // Check if taxrat is a string before splitting
         const taxNumber =
           typeof taxrat === "string"
@@ -210,7 +215,8 @@ export default function FullFeaturedCrudGrid({
         // Calculate total with tax
         // const totalWithTax = d(discountedTotal * taxNumber) / 100;
 
-        return totalWithoutTax; // Display the total with tax
+        // return totalWithoutTax; // Display the total with tax
+        return (quantity * rate)-(params.row.amountafterdescount ||0)
       },
     },
 
@@ -350,6 +356,21 @@ export default function FullFeaturedCrudGrid({
                     : params.row.taxApplied.split("GST@ ")[1].length
            
         );
+        const calc=()=>{
+          const taxvalue=( params.row.taxApplied
+            ? params.row.taxAppliedamount
+              ? parseInt(params.row.taxAppliedamount?.replace("%", " "))
+              : parseFloat(
+                  params.row?.taxApplied?.split("@")[1].replace("%", "")
+                )
+            : parseInt(params.row.taxAppliedamount?.replace("%", " ")) )
+            const totalval=(params.row.qty*params.row.rate)
+const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(params.row.amountafterdescount ||0))
+            const taxApplied= ((totaldis*taxvalue) / 100);
+
+            return taxApplied;
+
+        }
         return (
           <div style={{ width: "100%", display: "flex" }}>
               <select
@@ -394,14 +415,8 @@ export default function FullFeaturedCrudGrid({
                 background: "white",
               }}
               type="text"
-              value={
-                params.row.taxApplied
-                  ? params.row.taxAppliedamount
-                    ? parseInt(params.row.taxAppliedamount?.replace("%", " "))
-                    : parseFloat(
-                        params.row?.taxApplied?.split("@")[1].replace("%", "")
-                      )
-                  : parseInt(params.row.taxAppliedamount?.replace("%", " "))
+              value={calc()
+              
               }
               disabled
             />

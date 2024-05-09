@@ -45,7 +45,7 @@ function TransactionTable() {
         const selectedProductData = products.find(
           (product) => product.id === newValue?.value
         );
-      
+       console.log("selectedProductData",selectedProductData)
         const newRow = {
           id: selectedProductData.id,
           item: selectedProductData.name,
@@ -57,17 +57,23 @@ function TransactionTable() {
         };
       
         // Find the index of the row to update based on its id
-        const rowIndexToUpdate = rows.findIndex(row => row.id === selectedProductData.id);
+        // const rowIndexToUpdate = rows.findIndex(row => row.id === selectedProductData.id);
       
-        if (rowIndexToUpdate !== -1) {
-          // Update the existing row with the new data
-          const updatedRows = [...rows];
-          updatedRows[rowIndexToUpdate] = newRow;
-          setRows(updatedRows);
-        } else {
+        // if (rowIndexToUpdate !== -1) {
+        //   // Update the existing row with the new data
+        //   const updatedRows = [...rows];
+        //   updatedRows[rowIndexToUpdate] = newRow;
+        //   setRows(updatedRows);
+        // } else {
           // Insert the new row at the end of the table
-          setRows(prevRows => [...prevRows, newRow]);
-        }
+          console.log("row data",rows)
+          // setRows(prevRows => [...prevRows, newRow]);
+          // setRows(prevRows =>
+          //   prevRows.map(row =>
+          //     row.id === id ? { ...row, [name]: value } : row
+          //   )
+          // );
+        // }
       };
       
       
@@ -105,8 +111,10 @@ function TransactionTable() {
     
       // Add a new row at the top with a random ID
       const addNewRow = () => {
+        console.log(rows)
         const newRow = { 
-          id: Math.floor(Math.random() * 1000000), 
+          // Math.floor(Math.random() * 1000000), 
+          id:(parseInt(rows.id)+1), 
           item: '', 
           qty: 1, 
           price: 0, 
@@ -188,13 +196,13 @@ function TransactionTable() {
       
     const columns=[
         { field: 'id', headerName: 'id', hideable: false, flex: 1,renderCell: (params) => (
-          params.row.id === 'total' &&
+          params.row.id === 'total' ?
           <div style={{display:"flex",alignItems:"center",gap:10,}}>
             <button style={{background:"var(--black-button)",color:"white",outline:"none",border:"none",padding:"10px",borderRadius:"10px"}} onClick={addNewRow}>
               Add Row
             </button>
             <p>Total</p>
-          </div>
+          </div>:<p>{params.row.id}</p>
         )  },
         { field: 'item', headerName: 'Item', hideable: false, flex: 1, editable: false,renderCell: (params) => (
           params.row.id === 'total' ?

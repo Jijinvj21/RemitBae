@@ -20,19 +20,26 @@ function PaymenyIn() {
   const [paymentData, setPaymenData] = useState([]);
 
 
+
+const getpaymentDataGetAPI=()=>{
+  paymentDataGetAPI({payment_mode:toggle ?"IN":"OUT",project_id: 3}).then((data)=>{
+    console.log(data.data.responseData)
+    setPaymenData(data.data.responseData)
+        })
+        .catch((err)=>{
+    console.log(err)
+        })
+}
+
+
+
   useEffect(() => {
     const currentDate = new Date();
     const random6Digit = generateRandom6Digit(currentDate);
     console.log(random6Digit);
     setReceptNo(random6Digit);
 
-    paymentDataGetAPI({mode:toggle ?"IN":"OUT"}).then((data)=>{
-console.log(data.data.responseData)
-setPaymenData(data.data.responseData)
-    })
-    .catch((err)=>{
-console.log(err)
-    })
+    getpaymentDataGetAPI()
 
 
 
@@ -104,7 +111,8 @@ console.log(err)
     const data = {
       date: date,
       payment_type: parseInt(paymentSelect),
-      customer: partySelect,
+      party_id: partySelect,
+      project_id: 3,
       amount: parseInt(recived),
       payment_mode:toggle ?"IN":"OUT",
       description: textValue,
@@ -114,6 +122,18 @@ console.log(err)
     paymentInAPI(data)
       .then((data) => {
         console.log(data);
+
+        getpaymentDataGetAPI()
+        const currentDate = new Date();
+    const random6Digit = generateRandom6Digit(currentDate);
+    console.log(random6Digit);
+    setReceptNo(random6Digit);
+    setDate("")
+    setPaymentSelect("")
+    setPartySelect(0)
+    setRecived("")
+    setTextValue("")
+    setTextValue("")
       })
       .catch((err) => {
         console.log(err);
@@ -377,7 +397,7 @@ console.log(err)
                 {paymentData?.map((row, index) => (
                   <TableRow key={index + 1}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{new Date(row.date).toLocaleDateString()}ro</TableCell>
+                    <TableCell>{new Date(row.date).toLocaleDateString()}</TableCell>
                     <TableCell>{row.description}</TableCell>
                       <TableCell>{row.amount}</TableCell>
                      

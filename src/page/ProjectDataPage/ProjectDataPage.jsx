@@ -122,6 +122,52 @@ function ProjectDataPage() {
     window.open(blobURL, "_blank");
   };
 
+
+  // Function to convert table data to CSV format
+// Function to convert table data to CSV format
+// Function to convert table data to CSV format
+// Function to convert table data to CSV format
+const convertTableToCSV = () => {
+  let csv = [];
+  // Header row
+  let headerRow = ["ID", "Date", "Particular", "IGST", "CGST", "SGST", "Total"];
+  csv.push(headerRow.join(","));
+  // Data rows
+  projectData?.transaction.forEach((row, index) => {
+    let date = new Date(row.date);
+    let formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    let rowData = [
+      index + 1,
+      formattedDate,
+      row.particular,
+      toggle ? row.igst : 0,
+      toggle ? row.cgst : 0,
+      toggle ? row.sgst : 0,
+      toggle ? row.amount : row.amount - (row.igst + row.cgst + row.sgst)
+    ];
+    csv.push(rowData.join(","));
+  });
+  // Join rows with newline characters
+  return csv.join("\n");
+};
+
+
+
+// Function to handle CSV download
+const downloadCSV = () => {
+  const csvContent = convertTableToCSV();
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "project_data.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Rest of your code
+
   return (
     <div className="projectDatapage-section">
       <div className="top-section">
@@ -214,6 +260,33 @@ function ProjectDataPage() {
               <h6>Download</h6>
             </div>
           </button>
+
+
+          <button
+        className="data_show_card"
+        style={{
+          border: "none",
+          cursor: "pointer",
+          backgroundColor: "white",
+        }}
+        onClick={downloadCSV}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: "10px",
+          }}
+        >
+          <SimCardDownloadOutlinedIcon style={{ fontSize: "30px" }} />
+          <h6>Download CSV</h6>
+        </div>
+      </button>
+
+
+
+
         </div>
       </div>
       {projectData?.transaction ? (
