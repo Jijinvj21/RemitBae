@@ -45,38 +45,36 @@ function TransactionTable() {
         const selectedProductData = products.find(
           (product) => product.id === newValue?.value
         );
-       console.log("selectedProductData",selectedProductData)
-        const newRow = {
-          id: selectedProductData.id,
-          item: selectedProductData.name,
-          qty: 1,
-          unit: selectedProductData.unit,
-          rate: selectedProductData.rate,
-          price: selectedProductData.rate * 1,
-          tax: selectedProductData.tax, // Assuming selectedProductData contains tax information
-        };
       
-        // Find the index of the row to update based on its id
-        // const rowIndexToUpdate = rows.findIndex(row => row.id === selectedProductData.id);
+        // If selected product data is found
+        if (selectedProductData) {
+          const updatedRows = rows.map((row) => {
+            // Update the existing row if the product matches the row ID
+            if (row.id === selectedProductData.id) {
+              return {
+                ...row,
+                item: "stest",
+                qty: 1,
+                unit: "selectedProductData.unit",
+                rate: 645,
+                price: 321,
+                tax: "0.2%",
+              };
+            }
+            return row; // Return unchanged row if not matching
+          });
       
-        // if (rowIndexToUpdate !== -1) {
-        //   // Update the existing row with the new data
-        //   const updatedRows = [...rows];
-        //   updatedRows[rowIndexToUpdate] = newRow;
-        //   setRows(updatedRows);
-        // } else {
-          // Insert the new row at the end of the table
-          console.log("row data",rows)
-          // setRows(prevRows => [...prevRows, newRow]);
-          // setRows(prevRows =>
-          //   prevRows.map(row =>
-          //     row.id === id ? { ...row, [name]: value } : row
-          //   )
-          // );
-        // }
+          setRows(updatedRows);
+        }
       };
       
       
+      // item: selectedProductData.name,
+      // qty: 1,
+      // unit: selectedProductData.unit,
+      // rate: selectedProductData.rate,
+      // price: selectedProductData.rate * 1,
+      // tax: selectedProductData.tax,
 
 
 

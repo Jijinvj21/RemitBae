@@ -7,12 +7,21 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useEffect, useRef, useState } from "react";
+import { clientDataGetAPI, productGetAPI, projectGetAPI } from "../../service/api/admin";
+import { useNavigate } from "react-router-dom";
 
 function QuotationGeneratorPage() {
+  const navigate = useNavigate();
+
   const tableRef = useRef();
   const exclusionRef=useRef()
   const exclusionData=exclusionRef.current
   const table = tableRef.current;
+  const [clientOptions, setClientOptions] = useState([]);
+  const [projectOptions, setProjectOptions] = useState([]);
+  const [productsOptions, setProductsOptions] = useState([]);
+
+
 
   const [img, setImg] = useState("");
   const [inputs, setInputs] = useState([""]); // State to store  Terms and Conditions values
@@ -38,15 +47,79 @@ function QuotationGeneratorPage() {
   // adding data form local storage 
   const [myArray, setMyArray] = useState([]);
 
-  const getArrayFromLocalStorage = () => {
-    const storedArray = localStorage.getItem('products');
-    if (storedArray) {
-      setMyArray(JSON.parse(storedArray));
-    }
-  };
+ const getCliendData=()=>{
+  clientDataGetAPI()
+  .then((data) => {
+    console.log("clientData:", data);
+    // setTaxOptions(data);
+
+    // Transform data and set it to state
+    const partyData = data.responseData.map((entry) => ({
+      value: entry.id,
+      label: entry.name,
+    }));
+    partyData.unshift({ value: -2, label: "Add" });
+    partyData.unshift({ value: -1, label: "None" });
+
+
+    console.log(partyData);
+    setClientOptions(partyData);
+  })
+  .catch((err) => {
+    console.log(err);
+  }); 
+ }
+ const getProjectData=()=>{
+  projectGetAPI()
+  .then((data) => {
+    console.log("getProjectData:", data);
+    // setTaxOptions(data);
+
+    // Transform data and set it to state
+    const projectData = data.responseData.map((entry) => ({
+      value: entry.id,
+      label: entry.name,
+    }));
+    projectData.unshift({ value: -2, label: "Add" });
+    projectData.unshift({ value: -1, label: "None" });
+
+
+    console.log(projectData);
+    setProjectOptions(projectData);
+  })
+  .catch((err) => {
+    console.log(err);
+  }); 
+ }
+ 
+
+ const getProductsData=()=>{
+  productGetAPI()
+  .then((data) => {
+    console.log("getProjectData:", data);
+    // setTaxOptions(data);
+
+    // Transform data and set it to state
+    const productsData = data.responseData.map((entry) => ({
+      value: entry.id,
+      label: entry.name,
+    }));
+    productsData.unshift({ value: -1, label: "None" });
+
+
+    console.log(productsData);
+    setProductsOptions(productsData);
+  })
+  .catch((err) => {
+    console.log(err);
+  }); 
+ }
+
+
   useEffect(() => {
-    // Function to retrieve array from local storage
-    getArrayFromLocalStorage(); 
+    getProductsData()
+    getProjectData()
+    getCliendData()
   }, []);
 
   const handleleftIputsChange = (e) => {
@@ -85,6 +158,20 @@ function QuotationGeneratorPage() {
   setInputs(newInputs);
   console.log(newInputs);
 };
+
+const handleClientname=(e)=>{
+console.log("e.target",e.target.value==="-2")
+}
+const handleProjectname=(e)=>{
+  console.log("e.target",e.target.value==="-2")
+  // alert(e.target.value==="-2")
+  if(e.target.value==="-2"){
+    navigate("/admin/projects/add-projects");
+  }
+  }
+
+
+
  const handleExclusionInputChange= (index, value) => {
   console.log(index);
   const newInputs = [...inputsExclusion];
@@ -558,7 +645,9 @@ doc.addPage();
     {
       intputName: "productname",
       label: " Product Name",
-      type: "text",
+      inputOrSelect:"select" , 
+      options:productsOptions    
+
     },
     {
       intputName: "quantity",
@@ -593,16 +682,18 @@ doc.addPage();
   ];
   const RightArrOfInputs = [
     {
-      handleChange: handlerightIputsChange,
+      handleChange: handleClientname,
       intputName: "clientname",
       label: "Client Name",
-      type: "text",
+      inputOrSelect:"select" ,
+      options:clientOptions
     },
     {
-      handleChange: handlerightIputsChange,
+      handleChange: handleProjectname,
       intputName: "projectdetails",
       label: "Project Details",
-      type: "text",
+      inputOrSelect:"select" , 
+      options:projectOptions    
     },
     {
       handleChange: handlerightIputsChange,
@@ -835,10 +926,10 @@ doc.addPage();
           {leftArrOfInputs.slice(0,1).map((input, index) => (
             <InputComponent
             key={index}
-            handleChange={(e) => handleleftIputsChange(e, input.intputName)}
+            // handleChange={(e) => handleleftIputsChange(e, input.intputName)}
             label={input.label}
             type={input.type}
-            value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+            // value={leftInputs[input.intputName]} // Ensure the value is correctly passed
             intputName={input.intputName}
             inputOrSelect={input.inputOrSelect}
             options={input.options}

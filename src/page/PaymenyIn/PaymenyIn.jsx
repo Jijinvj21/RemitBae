@@ -1,11 +1,29 @@
-import { Autocomplete, Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,Paper, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 import "./PaymenyIn.scss";
 import { useEffect, useState } from "react";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useLocation } from "react-router-dom";
-import { partyDataGetAPI, paymentDataGetAPI, paymentInAPI } from "../../service/api/admin";
+import {
+  partyDataGetAPI,
+  paymentDataGetAPI,
+  paymentInAPI,
+} from "../../service/api/admin";
 import { generateRandom6Digit } from "../../utils/randomWithDate";
+import jsPDF from "jspdf";
+import { renderToString } from "react-dom/server";
+
 function PaymenyIn() {
   const location = useLocation();
   const [textValue, setTextValue] = useState("");
@@ -16,22 +34,18 @@ function PaymenyIn() {
   const [date, setDate] = useState("");
   const [recived, setRecived] = useState("");
   const [ReceptNo, setReceptNo] = useState("");
-  const [toggle, setToggle] = useState(true);
   const [paymentData, setPaymenData] = useState([]);
 
-
-
-const getpaymentDataGetAPI=()=>{
-  paymentDataGetAPI({payment_mode:toggle ?"IN":"OUT",project_id: 3}).then((data)=>{
-    console.log(data.data.responseData)
-    setPaymenData(data.data.responseData)
-        })
-        .catch((err)=>{
-    console.log(err)
-        })
-}
-
-
+  const getpaymentDataGetAPI = () => {
+    paymentDataGetAPI({ payment_mode: "IN", project_id: 1 })
+      .then((data) => {
+        console.log(data.data.responseData);
+        setPaymenData(data.data.responseData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
     const currentDate = new Date();
@@ -39,12 +53,8 @@ const getpaymentDataGetAPI=()=>{
     console.log(random6Digit);
     setReceptNo(random6Digit);
 
-    getpaymentDataGetAPI()
-
-
-
-  }, [toggle]);
-
+    getpaymentDataGetAPI();
+  }, []);
 
   useEffect(() => {
     partyDataGetAPI()
@@ -112,94 +122,237 @@ const getpaymentDataGetAPI=()=>{
       date: date,
       payment_type: parseInt(paymentSelect),
       party_id: partySelect,
-      project_id: 3,
+      project_id: 1,
       amount: parseInt(recived),
-      payment_mode:toggle ?"IN":"OUT",
+      payment_mode: "IN",
       description: textValue,
       ref_no: ReceptNo,
     };
     console.log(data);
     paymentInAPI(data)
       .then((data) => {
-        console.log(data);
+        console.log("paymentInAPI", data);
 
-        getpaymentDataGetAPI()
+        getpaymentDataGetAPI();
         const currentDate = new Date();
-    const random6Digit = generateRandom6Digit(currentDate);
-    console.log(random6Digit);
-    setReceptNo(random6Digit);
-    setDate("")
-    setPaymentSelect("")
-    setPartySelect(0)
-    setRecived("")
-    setTextValue("")
-    setTextValue("")
+        const random6Digit = generateRandom6Digit(currentDate);
+        console.log(random6Digit);
+        setReceptNo(random6Digit);
+        setDate("");
+        setPaymentSelect("");
+        setPartySelect(0);
+        setRecived("");
+        setTextValue("");
+        setTextValue("");
       })
       .catch((err) => {
         console.log(err);
       });
   };
+
+  const handleCreateReceipt = (row) => {
+    const string = renderToString(
+      <div id="recept-pdf">
+        <div
+          className="header-of-receipt"
+          style={{ display: "flex", marginBottom: "30px", marginTop: "10px" }}
+        >
+          <img
+            src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
+            alt="logo"
+            style={{ height: "50px" }}
+          />
+          <div
+            className="address"
+            style={{
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              marginLeft: "25px",
+            }}
+          >
+            <h5 style={{ fontSize: "13px", width: "300px" }}>
+              BILTREE FY204-25
+            </h5>
+            <p style={{ fontSize: "13px", width: "300px" }}>
+              54/3175, MANGHAT ARCADE <br /> 1ST FLOOR, KALOOR-KADAVANTHRA ROAD{" "}
+              <br /> ERANAKLAM
+            </p>
+            <p style={{ fontSize: "13px", width: "300px" }}>
+              StateName:Kerala, Code:32
+            </p>
+            <p style={{ fontSize: "13px", width: "300px" }}>
+              E-Mail:info@biltree.in
+            </p>
+          </div>
+        </div>
+        <h5
+          className="resceipt-text"
+          style={{ fontSize: "13px", width: "600px", textAlign: "center" }}
+        >
+          Receipt voucher
+        </h5>
+        <div
+          className="date-no"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "950px",
+          }}
+        >
+          <p style={{ fontSize: "13px", width: "600px", marginLeft: "10px" }}>
+            No:{row?.ref_no}
+          </p>
+          <p style={{ fontSize: "13px", width: "600px" }}>
+            Date:{new Date(row?.date).toLocaleDateString()}
+          </p>
+        </div>
+        <p
+          style={{
+            fontSize: "13px",
+            width: "600px",
+            marginTop: "10px",
+            marginLeft: "10px",
+          }}
+        >
+          Through: ICICI BANK CA-313254897
+        </p>
+        <div>
+          <div
+            style={{
+              marginTop: "20px",
+              width: "950px",
+              marginLeft: "10px",
+              display: "flex",
+            }}
+          >
+            <div style={{ width: "40%", borderRight: "1px solid" }}>
+              <hr style={{ width: "400px" }} />
+              <p style={{ marginLeft: "20px" }}>Particulars</p>
+              <hr style={{ width: "400px" }} />
+              <p style={{ fontSize: "13px", width: "600px" }}>Account :</p>
+              <p
+                style={{ marginLeft: "20px", fontSize: "13px", width: "600px" }}
+              >
+                {row?.party_id}
+              </p>
+              {/*  <p
+            style={{ marginLeft: "20px", fontSize: "13px", width: "600px" }}
+          >
+            Aqst Ref BT/24-25/1 40,075.00Cr
+          </p>
+          <p
+            style={{ marginLeft: "20px", fontSize: "13px", width: "600px" }}
+          >
+            New Ref BT/24-25/1 40,075.00Cr
+          </p>
+          <p
+            style={{
+              marginLeft: "20px",
+              fontSize: "13px",
+              width: "600px",
+              marginTop: "60px",
+            }}
+          >
+            On Account of :
+          </p>
+          <p
+            style={{ marginLeft: "30px", fontSize: "13px", width: "350px" }}
+          >
+            {" "}
+            RTGS-FDRLR52024042300253193-VIVID DIAGNOSTICS PRIVATE
+            LIMITED-16080200005241 -FDRL0001608
+          </p>
+          <p
+            style={{ marginLeft: "20px", fontSize: "13px", width: "600px" }}
+          >
+            Amount (in worde):
+          </p>
+          <p
+            style={{ marginLeft: "30px", fontSize: "13px", width: "350px" }}
+          >
+            INR Three Lakh Only
+          </p> */}
+            </div>
+            <div
+              style={{
+                width: "20%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <hr style={{ width: "190px" }} />
+                <p style={{ marginLeft: "20px", textAlign: "end" }}>Amount</p>
+                <hr style={{ width: "190px" }} />
+                <p
+                  style={{
+                    fontSize: "13px",
+                    width: "188px",
+                    textAlign: "end",
+                    marginTop: "20px",
+                  }}
+                >
+                  {row?.amount.toLocaleString("en-IN", {
+                    style: "decimal",
+                    minimumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+
+              <div>
+                <hr style={{ width: "190px" }} />
+                <p style={{ marginLeft: "25px", textAlign: "end" }}>
+                  {row?.amount.toLocaleString("en-IN", {
+                    style: "decimal",
+                    minimumFractionDigits: 2,
+                  })}
+                </p>
+                <hr style={{ width: "190px" }} />
+              </div>
+            </div>
+          </div>
+          <p
+            className="resceipt-text"
+            style={{
+              fontSize: "13px",
+              width: "580px",
+              textAlign: "end",
+              marginTop: "90px",
+            }}
+          >
+            Authorised Signatory
+          </p>
+          <div style={{ display: "flex", width: "580px", marginTop: "20px" }}>
+            <p style={{ marginLeft: "20px", fontSize: "13px", width: "580px" }}>
+              Prepared by
+            </p>
+            <p
+              style={{ fontSize: "13px", width: "580px", textAlign: "center" }}
+            >
+              Checked by
+            </p>
+            <p style={{ fontSize: "13px", width: "580px", textAlign: "end" }}>
+              Verified by
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+
+    const pdf = new jsPDF("p", "pt", "a4", true);
+    pdf.html(string, {
+      callback: () => {
+        const blobURL = pdf.output("bloburl");
+        window.open(blobURL, "_blank");
+      },
+    });
+  };
+
   return (
     <div className="payment-in-section">
-      {toggle ? (
-        <h2>Payment In</h2>
-      ) : (
-        <h2>Payment Out</h2>
-      )}
-
-
-<div className="toggle_button ">
-        
-
-            <ToggleButtonGroup
-              value={toggle ? "true" : "false"}
-              exclusive
-              onChange={(e, value) => setToggle(value === "true")}
-              aria-label="text alignment"
-            >
-              <ToggleButton
-                value="true"
-                aria-label="left aligned"
-                sx={{
-                  fontSize: "12px",
-                  borderRadius: "35px",
-                  width: "90px",
-                  height: "35px",
-                  textAlign: "center",
-                  marginTop: "5px",
-                  marginLeft: "10px",
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    color: "white",
-                    backgroundColor: "#8cdb7e",
-                  },
-                }}
-              >
-                <p>IN</p>
-              </ToggleButton>
-              <ToggleButton
-                value="false"
-                aria-label="centered"
-                sx={{
-                  fontSize: "12px",
-                  borderRadius: "35px",
-                  width: "90px",
-                  height: "35px",
-                  textAlign: "center",
-                  marginTop: "5px",
-                  marginLeft: "10px",
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    color: "white",
-                    backgroundColor: "#8cdb7e",
-                  },
-                }}
-              >
-                <p>Out</p>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </div>
-
-
-
+      <h2>Receipt</h2>
 
       <div className="inner-section">
         <div style={{ display: "flex", gap: "84px", padding: "20px" }}>
@@ -382,31 +535,63 @@ const getpaymentDataGetAPI=()=>{
         </div>
       </div>
       <div className="table">
-      <TableContainer component={Paper} id="pdf-content">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Data</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Amount</TableCell>
-                   
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paymentData?.map((row, index) => (
+        <TableContainer component={Paper} id="pdf-content">
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Data</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {/* {Array(1)
+                .fill()
+                .map((row, index) => ( */}
+              {paymentData?.map((row, index) => {
+                console.log("row", row);
+                return (
                   <TableRow key={index + 1}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{new Date(row.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{row.description}</TableCell>
-                      <TableCell>{row.amount}</TableCell>
-                     
+                    <TableCell>
+                      {new Date(row?.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{row?.description}</TableCell>
+                    <TableCell>
+                      {" "}
+                      {row?.amount.toLocaleString("en-IN", {
+                        style: "decimal",
+                        minimumFractionDigits: 2,
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        disableRipple
+                        sx={{
+                          textTransform: "none",
+                          color: "var(--black-button)",
+                          fontWeight: "600",
+
+                          "&:hover": {
+                            background: "transparent",
+                          },
+                        }}
+                        onClick={() => handleCreateReceipt(row)}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
+
+      <div></div>
     </div>
   );
 }

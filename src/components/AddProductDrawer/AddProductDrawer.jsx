@@ -6,6 +6,8 @@ import "./AddProductDrawer.scss";
 import bulkUpload from "../../assets/products/bulkUpload.svg";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useEffect, useState } from "react";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+
 
 
 function AddProductDrawer({
@@ -19,7 +21,9 @@ function AddProductDrawer({
   handleAdd,
   handleSelectChange,
   updatetrue,
-  handleUpdateData
+  handleUpdateData,
+  setToggle,
+  toggle,
 }) {
   // draw
 
@@ -58,6 +62,57 @@ function AddProductDrawer({
               </Grid>
             );
           })}
+         
+          <div className="toggle_button " style={{marginTop:"16px",marginLeft:"16px"}}>
+          
+<p style={{color:"#0009",fontWeight:800,fontSize:"14px"}}>Is products</p>
+            <ToggleButtonGroup
+              value={toggle ? "true" : "false"}
+              exclusive
+              onChange={(e, value) => setToggle(value === "true")}
+              aria-label="text alignment"
+            >
+              <ToggleButton
+                value="true"
+                aria-label="left aligned"
+                sx={{
+                  fontSize: "12px",
+                  borderRadius: "35px",
+                  width: "90px",
+                  height: "35px",
+                  textAlign: "center",
+                  marginTop: "5px",
+                  marginLeft: "10px",
+                  "&.Mui-selected, &.Mui-selected:hover": {
+                    color: "white",
+                    backgroundColor: "#8cdb7e",
+                  },
+                }}
+              >
+                <p>yes</p>
+              </ToggleButton>
+              <ToggleButton
+                value="false"
+                aria-label="centered"
+                sx={{
+                  fontSize: "12px",
+                  borderRadius: "35px",
+                  width: "90px",
+                  height: "35px",
+                  textAlign: "center",
+                  marginTop: "5px",
+                  marginLeft: "10px",
+                  "&.Mui-selected, &.Mui-selected:hover": {
+                    color: "white",
+                    backgroundColor: "#8cdb7e",
+                  },
+                }}
+              >
+                <p>no</p>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </div>
+
           <Button
             disableRipple
             sx={{

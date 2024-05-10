@@ -405,6 +405,9 @@ function PurchasePage() {
         >
           <p className="head-p-tag">Clinet Details</p>
           <select style={{ width: "100%" }} onChange={handleOptionSelect}>
+          <option value="" label="None">
+                  None
+                </option>
             {clientOptions.map((option, index) => {
               return (
                 <option key={index} value={option.value} label={option.label}>

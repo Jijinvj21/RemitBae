@@ -7,7 +7,7 @@ import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer
 import AddSquare from "../../assets/products/AddSquare.svg";
 import { Link } from "react-router-dom";
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
-import { gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import { categeryGetAPI, gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 
 function ManageProductsPage() {
   const [myArray, setMyArray] = useState([]);
@@ -16,6 +16,10 @@ const [taxOptions,setTaxOptions]=useState([])
 const [updatetrue,setUpdateTrue]=useState(false)
 const [unitOptions,setUnitOptions]=useState([])
 const [projectOptions,setProjectOptions]=useState([])
+const [toggle, setToggle] = useState(true);
+const [categoryOptions,setCategoryOptions]=useState([])
+
+
 
 
 
@@ -52,8 +56,31 @@ const getClientOptionsFormAPI = () => {
         label:`${entry.name} ( ${entry.client_name} )`,
         
       }));
+      projectdData.unshift({ value: 0, label: "None" });
+
       console.log(projectdData);
       setProjectOptions(projectdData);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+const getCategeryOptionsFormAPI = () => {
+  categeryGetAPI()
+    .then((data) => {
+      console.log("category:", data);
+      
+      // Transform data and set it to state
+      const projectdData = data?.responseData.map(entry => ({
+        value: entry.id,
+        label:`${entry.name}`,
+        
+      }));
+      projectdData.unshift({ value: 0, label: "None" });
+
+      console.log(projectdData);
+      setCategoryOptions(projectdData);
     })
     .catch(err => {
       console.log(err);
@@ -63,19 +90,12 @@ const getClientOptionsFormAPI = () => {
 
   const getDataFromAPI = () => {
     productGetAPI().then((data) => {
-      console.log("tax:", data);
+      console.log("productGetAPI:", data);
       // setTaxOptions(data);
 
       // Transform data and set it to state
-      const transformedData = data.map(entry => ({
-        value: entry.percentage,
-        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
-        taxlabel: entry.percentage,
-        id:entry.id
-
-      }));
-      console.log(transformedData)
-      setTaxOptions(transformedData);
+     
+      setMyArray(data.responseData);
     }).catch((err) => {
       console.log(err);
     });
@@ -100,6 +120,7 @@ const getClientOptionsFormAPI = () => {
     });
   }
   useEffect(() => {
+    getCategeryOptionsFormAPI()
     getClientOptionsFormAPI()
     getUnitOptionsFormAPI()
     getUnitOptionsFormAPI()
@@ -114,6 +135,8 @@ const getClientOptionsFormAPI = () => {
   })
     const [selectedValue, setSelectedValue] = useState('');
     const [projectValue, setProjectValue] = useState('');
+    const [categoryValue, setCategoryValue] = useState('');
+
 
     const [taxRateValue, setTaxRateValue] = useState({});
 
@@ -136,7 +159,11 @@ const getClientOptionsFormAPI = () => {
     console.log(event.target.value)
   };
 
- 
+  const handleSelectCatogary = (event) => {
+    setCategoryValue(event.target.value);
+    console.log(event.target.value)
+  };
+
 
 
   const handleTaxRateChange = (event) => {
@@ -176,17 +203,17 @@ const getClientOptionsFormAPI = () => {
   };
 
   const handleSearchButtonClick = () => {
-    // Retrieve the array of products from local storage
-    const storedArray = JSON.parse(localStorage.getItem('products')) || [];
+    // // Retrieve the array of products from local storage
+    // const storedArray = JSON.parse(localStorage.getItem('products')) || [];
   
-    // Filter the array based on the search query
-    const filteredProducts = storedArray.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    console.log(filteredProducts)
+    // // Filter the array based on the search query
+    // const filteredProducts = storedArray.filter(product =>
+    //   product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    // );
+    // console.log(filteredProducts)
   
-    // Update state with the filtered results
-    setMyArray(filteredProducts);
+    // // Update state with the filtered results
+    // setMyArray(filteredProducts);
   };
 
 
@@ -265,6 +292,18 @@ const getClientOptionsFormAPI = () => {
       
       
     },
+    {
+      handleChange: handleSelectCatogary,
+      intputName: "categery",
+      label: "Categerys",
+      // type: "text",
+      // value:selectedValue,
+
+      inputOrSelect:"select",
+      options: categoryOptions,
+      
+      
+    },
     
   ];
 
@@ -334,7 +373,9 @@ getDataFromAPI()
       rate: parseInt(ProductFormData.rate),
       quantity: parseInt(ProductFormData.quantity),
       unit: selectedValue,
-      projectValue:parseInt(projectValue),
+      projectid:parseInt(projectValue),
+      is_product:toggle,
+      category_id:parseInt(categoryValue),
       // gst: ((parseInt(ProductFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100
       tax_rate:{
         id:taxRateValue?.id
@@ -518,6 +559,8 @@ getDataFromAPI()
         handleAdd={handleAdd}
         updatetrue={updatetrue}
         handleUpdateData={handleUpdateData}
+        setToggle={setToggle}
+        toggle={toggle}
         
         // updateData={updateData}
       />

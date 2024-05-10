@@ -174,11 +174,11 @@ const downloadCSV = () => {
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <div className="data_show_card">
             <p>Income</p>
-            <h6>{projectData?.total_income}</h6>
+            <h6>{projectData?.total_income||0}</h6>
           </div>
           <div className="data_show_card">
             <p>Expence</p>
-            <h6>{projectData?.total_expenses}</h6>
+            <h6>{projectData?.total_expenses||0}</h6>
           </div>
           <div className="data_show_card">
             <p>Total</p>

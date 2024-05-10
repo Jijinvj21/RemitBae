@@ -1,11 +1,8 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 
-import { DataGrid, GridRowEditStopReasons } from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
-import { Autocomplete } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import { gstOptionsGetAPI } from "../../service/api/admin";
-import InputComponent from "../InputComponent/InputComponent";
 
 export default function FullFeaturedCrudGrid({
   selectedProductData,
@@ -14,8 +11,7 @@ export default function FullFeaturedCrudGrid({
   setRows,
   rows,
 }) {
-  // const [rows, setRows] = React.useState(initialRows);
-  // const [rows, setRows] = React.useState([]);
+
 
   const [rowModesModel, setRowModesModel] = React.useState({});
   const [taxOptions, setTaxOptions] = React.useState([]);
@@ -24,9 +20,7 @@ export default function FullFeaturedCrudGrid({
     gstOptionsGetAPI()
       .then((data) => {
         console.log("tax:", data);
-        // setTaxOptions(data);
 
-        // Transform data and set it to state
         const transformedData = data.map((entry) => ({
           value: entry.percentage,
           label: entry.name ? `${entry.name} ${entry.percentage}` : "none",
@@ -52,7 +46,7 @@ export default function FullFeaturedCrudGrid({
         unit: selectedProductData.unit,
         rate: selectedProductData.rate,
         taxApplied: ` ${selectedProductData.tax_rate?.name} ${selectedProductData.tax_rate?.percentage}`,
-        qty: 1, // Set quantity to 1 every time a new product is selected
+        qty: 1, 
       };
       setRows((prevRows) => [...prevRows, newRow]);
     }

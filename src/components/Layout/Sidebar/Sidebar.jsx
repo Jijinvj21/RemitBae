@@ -75,20 +75,20 @@ function Sidebar() {
             Projects
           </MenuItem>
         </NavLink>
-        <NavLink className="navelink" to="/admin/payment-in">
+        <NavLink className="navelink" to="/admin/receipt">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
-            Payment
+            Receipt
           </MenuItem>
         </NavLink>
-        {/* <NavLink className="navelink" to="/admin/payment-out">
+        <NavLink className="navelink" to="/admin/payment-out">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
             Payment out
           </MenuItem>
-        </NavLink> */}
+        </NavLink>
         <NavLink className="navelink" to="/admin/creadit-note">
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}

@@ -24,6 +24,7 @@ export const productAddAPI = async (productAdd) => {
 export const productGetAPI = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/product/getall`,);
+    console.log("productGetAPI",response)
     return response.data
   } catch (error) {
     console.error(error);
@@ -201,6 +202,16 @@ export const paymentDataGetAPI = async (paymentMode) => {
     const response = await axios.post(`${BASE_URL}/voucher/payment/getall`,paymentMode);
     console.log(response)
     return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const categeryGetAPI = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/product/category/getall`,);
+    return response.data
   } catch (error) {
     console.error(error);
     throw error.response.data;
