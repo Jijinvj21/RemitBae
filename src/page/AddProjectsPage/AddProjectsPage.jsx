@@ -206,32 +206,6 @@ useEffect(() => {
     // },
   ];
   const handleAddClient = () => {
-    // // Check if there are any validation errors
-    // const hasErrors = Object.values(errors).some(error => error !== '');
-  
-    // // If there are validation errors, do not proceed with adding the client
-    // if (hasErrors) {
-    //   console.log("Validation errors. Client data not added.");
-    //   return;
-    // }
-  
-    // // Create a new client object with form data
-    // const newClient = {
-    //   ...formData,
-    //   image: img, // Assuming you want to store the image as well
-    //   hasPlanGiven: toggle
-    // };
-  
-    // // Retrieve existing client data from local storage or initialize an empty array
-    // const existingClients = JSON.parse(localStorage.getItem("clients")) || [];
-  
-    // // Add the new client to the array
-    // const updatedClients = [...existingClients, newClient];
-  
-    // // Update local storage with the updated array of clients
-    // localStorage.setItem("clients", JSON.stringify(updatedClients));
-
-
 
     const projectAdd={
       name:formData.project,         

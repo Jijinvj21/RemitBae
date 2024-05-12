@@ -217,3 +217,15 @@ export const categeryGetAPI = async () => {
     throw error.response.data;
   }
 };
+
+
+export const stockJournalCreateAPI = async (stockJournalAdd) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/product/ismaster/create`,stockJournalAdd);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};

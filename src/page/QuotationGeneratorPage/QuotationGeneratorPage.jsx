@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Modal, Typography } from "@mui/material";
 import "./QuotationGeneratorPage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import ProductInputCard from "../../components/ProductInputCard/ProductDataCard";
@@ -7,23 +7,41 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useEffect, useRef, useState } from "react";
-import { clientDataGetAPI, productGetAPI, projectGetAPI } from "../../service/api/admin";
+import {
+  clientDataGetAPI,
+  productGetAPI,
+  projectGetAPI,
+} from "../../service/api/admin";
 import { useNavigate } from "react-router-dom";
+import { renderToString } from "react-dom/server";
+import AddClientDrawer from "../../components/AddClientDrawer/AddClientDrawer";
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "0px solid #000",
+  borderRadius: "10px",
+  boxShadow: 24,
+  p: 4,
+};
 
 function QuotationGeneratorPage() {
   const navigate = useNavigate();
 
   const tableRef = useRef();
-  const exclusionRef=useRef()
-  const exclusionData=exclusionRef.current
+  const exclusionRef = useRef();
+  const exclusionData = exclusionRef.current;
   const table = tableRef.current;
   const [clientOptions, setClientOptions] = useState([]);
   const [projectOptions, setProjectOptions] = useState([]);
   const [productsOptions, setProductsOptions] = useState([]);
 
-
-
   const [img, setImg] = useState("");
+  const [projectImg, setProjectImg] = useState("");
+
   const [inputs, setInputs] = useState([""]); // State to store  Terms and Conditions values
   const [inputsExclusion, setInputsExclusion] = useState([""]); // State to store  Terms and Conditions values
 
@@ -44,87 +62,177 @@ function QuotationGeneratorPage() {
     startdate: "",
   });
   const [formData, setFormData] = useState([]);
-  // adding data form local storage 
+  // adding data form local storage
   const [myArray, setMyArray] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [projectFormData, setProjectFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    address1: "",
+    address2: "",
+    pinCode: "",
+    worktype: "",
+    country: "",
+    project:"",
+  });
+  const [toggle, setToggle] = useState(true);
+  const [state, setState] = useState({
+    right: false,
+  });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log(name,value)
+    setProjectFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));}
+    const toggleDrawer = (anchor, open) => (event) =>{
+      console.log(event)
+      console.log("Toggle Drawer:", anchor, open);
+      if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
+        return;
+      }
+      setState({ ...state, [anchor]: open });
+    };
+  const arrOfInputs = [
+    {
+      handleChange: handleChange,
+      intputName: "project",
+      label: "Project Name",
+      type: "text",
+      value:projectFormData.project
+    },
+    {
+      handleChange: handleChange,
+      intputName: "name",
+      label: "Client Name",
+      type: "text",
+      value:projectFormData.name
+    },
+    {
+      handleChange: handleChange,
+      intputName: "email",
+      label: "Email",
+      type: "email",
+      value:projectFormData.email
+    },
+    {
+      handleChange: handleChange,
+      intputName: "mobile",
+      label: "Mobile",
+      type: "tel",
+      value:projectFormData.mobile
+    },
+    {
+      handleChange: handleChange,
+      intputName: "address1",
+      label: "Address 1",
+      type: "text",
+      value:projectFormData.address1
+    },
+    {
+      handleChange: handleChange,
+      intputName: "address2",
+      label: "Address 2",
+      type: "text",
+      value:projectFormData.address2
+    },
+    {
+      handleChange: handleChange,
+      intputName: "pinCode",
+      label: "Pin Code",
+      type: "text",
+      value:projectFormData.pinCode
+    },
+    
+  ];
 
- const getCliendData=()=>{
-  clientDataGetAPI()
-  .then((data) => {
-    console.log("clientData:", data);
-    // setTaxOptions(data);
 
-    // Transform data and set it to state
-    const partyData = data.responseData.map((entry) => ({
-      value: entry.id,
-      label: entry.name,
-    }));
-    partyData.unshift({ value: -2, label: "Add" });
-    partyData.unshift({ value: -1, label: "None" });
+    const handleAdd = () => {
+alert("add")
+    }
+    const handleprojectImageChange = (e) => {
+      const file = e.target.files[0];
+      setProjectImg(file);
+    };
 
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-    console.log(partyData);
-    setClientOptions(partyData);
-  })
-  .catch((err) => {
-    console.log(err);
-  }); 
- }
- const getProjectData=()=>{
-  projectGetAPI()
-  .then((data) => {
-    console.log("getProjectData:", data);
-    // setTaxOptions(data);
+  const getCliendData = () => {
+    clientDataGetAPI()
+      .then((data) => {
+        console.log("clientData:", data);
+        // setTaxOptions(data);
 
-    // Transform data and set it to state
-    const projectData = data.responseData.map((entry) => ({
-      value: entry.id,
-      label: entry.name,
-    }));
-    projectData.unshift({ value: -2, label: "Add" });
-    projectData.unshift({ value: -1, label: "None" });
+        // Transform data and set it to state
+        const partyData = data.responseData.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+        }));
+        partyData.unshift({ value: -2, label: "Add" });
+        partyData.unshift({ value: -1, label: "None" });
 
+        console.log(partyData);
+        setClientOptions(partyData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const getProjectData = () => {
+    projectGetAPI()
+      .then((data) => {
+        console.log("getProjectData:", data);
+        // setTaxOptions(data);
 
-    console.log(projectData);
-    setProjectOptions(projectData);
-  })
-  .catch((err) => {
-    console.log(err);
-  }); 
- }
- 
+        // Transform data and set it to state
+        const projectData = data.responseData.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+        }));
+        projectData.unshift({ value: -2, label: "Add" });
+        projectData.unshift({ value: -1, label: "None" });
 
- const getProductsData=()=>{
-  productGetAPI()
-  .then((data) => {
-    console.log("getProjectData:", data);
-    // setTaxOptions(data);
+        console.log(projectData);
+        setProjectOptions(projectData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
-    // Transform data and set it to state
-    const productsData = data.responseData.map((entry) => ({
-      value: entry.id,
-      label: entry.name,
-    }));
-    productsData.unshift({ value: -1, label: "None" });
+  const getProductsData = () => {
+    productGetAPI()
+      .then((data) => {
+        console.log("getProjectData:", data);
+        // setTaxOptions(data);
 
+        // Transform data and set it to state
+        const productsData = data.responseData.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+        }));
+        productsData.unshift({ value: -1, label: "None" });
 
-    console.log(productsData);
-    setProductsOptions(productsData);
-  })
-  .catch((err) => {
-    console.log(err);
-  }); 
- }
-
+        console.log(productsData);
+        setProductsOptions(productsData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   useEffect(() => {
-    getProductsData()
-    getProjectData()
-    getCliendData()
+    getProductsData();
+    getProjectData();
+    getCliendData();
   }, []);
 
   const handleleftIputsChange = (e) => {
     const { name, value } = e.target;
-    console.log(name,value)
+    console.log(name, value);
     setLeftInputs({
       ...leftInputs,
       [name]: value,
@@ -150,35 +258,36 @@ function QuotationGeneratorPage() {
     }));
   };
 
- // Function to handle input value change
- const handleInputChange = (index, value) => {
-  console.log(index);
-  const newInputs = [...inputs];
-  newInputs[index] = value;
-  setInputs(newInputs);
-  console.log(newInputs);
-};
+  // Function to handle input value change
+  const handleInputChange = (index, value) => {
+    console.log(index);
+    const newInputs = [...inputs];
+    newInputs[index] = value;
+    setInputs(newInputs);
+    console.log(newInputs);
+  };
 
-const handleClientname=(e)=>{
-console.log("e.target",e.target.value==="-2")
-}
-const handleProjectname=(e)=>{
-  console.log("e.target",e.target.value==="-2")
-  // alert(e.target.value==="-2")
-  if(e.target.value==="-2"){
-    navigate("/admin/projects/add-projects");
-  }
-  }
+  const handleClientname = (e) => {
+    console.log("e.target", e.target.value === "-2");
+    if (e.target.value === "-2") {
+        toggleDrawer("right", true)();
+     }
+  };
+  // const handleProjectname = (e) => {
+  //   console.log("e.target", e.target.value === "-2");
+  //   // alert(e.target.value==="-2")
+  //   if (e.target.value === "-2") {
+  //     navigate("/admin/projects/add-projects");
+  //   }
+  // };
 
-
-
- const handleExclusionInputChange= (index, value) => {
-  console.log(index);
-  const newInputs = [...inputsExclusion];
-  newInputs[index] = value;
-  setInputsExclusion(newInputs);
-  console.log(newInputs);
-};
+  const handleExclusionInputChange = (index, value) => {
+    console.log(index);
+    const newInputs = [...inputsExclusion];
+    newInputs[index] = value;
+    setInputsExclusion(newInputs);
+    console.log(newInputs);
+  };
 
   // Function to handle adding a new input field
   const handleAddInput = () => {
@@ -201,453 +310,12 @@ const handleProjectname=(e)=>{
     setImg(fileList); // Update state with array of files
   };
 
-  const longText =
-    " We thank you for giving us an opportunity to quote for the mentioned subject. With reference to your enquiry, please find. ";
-  const longText2 =
-    "Biltree was founded on the principle of providing quality work with an emphasis on cost- effectiveness and the highest quality work for its prospective clients in the quickest way possible. Our strength is in achieving recognition for our ability to analyze the client's requirements in collaboration with architects and consultants, as well as developing an understanding of architectural and interior concepts. We specialize in providing solutions’ that blend aesthetically with interiors and exteriors, without sacrificing any functional attributes. As a company, our goal is to ensure customer satisfaction with the quality of our aesthetic. We also intend to achieve  fluency from design to design and installation. We will maintain our loyalty and plough to build good and fair relationships with our clients, founded on trust and loyalty.";
-  const quotationno = "BT0184";
-  // const quotatinodate = "21/10/2023";
-  const quotatiaddress =
-    "BILTREE -1ST FLOOR MANGHAT ARCADE, KALOOR KADAVANTRA ROAD, KADAVANTRA -20 ";
-  const phone = "PHONE: +91 9447519770 ";
-  const doc = new jsPDF();
-  const width = 205;
-  const padding = 20;
-  const maxWidth = width - 2 * padding;
-  const today = new Date();
-  const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // January is 0!
-  const year = today.getFullYear();
-
-  const formattedDate = `${day}/${month}/${year}`;
-  const pdfCommonPart = (doc, img, inputs, width, padding, maxWidth) => {
-    doc.setFont(undefined, "bold"); // Set font to bold
-    // doc.setFont("bold");
-    doc.setTextColor("#a2846b");
-    doc.setFontSize(30);
-    // doc.text("BILTREE", 15, 20);
-    const imageWidth = 100; // Width in millimeters
-const imageHeight = 30; // Height in millimeters
-    doc.addImage(
-      "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-    
-      1,0,
-      imageWidth, // Width
-      imageHeight // Height
-    );
-    doc.setFont(undefined, "normal"); // Set font to bold
-    doc.setTextColor("BLACK");
-    doc.setFontSize(12);
-    doc.text("To,", padding, 40, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "left",
-    });
-    doc.text(`${rightIputs.clientname},`, padding, 50, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "left",
-    });
-    doc.text(`QUOTATION NO:${quotationno} `, 175, 50, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "right",
-    });
-    doc.text(` DATE: ${formattedDate} `, 138, 60, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "left",
-    });
-
-    doc.text(longText, padding, 80, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "left",
-    });
-    doc.text("Sr,", padding, 100, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "left",
-    });
-
-    doc.text(longText2, padding, 110, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-      align: "left",
-    });
-    doc.setFont(undefined, "bold"); // Set font to bold
-    doc.setFontSize(10);
-    doc.text(quotatiaddress, padding, 250, { maxWidth, lineHeightFactor: 1.5 });
-    doc.text(phone, 80, 259, { maxWidth, lineHeightFactor: 1.5 });
-    doc.addPage();
-    doc.autoTable({
-      head: [["Id", "Name", "Qty", "Unit", "Rate", "Img"]],
-      body: myArray.map((val, i) => [
-        i + 1,
-        val.name,
-        val.quantity,
-        val.unit,
-        val.rate,
-         "https://images.unsplash.com/photo-1614424428282-b2b1e72c6a4e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      ]),
-      columnStyles: {
-        0: { cellWidth: 10, valign: "center", halign: "center" },
-        1: { cellWidth: 45, valign: "center", halign: "center" },
-        2: { cellWidth: 25, valign: "center", halign: "center" },
-        3: { cellWidth: 25, valign: "center", halign: "center" },
-        4: { cellWidth: 25, valign: "center", halign: "center" },
-        5: {
-          cellWidth: 25,
-          valign: "center",
-          halign: "center",
-          minCellHeight: 20,
-          fontSize: 1,
-          textColor: "white",
-        },
-      },
-      theme: "grid",
-      headStyles: {
-        fillColor: "black",
-        textColor: "white",
-        halign: "center",
-      },
-      didDrawCell: function (data) {
-        if (data.column.index === 5 && data.cell.section === "body") {
-          var img = new Image();
-          img.src = data.cell.raw;
-          var textPos = data.cell;
-          var dim =
-            20 - (data.cell.padding("top") + data.cell.padding("bottom"));
-          var padding = {
-            left: data.cell.padding("left"),
-            top: data.cell.padding("top"),
-          };
-          doc.addImage(
-            img,
-            textPos.x + padding.left,
-            textPos.y + padding.top,
-            dim,
-            dim
-          );
-        }
-      },
-      didParseCell: function (data) {
-        if (data.column.index === 5 && data.cell.section === "body") {
-          var imgHeight =
-            20 - (data.cell.padding("top") + data.cell.padding("bottom"));
-          data.cell.height = Math.max(
-            imgHeight,
-            data.row.raw.minCellHeight || 0
-          );
-        }
-      },
-    });
-  };
-  const handleGenerate = async () => {
-    pdfCommonPart(doc, img, inputs, width, padding, maxWidth);
-    // pdfCommonPart(doc, img, inputs, width, padding, maxWidth); // This line generates the common part of the PDF
-
-    doc.addPage();
-
-    doc.autoTable({
-      html: table, // Pass the HTML structure directly
-      startY: 25,
-      theme: "grid",
-      headStyles: {
-        fillColor: "black",
-        textColor: "white",
-      },
-    });
-
-    if (img) {
-      const imageUrls = img.map((file) => URL.createObjectURL(file));
-      doc.addPage();
-
-      const addImageProcess = async (url) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const reader = new FileReader();
-        return new Promise((resolve) => {
-          reader.onloadend = () => {
-            resolve(reader.result);
-          };
-          reader.readAsDataURL(blob);
-        });
-      };
-
-      const imageWidth = 188; // Set the width of the image
-      const imageHeight = 275; // Set the height of the image
-      const paddingX = 10; // Set the horizontal padding
-      const paddingY = 10; // Set the vertical padding
-      const marginLeft = 0; // Set the left margin
-      const marginTop = 0; // Set the top margin
-
-      for (const [i, url] of imageUrls.entries()) {
-        const image = await addImageProcess(url);
-        doc.addImage(
-          image,
-          "png",
-          marginLeft + paddingX,
-          marginTop + paddingY,
-          imageWidth,
-          imageHeight
-        );
-        if (i !== imageUrls.length - 1) {
-          doc.addPage();
-        }
-      }
-
-   // Inside the handleGenerate function
-if (inputs.length > 0) {
-  // doc.addPage();
-
-//   !(inputsExclusion == "") &&
-//   doc.text("EXCLUSIONS ", padding, 20, {
-//     maxWidth,
-//     lineHeightFactor: 1.5,
-//   });
-// doc.setFontSize(12);
-// const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
-// doc.text(`${inputText1}`, 30, 30, {
-//   maxWidth,
-//   lineHeightFactor: 1.5,
-//   align: "left",
-// });
-
-
-!(inputs == "") &&
-doc.addPage();
-
-
-// const exclusionTextHeight =inputsExclusion.length<=1?45:20+(inputsExclusion.length*1.5)+20; // Assuming each entry takes 20 units of space vertically
-  !(inputs == "") &&
-  
-  doc.text("TERMS AND CONDITIONS", padding, 20, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-  });
-  
-  
-  doc.setFontSize(12);
-  const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
-  doc.text(`${inputText}`, 30, 30, {
-    maxWidth,
-    lineHeightFactor: 1.5,
-    align: "left",
-  });
-}
-const blobURL = doc.output('bloburl');
-      window.open(blobURL, "_blank");
-    } else {
-      {
-        // !(inputs == "") && doc.addPage();
-        doc.setFontSize(15);
-
-        // !(inputsExclusion == "") &&
-        // doc.html(exclusionData,{
-        //   margin: 10,
-        //   html2canvas: {
-        //     scale: 0.65
-        //   },
-        // });
-      //   !(inputsExclusion == "") &&
-      //   doc.text("EXCLUSIONS ", padding, 20, {
-      //     maxWidth,
-      //     lineHeightFactor: 1.5,
-      //   });
-      // doc.setFontSize(12);
-      // const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
-      // doc.text(`${inputText1}`, 30, 30, {
-      //   maxWidth,
-      //   lineHeightFactor: 1.5,
-      //   align: "left",
-      // });
-
-
-      !(inputs == "") &&
-      doc.addPage();
-
-
-      // const exclusionTextHeight =inputsExclusion.length<=1?45:20+(inputsExclusion.length*1.5)+20; // Assuming each entry takes 20 units of space vertically
-        !(inputs == "") &&
-        
-        doc.text("TERMS AND CONDITIONS", padding, 20, {
-            maxWidth,
-            lineHeightFactor: 1.5,
-        });
-        
-        
-        doc.setFontSize(12);
-        const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
-        doc.text(`${inputText}`, 30, 30, {
-          maxWidth,
-          lineHeightFactor: 1.5,
-          align: "left",
-        });
-      }
-      const blobURL = doc.output('bloburl');
-      window.open(blobURL, "_blank");
-    }
-  };
-
-  const handleDownloadPdf = async () => {
-    pdfCommonPart(doc, img, inputs, width, padding, maxWidth);
-    // pdfCommonPart(doc, img, inputs, width, padding, maxWidth); // This line generates the common part of the PDF
-
-    doc.addPage();
-
-    doc.autoTable({
-      html: table, // Pass the HTML structure directly
-      startY: 25,
-      theme: "grid",
-      headStyles: {
-        fillColor: "black",
-        textColor: "white",
-      },
-    });
-
-    if (img) {
-      const imageUrls = img.map((file) => URL.createObjectURL(file));
-      doc.addPage();
-
-      const addImageProcess = async (url) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const reader = new FileReader();
-        return new Promise((resolve) => {
-          reader.onloadend = () => {
-            resolve(reader.result);
-          };
-          reader.readAsDataURL(blob);
-        });
-      };
-
-      const imageWidth = 188; // Set the width of the image
-      const imageHeight = 275; // Set the height of the image
-      const paddingX = 10; // Set the horizontal padding
-      const paddingY = 10; // Set the vertical padding
-      const marginLeft = 0; // Set the left margin
-      const marginTop = 0; // Set the top margin
-
-      for (const [i, url] of imageUrls.entries()) {
-        const image = await addImageProcess(url);
-        doc.addImage(
-          image,
-          "png",
-          marginLeft + paddingX,
-          marginTop + paddingY,
-          imageWidth,
-          imageHeight
-        );
-        if (i !== imageUrls.length - 1) {
-          doc.addPage();
-        }
-      }
-
-   // Inside the handleGenerate function
-if (inputs.length > 0) {
-  // doc.addPage();
-
-//   !(inputsExclusion == "") &&
-//   doc.text("EXCLUSIONS ", padding, 20, {
-//     maxWidth,
-//     lineHeightFactor: 1.5,
-//   });
-// doc.setFontSize(12);
-// const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
-// doc.text(`${inputText1}`, 30, 30, {
-//   maxWidth,
-//   lineHeightFactor: 1.5,
-//   align: "left",
-// });
-
-
-!(inputs == "") &&
-doc.addPage();
-
-
-// const exclusionTextHeight =inputsExclusion.length<=1?45:20+(inputsExclusion.length*1.5)+20; // Assuming each entry takes 20 units of space vertically
-  !(inputs == "") &&
-  
-  doc.text("TERMS AND CONDITIONS", padding, 20, {
-      maxWidth,
-      lineHeightFactor: 1.5,
-  });
-  
-  
-  doc.setFontSize(12);
-  const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
-  doc.text(`${inputText}`, 30, 30, {
-    maxWidth,
-    lineHeightFactor: 1.5,
-    align: "left",
-  });
-}
-     doc.save("download.pdf"); // Save the PDF with the specified filename
-
-    } else {
-      {
-        // !(inputs == "") && doc.addPage();
-        doc.setFontSize(15);
-
-        // !(inputsExclusion == "") &&
-        // doc.html(exclusionData,{
-        //   margin: 10,
-        //   html2canvas: {
-        //     scale: 0.65
-        //   },
-        // });
-      //   !(inputsExclusion == "") &&
-      //   doc.text("EXCLUSIONS ", padding, 20, {
-      //     maxWidth,
-      //     lineHeightFactor: 1.5,
-      //   });
-      // doc.setFontSize(12);
-      // const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
-      // doc.text(`${inputText1}`, 30, 30, {
-      //   maxWidth,
-      //   lineHeightFactor: 1.5,
-      //   align: "left",
-      // });
-
-
-      !(inputs == "") &&
-      doc.addPage();
-
-
-      // const exclusionTextHeight =inputsExclusion.length<=1?45:20+(inputsExclusion.length*1.5)+20; // Assuming each entry takes 20 units of space vertically
-        !(inputs == "") &&
-        
-        doc.text("TERMS AND CONDITIONS", padding, 20, {
-            maxWidth,
-            lineHeightFactor: 1.5,
-        });
-        
-        
-        doc.setFontSize(12);
-        const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
-        doc.text(`${inputText}`, 30, 30, {
-          maxWidth,
-          lineHeightFactor: 1.5,
-          align: "left",
-        });
-      }
-                  doc.save("download.pdf"); // Save the PDF with the specified filename
-
-    }
-  };
-
-
-
-
-
   const leftArrOfInputs = [
     {
       intputName: "productname",
       label: " Product Name",
-      inputOrSelect:"select" , 
-      options:productsOptions    
-
+      inputOrSelect: "select",
+      options: productsOptions,
     },
     {
       intputName: "quantity",
@@ -685,15 +353,15 @@ doc.addPage();
       handleChange: handleClientname,
       intputName: "clientname",
       label: "Client Name",
-      inputOrSelect:"select" ,
-      options:clientOptions
+      inputOrSelect: "select",
+      options: clientOptions,
     },
     {
-      handleChange: handleProjectname,
+      // handleChange: handleProjectname,
       intputName: "projectdetails",
       label: "Project Details",
-      inputOrSelect:"select" , 
-      options:projectOptions    
+      // inputOrSelect: "select",
+      // options: projectOptions,
     },
     {
       handleChange: handlerightIputsChange,
@@ -717,6 +385,184 @@ doc.addPage();
   const handleDelete = (event) => {
     event.stopPropagation(); // Prevent the click event from bubbling up to the main div
     alert("You clicked delete!");
+  };
+  const pageone = renderToString(
+    <div
+        className="quatationgenerator"
+        id="quatationgenerator"
+        style={{ fontSize: "12px" }}
+      >
+        <img
+          src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
+          alt="logo"
+          style={{ marginLeft: "20px", height: "90px", paddingBottom: "50px" }}
+        />
+        <div style={{ marginLeft: "50px" }}>
+          <p style={{ paddingBottom: "5px" }}>To,</p>
+          <p>jijin vj</p>
+        </div>
+
+        <div style={{ width: "510px", paddingBottom: "50px" }}>
+          <p style={{ textAlign: "end", paddingBottom: "5px" }}>
+            QUOTATION NO: QT / 24-25/020{" "}
+          </p>
+          <p style={{ textAlign: "end" }}>Date: 08/05/2024 </p>
+        </div>
+        <div
+          style={{ marginLeft: "50px", width: "500px", paddingBottom: "200px" }}
+        >
+          <p style={{ paddingBottom: "5px" }}>
+            {" "}
+            We thank you for giving us an opportunity to quote for the mentioned
+            subject. With reference to your enquiry, please find.
+          </p>
+          <p style={{ paddingBottom: "5px" }}>Sir,</p>
+          <p style={{ paddingBottom: "5px" }}>
+            Biltree was founded on the principle of providing quality work with
+            an emphasis on cost- effectiveness and the highest quality work for
+            its prospective clients in the quickest way possible. Our strength
+            is in achieving recognition for our ability to analyze the client's
+            requirements in collaboration with architects and consultants, as
+            well as developing an understanding of architectural and interior
+            concepts. We specialize in providing solutions’ that blend
+            aesthetically with interiors and exteriors, without sacrificing any
+            functional attributes. As a company, our goal is to ensure customer
+            satisfaction with the quality of our aesthetic. We also intend to
+            achieve fluency from design to design and installation. We will
+            maintain our loyalty and plough to build good and fair relationships
+            with our clients, founded on trust and loyalty.
+          </p>
+        </div>
+        <div
+          style={{ marginLeft: "50px", width: "500px", textAlign: "center" }}
+        >
+          <h5 style={{ paddingBottom: "10px" }}>
+            BILTREE -1ST FLOOR MANGHAT ARCADE, KALOOR KADAVANTRA ROAD,
+            KADAVANTRA -20{" "}
+          </h5>
+          <h5>PHONE: +91 9447519770 </h5>
+        </div>
+      </div>
+
+  )
+
+
+  const handleGenerate = () => {
+    const pdftable = document.querySelector("#quatationgeneratorttable");
+    const pdflastpage = document.querySelector("#exclusion-terms-and-condition");
+  
+
+
+    const pdf = new jsPDF("p", "pt", "a4", true);
+    pdf.html(pageone, {
+      callback: () => {
+        pdf.addPage();
+        pdf.addImage(
+          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+
+          30,
+          0,
+          100, // Width
+          50 // Height
+        );
+        pdf.autoTable({
+          html: pdftable, // Pass the HTML structure directly
+          useCss: true,
+          startY: 50,
+          theme: "grid",
+          // headStyles: {
+          //   fillColor: "yellow",
+          //   textColor: "black",
+          //   border:"1px solid"
+          // },
+        });
+
+        pdf.addPage();
+        pdf.addImage(
+          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+
+          30,
+          0,
+          100, // Width
+          50 // Height
+        );
+        pdf.autoTable({
+          html: "#accessoriestable", // Pass the HTML structure directly
+          useCss: true,
+          startY: 50,
+          theme: "grid",
+          // headStyles: {
+          //   fillColor: "yellow",
+          //   textColor: "black",
+          //   border:"1px solid"
+          // },
+          bodyStyles: { minCellHeight: 15 },
+          columnStyles: {
+            2: {
+              cellWidth: 100,
+              valign: "center",
+              halign: "center",
+              minCellHeight: 50,
+              fontSize: 1,
+              textColor: "white",
+            },
+          },
+          didDrawCell: function (data) {
+            console.log("didDrawCell", data.cell);
+            if (data.column.index === 2 && data.cell.section === "body") {
+              var td = data.cell.raw;
+              var img = td.getElementsByTagName("img")[0];
+              var imageSize = 35; // Increase image size here
+              pdf.addImage(
+                img.src,
+                data.cell.x + 35,
+                data.cell.y + 10,
+                imageSize, // Width
+                imageSize // Height
+              );
+            }
+          },
+        });
+        pdf.addPage();
+        pdf.addImage(
+          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+
+          30,
+          0,
+          100, // Width
+          50 // Height
+        );
+        pdf.autoTable({
+          html: "#tablethree", // Pass the HTML structure directly
+          useCss: true,
+          startY: 50,
+          theme: "grid",
+          // headStyles: {
+          //   fillColor: "yellow",
+          //   textColor: "black",
+          //   border:"1px solid"
+          // },
+        });
+
+        pdf.addPage();
+        pdf.addImage(
+          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+
+          30,
+          0,
+          100, // Width
+          50 // Height
+        );
+
+        // pdf.html(pdflastpage,{
+        //   callback: () => {
+
+            const blobURL = pdf.output("bloburl");
+            window.open(blobURL, "_blank");
+          // }})
+
+      },
+    });
   };
 
   return (
@@ -789,7 +635,7 @@ doc.addPage();
           </Box>
 
           {/* EXCLUSIONS */}
-           {/* <Box
+          {/* <Box
             sx={{
             }}
           >
@@ -845,9 +691,7 @@ doc.addPage();
             </Box>
           </Box>  */}
 
-          <Box
-         
-          >
+          <Box>
             <Typography
               className="Terms-label"
               variant="string"
@@ -868,16 +712,17 @@ doc.addPage();
                   width: "100%",
                 }}
               >
-             {inputs.map((input, index) => (
-    <InputComponent
-        key={index}
-        handleChange={(e) => handleInputChange(index, e.target.value)} // Pass index and value
-        label={input.label}
-        type={input.type}
-        intputName={input.intputName}
-    />
-))}
-
+                {inputs.map((input, index) => (
+                  <InputComponent
+                    key={index}
+                    handleChange={(e) =>
+                      handleInputChange(index, e.target.value)
+                    } // Pass index and value
+                    label={input.label}
+                    type={input.type}
+                    intputName={input.intputName}
+                  />
+                ))}
               </Box>
               {/* Button to add more input fields */}
               <Button
@@ -921,100 +766,110 @@ doc.addPage();
         </Box>
 
         <Box className="input-box" sx={{ gap: 2 }}>
-          <Box sx={{display:'flex', gap:2}}>
-
-          {leftArrOfInputs.slice(0,1).map((input, index) => (
-            <InputComponent
-            key={index}
-            // handleChange={(e) => handleleftIputsChange(e, input.intputName)}
-            label={input.label}
-            type={input.type}
-            // value={leftInputs[input.intputName]} // Ensure the value is correctly passed
-            intputName={input.intputName}
-            inputOrSelect={input.inputOrSelect}
-            options={input.options}
-            />
-          ))}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {leftArrOfInputs.slice(0, 1).map((input, index) => (
+              <InputComponent
+                key={index}
+                // handleChange={(e) => handleleftIputsChange(e, input.intputName)}
+                label={input.label}
+                type={input.type}
+                // value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                intputName={input.intputName}
+                inputOrSelect={input.inputOrSelect}
+                options={input.options}
+              />
+            ))}
           </Box>
 
-
-          <Box sx={{display:'flex', gap:2}}>
-
-          {leftArrOfInputs.slice(1,3).map((input, index) => (
-            <InputComponent
-            key={index}
-            handleChange={(e) => handleleftIputsChange(e, input.intputName)}
-            label={input.label}
-            type={input.type}
-            value={leftInputs[input.intputName]} // Ensure the value is correctly passed
-            intputName={input.intputName}
-            inputOrSelect={input.inputOrSelect}
-            options={input.options}
-            />
-          ))}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {leftArrOfInputs.slice(1, 3).map((input, index) => (
+              <InputComponent
+                key={index}
+                handleChange={(e) => handleleftIputsChange(e, input.intputName)}
+                label={input.label}
+                type={input.type}
+                value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                intputName={input.intputName}
+                inputOrSelect={input.inputOrSelect}
+                options={input.options}
+              />
+            ))}
           </Box>
 
-          
-          <Box sx={{display:'flex', gap:2}}>
-
-          {leftArrOfInputs.slice(3,4).map((input, index) => (
-            <InputComponent
-            key={index}
-            handleChange={(e) => handleleftIputsChange(e, input.intputName)}
-            label={input.label}
-            type={input.type}
-            value={leftInputs[input.intputName]} // Ensure the value is correctly passed
-            intputName={input.intputName}
-            inputOrSelect={input.inputOrSelect}
-            options={input.options}
-            />
-          ))}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {leftArrOfInputs.slice(3, 4).map((input, index) => (
+              <InputComponent
+                key={index}
+                handleChange={(e) => handleleftIputsChange(e, input.intputName)}
+                label={input.label}
+                type={input.type}
+                value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                intputName={input.intputName}
+                inputOrSelect={input.inputOrSelect}
+                options={input.options}
+              />
+            ))}
           </Box>
 
-
-
-          <Box sx={{display:'flex', gap:2}}>
-
-          {leftArrOfInputs.slice(4).map((input, index) => (
-            <InputComponent
-            key={index}
-            handleChange={(e) => handleleftIputsChange(e, input.intputName)}
-            label={input.label}
-            type={input.type}
-            value={leftInputs[input.intputName]} // Ensure the value is correctly passed
-            intputName={input.intputName}
-            inputOrSelect={input.inputOrSelect}
-            options={input.options}
-            />
-          ))}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {leftArrOfInputs.slice(4).map((input, index) => (
+              <InputComponent
+                key={index}
+                handleChange={(e) => handleleftIputsChange(e, input.intputName)}
+                label={input.label}
+                type={input.type}
+                value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                intputName={input.intputName}
+                inputOrSelect={input.inputOrSelect}
+                options={input.options}
+              />
+            ))}
           </Box>
 
-
-
-          <Box sx={{
-            display:"flex",
-            justifyContent:"flex-end"
-          }}>
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
+          <Box
             sx={{
-              mt: 1,
-              fontWeight: "bold",
-              textTransform: "none",
-              bgcolor: "var(--black-button)",
-              "&:hover": {
-                background: "var(--button-hover)",
-              },
+              display: "flex",
+              justifyContent: "space-between",
             }}
-            onClick={handleAddData}
           >
-            Add Product
-          </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{
+                mt: 1,
+                fontWeight: "bold",
+                textTransform: "none",
+                bgcolor: "var(--black-button)",
+                "&:hover": {
+                  background: "var(--button-hover)",
+                },
+              }}
+              // onClick={handleOpen}
+              onClick={() => {
+                toggleDrawer("right", true)();
+              }}
+            >
+              Add
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{
+                mt: 1,
+                fontWeight: "bold",
+                textTransform: "none",
+                bgcolor: "var(--black-button)",
+                "&:hover": {
+                  background: "var(--button-hover)",
+                },
+              }}
+              onClick={handleAddData}
+            >
+              Add Product
+            </Button>
           </Box>
-
         </Box>
 
         <Box
@@ -1065,58 +920,7 @@ doc.addPage();
         </Box>
       </Box>
       {/* <p className="added-item"> Added Items</p> */}
-{/* there are table data for the pdf  */}
-      <table align="center" ref={tableRef} style={{ display: "none" }}>
-        <thead>
-          <tr>
-            <th>SL NO</th>
-            <th>SCOPE OF WORK</th>
-            <th>SPECIFICATIONS</th>
-            <th>AMOUNT</th>
-          </tr>
-        </thead>
-        <tbody>
-          {formData.map((item, index) => (
-            <>
-              <tr>
-                <td rowspan="4">{index + 1}</td>
-                <td rowspan="4">{item.productname}</td>
-                <td>{item.description}</td>
-                <td>{item.amount}</td>
-              </tr>
-              <tr>
-                <td>hardware</td>
-                <td>{item.hardware}</td>
-              </tr>
-              <tr>
-                <td>installation</td>
-                <td>{item.installation} </td>
-              </tr>
-              <tr>
-                <td>accessories</td>
-                <td>{item.accessories}</td>
-              </tr>
-            </>
-          ))}
-          <tr>
-            <td colspan="3" style={{ textAlign: "end" }}>
-              TOTAL
-            </td>
-            <td>
-              {/* Calculate the total */}
-              {formData.reduce(
-                (acc, curr) =>
-                  acc +
-                  parseInt(curr.amount) +
-                  parseInt(curr.hardware) +
-                  parseInt(curr.installation) +
-                  parseInt(curr.accessories),
-                0
-              )}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      {/* there are table data for the pdf  */}
 
       {/* EXCLUSIONS */}
       {/* <div ref={exclusionRef}>
@@ -1147,11 +951,221 @@ doc.addPage();
               background: "var(--button-hover)",
             },
           }}
-          onClick={handleDownloadPdf}
+          // onClick={handleDownloadPdf}
         >
           Create
         </Button>
       </Box>
+      <div>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <div>
+              <h4 style={{ textAlign: "center" }}>Add Accessories</h4>
+            </div>
+          </Box>
+        </Modal>
+        <AddClientDrawer 
+         setToggle={setToggle}
+         toggle={toggle}
+         handleAdd={handleAdd}
+         handleImageChange={handleprojectImageChange}
+                 arrOfInputs={arrOfInputs}
+                 projectFormData={projectFormData}
+        state={state}
+        toggleDrawer={toggleDrawer}
+
+
+        />
+      </div>
+      
+
+      <div>
+        <table
+          align="center"
+          id="quatationgeneratorttable"
+          style={{ backgroundColor: "white", display:"none" }}
+        >
+          <thead style={{ backgroundColor: "yellow" }}>
+            <tr>
+              <th style={{ border: "2px solid" }}>SL NO</th>
+              <th style={{ border: "2px solid" }}>SCOPE OF WORK</th>
+              <th style={{ border: "2px solid" }}>SPECIFICATIONS</th>
+              <th style={{ border: "2px solid" }}>AMOUNT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array(10)
+              .fill()
+              .map((item, index) => (
+                <>
+                  <tr>
+                    <td rowspan="4">{index + 1}</td>
+                    <td rowspan="4">test</td>
+                    <td>
+                      ertyu iosd fghjkl;dfg hjuiodf dkjjg woftw iosd fghjkl;dfg
+                      hjuiodf dkjjg woftw i fg kjdgv
+                    </td>
+                    <td>78</td>
+                  </tr>
+                  <tr>
+                    <td>hardware</td>
+                    <td>546</td>
+                  </tr>
+                  <tr>
+                    <td>installation</td>
+                    <td>97456 </td>
+                  </tr>
+                  <tr>
+                    <td>accessories</td>
+                    <td>321</td>
+                  </tr>
+                </>
+              ))}
+            <tr style={{ backgroundColor: "green" }}>
+              <td colspan="3" style={{ textAlign: "end" }}>
+                TOTAL
+              </td>
+              <td>321</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <table id="accessoriestable" style={{ backgroundColor: "white",display:"none"  }}>
+          <thead>
+            <tr>
+              <th
+                colspan="3"
+                style={{ backgroundColor: "blue", border: "1px solid" }}
+              >
+                ACCESSORIES LIST OF KITCHEN
+              </th>
+            </tr>
+            <tr style={{ backgroundColor: "yellow" }}>
+              <th style={{ border: "1px solid" }}>SL No:</th>
+              <th style={{ border: "1px solid" }}>Specification</th>
+              <th style={{ border: "1px solid" }}>Image</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array(2)
+              .fill()
+              .map(() => (
+                <tr key={Math.random()}>
+                  <td>1</td>
+                  <td>SANDEM BOX</td>
+                  <td style={{ display: "flex", justifyContent: "center" }}>
+                    <img
+                      src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
+                      alt="Test image"
+                      height="50"
+                      width="100"
+                    />
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <table id="tablethree" style={{ backgroundColor: "white",display:"none"  }}>
+          <thead style={{ backgroundColor: "yellow" }}>
+            <tr>
+              <th style={{ border: "2px solid" }}>Area of Work</th>
+              <th style={{ border: "2px solid" }}>Specification</th>
+              <th style={{ border: "2px solid" }}>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="2" style={{ padding: "10px" }}>
+                Field 1
+              </td>
+              <td style={{ padding: "10px" }}>
+                {" "}
+                typesetting industry. ever since the 1500s
+              </td>
+              <td style={{ padding: "10px" }}> 123,222.00</td>
+            </tr>
+            <tr>
+              <td style={{ padding: "10px" }}>
+                {" "}
+                typesetting industry. ever since the 1500s
+              </td>
+              <td style={{ padding: "10px" }}> 123,222.00</td>
+            </tr>
+            <tr></tr>
+            <tr>
+              <td rowspan="2" style={{ padding: "10px" }}>
+                Field 2
+              </td>
+              <td style={{ padding: "10px" }}>
+                {" "}
+                typesetting industry. ever since the 1500s
+              </td>
+              <td style={{ padding: "10px" }}> 123,222.00</td>
+            </tr>
+            <tr>
+              <td style={{ padding: "10px" }}>
+                {" "}
+                typesetting industry. ever since the 1500s
+              </td>
+              <td style={{ padding: "10px" }}> 123,222.00</td>
+            </tr>
+            <tr>
+              <td rowspan="2" style={{ padding: "10px" }}>
+                Field 3
+              </td>
+              <td style={{ padding: "10px" }}>
+                {" "}
+                typesetting industry. ever since the 1500s
+              </td>
+              <td style={{ padding: "10px" }}> 123,222.00</td>
+            </tr>
+            <tr>
+              <td style={{ padding: "10px" }}>
+                {" "}
+                typesetting industry. ever since the 1500s
+              </td>
+              <td style={{ padding: "10px" }}> 123,222.00</td>
+            </tr>
+            <tr style={{ backgroundColor: "green" }}>
+              <td colspan="2" style={{ textAlign: "end" }}>
+                TOTAL
+              </td>
+              <td style={{ textAlign: "center" }}>321</td>
+            </tr>
+            <tr style={{ backgroundColor: "red" }}>
+              <td colspan="2" style={{ textAlign: "end" }}>
+                GRAND TOTAL
+              </td>
+              <td style={{ textAlign: "center" }}>321</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="exclusion-terms-and-condition" style={{display:"none" }}>
+        <h5>EXCLUSIONS</h5>
+        <p>test</p>
+        <p>test</p>
+        <p>test</p>
+        <p>test</p>
+        <p>test</p>
+        <p>test</p>
+        <p>test</p>
+
+        {/* {Array(1).fill().map((_,index)=>(
+
+          <p key={index}>test</p>
+        )) */}
+        {/* } */}
+      </div>
     </Box>
   );
 }

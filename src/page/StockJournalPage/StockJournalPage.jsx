@@ -13,66 +13,122 @@ import { useNavigate } from "react-router-dom";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useEffect, useState } from "react";
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
+import { gstOptionsGetAPI, productGetAPI, projectGetAPI, stockJournalCreateAPI } from "../../service/api/admin";
 
 
 function StockJournalPage() {
   const navigate = useNavigate();
   const [productOptions, setProductOptions] = useState([]);
-  const [leftArrOfInputs, setLeftArrOfInputs] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
+  const [projectOptions, setProjectOptions] = useState([]);
+
+  // const [leftArrOfInputs, setLeftArrOfInputs] = useState([]);
+  const [selectedProject, setSelectedProject] = useState("None"); // State to hold selected product
+
+  const [selectedProduct, setSelectedProduct] = useState("None"); // State to hold selected product
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
-  const [totalAmout, setTotalAmout] = useState(); // State to hold selected product
-  const [quantity, setQuantity] = useState(); // State to hold quantity
+  const [totalAmout, setTotalAmout] = useState(0); // State to hold selected product
+  const [quantity, setQuantity] = useState(0); // State to hold quantity
   const [myArray, setMyArray] = useState([]);
   const [createdProducts, setCreatedProducts] = useState({
     productname: "",
     unit: "",
     amount: "",
+    hsn:"",
   });
+  const [selectedTax, setSelectedTax] = useState(0); // State to hold quantity
 
 
-  const getArrayFromLocalStorage = () => {
-    const storedArray = localStorage.getItem('stockJournal');
-    if (storedArray) {
-      setMyArray(JSON.parse(storedArray));
-    }
-  };
+  const [taxOptions,setTaxOptions]=useState([])
+
+
+  const getTaxOptionsFormAPI = () => {
+    gstOptionsGetAPI().then((data) => {
+      console.log("tax:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const transformedData = data.map(entry => ({
+        value: entry.id,
+        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
+        taxlabel: entry.percentage,
+        id:entry.id
+
+      }));
+      console.log(transformedData)
+      setTaxOptions(transformedData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
+
+  const getProductsData=()=>{
+    productGetAPI()
+    .then((data) => {
+      console.log("getProductsData:", data);
+      // setTaxOptions(data);
+  
+      // Transform data and set it to state
+      const productsData = data.responseData.map((entry) => ({
+        value: entry.id,
+        label: entry.name,
+        rate:entry.rate,
+        unit:entry.unit
+      }));
+      // productsData.unshift({ value: -1, label: "None" });
+  
+  
+      console.log(productsData);
+      setProductOptions(productsData);
+    })
+    .catch((err) => {
+      console.log(err);
+    }); 
+   }
+
+   const getProjectData=()=>{
+    projectGetAPI()
+    .then((data) => {
+      console.log("getProjectData:", data);
+      // setTaxOptions(data);
+  
+      // Transform data and set it to state
+      const productsData = data.responseData.map((entry) => ({
+        value: entry.id,
+        label:` ${entry.name} (${entry.client_name})`,
+      }));
+      // productsData.unshift({ value: -1, label: "None" });
+  
+  
+      console.log(productsData);
+      setProjectOptions(productsData);
+    })
+    .catch((err) => {
+      console.log(err);
+    }); 
+   }
+
+
   useEffect(() => {
-    getArrayFromLocalStorage()
-    // Retrieve products array from local storage
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-
-    // Extract product names from the products array
-    const productNames = storedProducts.map((product) => product.name);
-
-    // Generate options using the product names
-    const options = productNames.map((name, index) => ({
-      value: `option${index + 1}`,
-      label: name,
-    }));
-
-    // Set the options state
-    setProductOptions(options);
-
-    // Update leftArrOfInputs with dynamic options
-    const updatedLeftArrOfInputs = [
-      {
-        intputName: "quantity",
-        label: "Quantity",
-        type: "number",
-        value:quantity
-      },
-      {
-        intputName: "amount",
-        label: "Amount",
-        type: "number",
-        value: totalAmout,
-        disabled:"disabled"
-      },
-    ];
-
-    setLeftArrOfInputs(updatedLeftArrOfInputs);
-  }, [totalAmout]);
+    getProjectData()
+    getProductsData()
+    getTaxOptionsFormAPI()
+  }, []);
+  const updatedLeftArrOfInputs = [
+    {
+      intputName: "quantity",
+      label: "Quantity",
+      type: "number",
+      value:quantity
+    },
+    {
+      intputName: "amount",
+      label: "Amount",
+      type: "number",
+      value: totalAmout,
+      disabled:"disabled"
+    },
+   
+  ];
 
   const RightArrOfInputs = [
     {
@@ -88,12 +144,24 @@ function StockJournalPage() {
       type: "text",
       value:createdProducts.unit
     },
+    
     {
-      intputName: "amount",
-      label: "  Amount",
-      type: "text",
-      value:createdProducts.amount
-    },
+      intputName: "tax",
+      label: "Tax",
+      type: "number",
+      inputOrSelect:"select",
+      options:taxOptions    },
+      {
+        intputName: "hsn",
+        label: "HSN",
+        type: "text",
+      },
+      {
+        intputName: "amount",
+        label: "  Amount",
+        type: "text",
+        value:createdProducts.amount
+      },
   ];
   const handleDelete = (event) => {
     event.stopPropagation(); // Prevent the click event from bubbling up to the main div
@@ -102,112 +170,96 @@ function StockJournalPage() {
 
 // handle right input change
 const handleRightInputChange = (e) => {
+  console.log("handleRightInputChange",e.target)
   const { name, value } = e.target;
-  setCreatedProducts(prevState => ({
-    ...prevState,
-    [name]: value
-  }));
+  if(name){
+    setCreatedProducts(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  }else{
+    setSelectedTax(e.target.value)
+  }
 };
 
   // select prodect from local storage
   const handleSelectedProductChange = (event, newValue) => {
+    console.log("newValue",newValue.value)
     setSelectedProduct(newValue);
 
-    if (newValue) {
-      // Set the amount based on the selected product
-      const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-      const selectedProductData = storedProducts.find(
-        (product) => product.name === newValue.label
-      );
-      setSelectedProductDetails(selectedProductData);
-    }
+  };
+  const handleSelectedProjectChange = (event, newValue) => {
+    setSelectedProject(newValue);
+
   };
   // add quantity
   const handleQtyChange = (e) => {
     console.log(e.target.value);
     setQuantity(e.target.value)
-    const totalvalue = selectedProductDetails.rate * e.target.value;
+    const totalvalue = selectedProduct.rate * e.target.value;
     setTotalAmout(totalvalue);
     console.log(totalvalue);
   };
 
 // remove and add the product to local storage
 const handleAddProduct = () => {
-  if (selectedProduct && quantity > 0) {
-    // Retrieve products array from local storage
-    let storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-  
-    // Find the index of the selected product in the stored products array
-    const index = storedProducts.findIndex(
-      (product) => product.name === selectedProduct.label
-    );
-  
-    // If the product is found, update its quantity
-    if (index !== -1) {
-      storedProducts[index].quantity -= quantity;
-      localStorage.setItem("products", JSON.stringify(storedProducts));
-  
-      // Create a new entry for the stock journal
-      // const productData = JSON.parse(localStorage.getItem("products")) || [];
-      console.log(storedProducts[index])
+  const products={
+    productData:selectedProduct,
+    qty:quantity,
+    totalAmout:selectedProduct?.rate * quantity
+    
 
-      const stockEntry = {
-        product: storedProducts[index].name,
-        quantity: quantity,
-        totalAmount: totalAmout,
-        unit:storedProducts[index].unit,
-        rate:storedProducts[index].rate
-      };
-  
-      // Retrieve stock journal array from local storage or initialize if it doesn't exist
-      const stockJournal = JSON.parse(localStorage.getItem("stockJournal")) || [];
-  
-      // Add the new entry to the stock journal array
-      stockJournal.push(stockEntry);
-  
-      // Update the stock journal array in local storage
-      localStorage.setItem("stockJournal", JSON.stringify(stockJournal));
-  
-      setQuantity(0); // Reset quantity after adding product
-      setSelectedProduct(null); // Reset selected product after adding product
-      setTotalAmout(0)
-    } else {
-      alert("Selected product not found in the inventory!");
-    }
-  } else {
-    alert("Please select a product and enter a valid quantity.");
   }
+  setMyArray(pre=>[...pre,products])
+  setQuantity(0)
+  setSelectedProduct("None")
+  setTotalAmout(0)
+
   
 };
 // handle create button click
 const handleCreateProduct = async () => {
-  // Check if stockJournal is available in local storage
-  const stockJournalData = JSON.parse(localStorage.getItem("stockJournal")) || [];
+  const newArray =  myArray.map(item => { 
+   console.log("first", item)
+    return({
+    quantity: parseInt(item.qty),
+    unit: item.productData.unit,
+    product_id: item.productData.value
+  })});
+  const journalCreate={
+    product: {
+      category_id:1,//we not need this in the future
+      id: parseInt(selectedProduct.value),
+      hsn: createdProducts.hsn,
+      rate:  parseFloat(createdProducts.amount),
+      projectid: selectedProject.id,
+      tax_rate: {
+    id:parseInt(selectedTax)
+       },
+      is_master_product: true,
+  
+    },
+    materials_used: newArray
+  
+  }
+  stockJournalCreateAPI(journalCreate).then((data)=>{
+  console.log("stockJournalCreateAPI",data)
+setCreatedProducts({
+  productname: "",
+  unit: "",
+  amount: "",
+  hsn:"",
+})
+setMyArray([])
+setSelectedProduct("None")
+setSelectedProject("None")
+setSelectedTax(0)
 
-  // Retrieve existing data from createStockJournal or initialize as an empty array
-  const existingData = JSON.parse(localStorage.getItem("createStockJournal")) || [];
-
-  // Create the new entry
-  const newEntry = { createdProducts, products: stockJournalData };
-
-  // Append the new entry to the existing data
-  const updatedData = [...existingData, newEntry];
-
-  // Store the updated data in local storage
-   localStorage.setItem("createStockJournal", JSON.stringify(updatedData));
-  // Reset createdProducts state
-  window.location.reload()
- setCreatedProducts({
-    productname: "",
-    unit: "",
-    amount: "",
-  });
-
-  // Remove stockJournal from local storage
-  localStorage.removeItem("stockJournal");
-
-  // Retrieve updated array from local storage
-  getArrayFromLocalStorage();
+  })
+  .catch((err)=>{
+console.log(err)
+  })
+ 
 };
 
 
@@ -280,7 +332,7 @@ const handleCreateProduct = async () => {
             />
           </Box>
 
-          {leftArrOfInputs.map((input, index) => {
+          {updatedLeftArrOfInputs.map((input, index) => {
             return (
               <Grid item key={index} xs={6} md={4}>
                 <InputComponent
@@ -319,7 +371,48 @@ const handleCreateProduct = async () => {
         <Box className="input-box">
           <Box sx={{ display: "flex", gap: 5 }}>
             <Box sx={{ width: "100%" }}>
-              {RightArrOfInputs.slice(0, 3).map((input, index) => {
+            <p className="product-name">Project</p>
+
+            <Autocomplete
+              sx={{
+                display: "inline-block",
+                "& input": {
+                  width: "100%",
+                  border: "none",
+                  bgcolor: "var(--inputbg-color)",
+                  color: (theme) =>
+                    theme.palette.getContrastText(
+                      theme.palette.background.paper
+                    ),
+                },
+              }}
+              id="custom-input-demo"
+              options={projectOptions}
+              value={selectedProject}
+              onChange={handleSelectedProjectChange}
+              componentsProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, -20],
+                      },
+                    },
+                  ],
+                },
+              }}
+              renderInput={(params) => (
+                <div ref={params.InputProps.ref}>
+                  <input
+                    type="text"
+                    {...params.inputProps}
+                    style={{ height: "10xp" }}
+                  />
+                </div>
+              )}
+            />
+              {RightArrOfInputs.map((input, index) => {
                 return (
                   <InputComponent
                     key={index}
@@ -409,7 +502,9 @@ const handleCreateProduct = async () => {
  <PlaylistAddRoundedIcon sx={{mx:"auto"}} style={{fontSize:"40px"}}/>
  <p style={{textAlign:"center"}}>No products available</p>
  </Box>:
-          myArray.map((data, index) => (
+          myArray.map((data, index) => { 
+            console.log("arr data",data.productData)
+            return(
             <Box
               item
               key={index}
@@ -424,15 +519,15 @@ const handleCreateProduct = async () => {
               <ProductInputCard
                 // handleUpdate={handleUpdate}
                 handleDelete={handleDelete}
-                heading={data.product}
+                heading={data.productData.label}
                 image={data.img}
-                qty={data.quantity}
-                unit={data.unit}
-                rate={data.rate}
+                qty={data.qty}
+                unit={data.productData.unit}
+                rate={data.totalAmout}
                 amount={data.amount}
               />
             </Box>
-          ))}
+          )})}
         </Box>
       </Box>
     </Box>

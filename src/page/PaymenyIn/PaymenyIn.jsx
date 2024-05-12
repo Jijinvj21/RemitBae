@@ -100,7 +100,7 @@ function PaymenyIn() {
   const leftsideinput = [
     {
       intputName: "receiptno",
-      label: "Recipes No",
+      label: "Recipt No",
       type: "text",
       value: ReceptNo,
       disabled: "disabled",

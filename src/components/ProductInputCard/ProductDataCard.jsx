@@ -51,9 +51,9 @@ function ProductInputCard({
 
           }}
         >
-          <Box sx={{width:"65%"}}>
+          <Box sx={{width:"100%"}}>
 
-          <p style={{fontWeight:500}}>{heading} </p>
+          <p >{heading} </p>
           </Box>
           <img src={Deleteicon} alt="Delete" onClick={handleDelete} />
         </Box>
