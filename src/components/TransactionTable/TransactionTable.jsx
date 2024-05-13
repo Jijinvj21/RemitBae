@@ -112,7 +112,7 @@ function TransactionTable() {
         console.log(rows)
         const newRow = { 
           // Math.floor(Math.random() * 1000000), 
-          id:(parseInt(rows.id)+1), 
+          id:0, 
           item: '', 
           qty: 1, 
           price: 0, 

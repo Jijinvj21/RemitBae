@@ -11,6 +11,7 @@ import {
   clientDataGetAPI,
   productGetAPI,
   projectGetAPI,
+  quotationCreateAPI,
 } from "../../service/api/admin";
 import { useNavigate } from "react-router-dom";
 import { renderToString } from "react-dom/server";
@@ -29,7 +30,6 @@ const style = {
 };
 
 function QuotationGeneratorPage() {
-  const navigate = useNavigate();
 
   const tableRef = useRef();
   const exclusionRef = useRef();
@@ -46,24 +46,27 @@ function QuotationGeneratorPage() {
   const [inputsExclusion, setInputsExclusion] = useState([""]); // State to store  Terms and Conditions values
 
   const [leftInputs, setLeftInputs] = useState({
-    productname: "",
     quantity: "",
     amount: "",
     description: "",
     hardware: "",
     installation: "",
     accessories: "",
+    
   });
   const [rightIputs, setRightIputs] = useState({
-    clientname: "",
-    projectdetails: "",
     quoteamount: "",
     completiontime: "",
     startdate: "",
   });
   const [formData, setFormData] = useState([]);
   // adding data form local storage
-  const [myArray, setMyArray] = useState([]);
+  const [selectedAccessory, setSelectedAccessory] = useState({ id: '', name: '' });
+  const [quantity, setQuantity] = useState(1);
+  const [accessoriesList, setAccessoriesList] = useState([]);
+
+
+
   const [open, setOpen] = useState(false);
   const [projectFormData, setProjectFormData] = useState({
     name: "",
@@ -80,9 +83,13 @@ function QuotationGeneratorPage() {
   const [state, setState] = useState({
     right: false,
   });
+  const [productData, setProductData] = useState([]);
+  const [clientNameSelect, setClientNameSelect] = useState({});
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name,value)
+    console.log("name,value",name,value)
     setProjectFormData(prevState => ({
       ...prevState,
       [name]: value
@@ -94,6 +101,20 @@ function QuotationGeneratorPage() {
         return;
       }
       setState({ ...state, [anchor]: open });
+    };
+
+
+
+    const handleAccessoryChange = (event) => {
+      const selectedOptionObject = productsOptions.find(option => option.value == event.target.value);
+      console.log("event.target",event.target.value,selectedOptionObject)
+
+     
+      setSelectedAccessory({ selectedOptionObject });
+    };
+  
+    const handleQuantityChange = (event) => {
+      setQuantity(event.target.value);
     };
   const arrOfInputs = [
     {
@@ -170,6 +191,8 @@ alert("add")
         const partyData = data.responseData.map((entry) => ({
           value: entry.id,
           label: entry.name,
+          project: entry.project_name,
+
         }));
         partyData.unshift({ value: -2, label: "Add" });
         partyData.unshift({ value: -1, label: "None" });
@@ -213,6 +236,8 @@ alert("add")
         const productsData = data.responseData.map((entry) => ({
           value: entry.id,
           label: entry.name,
+          unit:entry.unit,
+          amount:entry.rate,
         }));
         productsData.unshift({ value: -1, label: "None" });
 
@@ -232,26 +257,26 @@ alert("add")
 
   const handleleftIputsChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
+    console.log("name, value",name, value);
     setLeftInputs({
       ...leftInputs,
       [name]: value,
     });
   };
   const handleAddData = () => {
-    setFormData([...formData, leftInputs]);
-    setLeftInputs({
-      productname: "",
-      quantity: "",
-      amount: "",
-      description: "",
-      hardware: "",
-      installation: "",
-      accessories: "",
-    });
+    console.log("firsttest")
+    const productDatas = {
+      ...leftInputs,
+      accessorieslist: accessoriesList,
+      product:selectedAccessory.selectedOptionObject?.id?selectedAccessory.selectedOptionObject?.id:selectedAccessory.selectedOptionObject?.value
+    };
+    console.log("handleAddData",productDatas)
+    setProductData([...productData, productDatas]);
+
   };
   const handlerightIputsChange = (e) => {
     const { name, value } = e.target;
+    console.log("first",name, value)
     setRightIputs((prevFormData) => ({
       ...prevFormData,
       [name]: value,
@@ -272,6 +297,11 @@ alert("add")
     if (e.target.value === "-2") {
         toggleDrawer("right", true)();
      }
+     const selectedOptionObject = clientOptions.find(option => option.value == e.target.value);
+      console.log("event.target",e.target.value,selectedOptionObject)
+
+     
+      setSelectedAccessory({ selectedOptionObject });
   };
   // const handleProjectname = (e) => {
   //   console.log("e.target", e.target.value === "-2");
@@ -305,13 +335,40 @@ alert("add")
   //   setImg(file);
   // };
   const handleImageChange = (e) => {
+    console.log("e.target.files",e.target.files)
     const files = e.target.files; // Get all selected files
     const fileList = Array.from(files); // Convert FileList to array
     setImg(fileList); // Update state with array of files
   };
 
+
+  const handleAddAccessory = async() => {
+    if (selectedAccessory.selectedOptionObject.value !== '') {
+      console.log(selectedAccessory.selectedOptionObject)
+      const accessory = {
+        id: selectedAccessory.selectedOptionObject.value,
+        name: selectedAccessory.selectedOptionObject.label,
+        quantity: parseInt(quantity),
+        price:selectedAccessory.selectedOptionObject.amount,
+        unit:selectedAccessory.selectedOptionObject.unit,
+      };
+      console.log("accessory",[...accessoriesList, accessory])
+      setAccessoriesList([...accessoriesList, accessory]);
+      setSelectedAccessory({});
+      setQuantity(1);
+    }
+  };
+  const handleProductNameChange = (event) => {
+    const selectedOptionObject = productsOptions.find(option => option.value == event.target.value);
+    console.log("event.target",event.target.value,selectedOptionObject)
+
+   
+    setSelectedAccessory({ selectedOptionObject });
+  };
+
   const leftArrOfInputs = [
     {
+      handleChange:handleProductNameChange,
       intputName: "productname",
       label: " Product Name",
       inputOrSelect: "select",
@@ -347,6 +404,19 @@ alert("add")
       label: " Accessories",
       type: "number",
     },
+    {
+      handleChange:handleAccessoryChange,
+      intputName: " accessorieslist",
+      label: " Accessories list",
+      inputOrSelect: "select",
+      options: productsOptions,
+    },
+    {
+      handleChange:handleQuantityChange,
+      intputName: "accessoriesQuantity",
+      label: " Quantity",
+      type: "number",
+    },
   ];
   const RightArrOfInputs = [
     {
@@ -362,6 +432,8 @@ alert("add")
       label: "Project Details",
       // inputOrSelect: "select",
       // options: projectOptions,
+      value:selectedAccessory?.selectedOptionObject?.project,
+      disabled:"disabled"
     },
     {
       handleChange: handlerightIputsChange,
@@ -373,13 +445,13 @@ alert("add")
       handleChange: handlerightIputsChange,
       intputName: "completiontime",
       label: "Completion Time",
-      type: "text",
+      type: "date",
     },
     {
       handleChange: handlerightIputsChange,
       intputName: "startdate",
       label: "Start date",
-      type: "text",
+      type: "date",
     },
   ];
   const handleDelete = (event) => {
@@ -446,20 +518,16 @@ alert("add")
 
   )
 
-
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const pdftable = document.querySelector("#quatationgeneratorttable");
     const pdflastpage = document.querySelector("#exclusion-terms-and-condition");
   
-
-
     const pdf = new jsPDF("p", "pt", "a4", true);
     pdf.html(pageone, {
-      callback: () => {
+      callback: async () => { // Make the callback function async
         pdf.addPage();
         pdf.addImage(
           "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-
           30,
           0,
           100, // Width
@@ -470,17 +538,11 @@ alert("add")
           useCss: true,
           startY: 50,
           theme: "grid",
-          // headStyles: {
-          //   fillColor: "yellow",
-          //   textColor: "black",
-          //   border:"1px solid"
-          // },
         });
-
+  
         pdf.addPage();
         pdf.addImage(
           "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-
           30,
           0,
           100, // Width
@@ -491,11 +553,6 @@ alert("add")
           useCss: true,
           startY: 50,
           theme: "grid",
-          // headStyles: {
-          //   fillColor: "yellow",
-          //   textColor: "black",
-          //   border:"1px solid"
-          // },
           bodyStyles: { minCellHeight: 15 },
           columnStyles: {
             2: {
@@ -523,10 +580,10 @@ alert("add")
             }
           },
         });
+  
         pdf.addPage();
         pdf.addImage(
           "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-
           30,
           0,
           100, // Width
@@ -537,34 +594,118 @@ alert("add")
           useCss: true,
           startY: 50,
           theme: "grid",
-          // headStyles: {
-          //   fillColor: "yellow",
-          //   textColor: "black",
-          //   border:"1px solid"
-          // },
         });
+  
+        if (img) {
+          const imageUrls = img.map((file) => URL.createObjectURL(file));
+          pdf.addPage();
+  
+          const addImageProcess = async (url) => {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            return new Promise((resolve) => {
+              reader.onloadend = () => {
+                resolve(reader.result);
+              };
+              reader.readAsDataURL(blob);
+            });
+          };
+  
+          const imageWidth = 575; // Set the width of the image
+          const imageHeight = 820; // Set the height of the image
+          const paddingX = 10; // Set the horizontal padding
+          const paddingY = 10; // Set the vertical padding
+          const marginLeft = 0; // Set the left margin
+          const marginTop = 0; // Set the top margin
+  
+          for (const [i, url] of imageUrls.entries()) {
+            const image = await addImageProcess(url); // Await here
+            pdf.addImage(
+              image,
+              "png",
+              marginLeft + paddingX,
+              marginTop + paddingY,
+              imageWidth,
+              imageHeight
+            );
+            if (i !== imageUrls.length - 1) {
+              pdf.addPage();
+            }
+          }
+        }
+        console.log("inputsExclusion",inputsExclusion[0]!=='',inputsExclusion.length)
 
-        pdf.addPage();
-        pdf.addImage(
+  
+        inputsExclusion[0]!=='' || inputs[0]!==''? pdf.addPage():""
+        inputsExclusion[0]!=='' || inputs[0]!==''? pdf.addImage(
           "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-
           30,
           0,
           100, // Width
           50 // Height
-        );
+        ):""
+  
+        const width = 305;
+        const padding = 40;
+        const maxWidth = width - 2 * padding;
 
-        // pdf.html(pdflastpage,{
-        //   callback: () => {
 
-            const blobURL = pdf.output("bloburl");
-            window.open(blobURL, "_blank");
-          // }})
+        pdf.setFontSize(15);
 
+        inputsExclusion[0]!==''&& pdf.text("EXCLUSIONS ", padding, 80, {
+    maxWidth,
+    lineHeightFactor: 1.5,
+  });
+pdf.setFontSize(12);
+console.log("inputsExclusion",inputsExclusion.length)
+const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
+pdf.text(`${inputText1}`, 50, 100, {
+  maxWidth,
+  lineHeightFactor: 1.5,
+  align: "left",
+});
+
+        pdf.setFontSize(15);
+  console.log("TERMS AND CONDITIONS",inputs[0]=='',inputs.length)
+  inputs[0]!=='' && pdf.text("TERMS AND CONDITIONS", padding, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+70, {
+          maxWidth,
+          lineHeightFactor: 1.5,
+        });
+        pdf.setFontSize(12);
+        const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
+        pdf.text(`${inputText}`, 50, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+90, {
+          maxWidth,
+          lineHeightFactor: 1.5,
+          align: "left",
+        });
+  
+        const blobURL = pdf.output("bloburl");
+        window.open(blobURL, "_blank");
       },
     });
   };
 
+  const hanldeAddDataToApi=()=>{
+  console.log(productData)
+   const quotationData= {
+      id:selectedAccessory.selectedOptionObject?.value,
+      quote_amount:rightIputs.quoteamount,
+      completation_time: rightIputs.completiontime,
+      start_date:rightIputs.startdate,
+      terms_and_conditions: inputs,
+      product_info: productData,
+      
+  }
+  console.log("quotationData",productData)
+//     quotationCreateAPI(quotationData).then((data)=>{
+// console.log(data)
+//     })
+//     .catch((err)=>{
+//       console.log(err)
+//     })
+  }
+  
   return (
     <Box className="quotation-generator-page">
       <h2> Quotation Generator</h2>
@@ -584,6 +725,10 @@ alert("add")
                     intputName={input.intputName}
                     inputOrSelect={input.inputOrSelect}
                     options={input.options}
+                    disabled={input.disabled}
+                    value={input.value}
+
+
                   />
                 );
               })}
@@ -635,7 +780,7 @@ alert("add")
           </Box>
 
           {/* EXCLUSIONS */}
-          {/* <Box
+          <Box
             sx={{
             }}
           >
@@ -689,7 +834,7 @@ alert("add")
                 Add
               </Button>
             </Box>
-          </Box>  */}
+          </Box>  
 
           <Box>
             <Typography
@@ -770,7 +915,7 @@ alert("add")
             {leftArrOfInputs.slice(0, 1).map((input, index) => (
               <InputComponent
                 key={index}
-                // handleChange={(e) => handleleftIputsChange(e, input.intputName)}
+                handleChange={input.handleChange}
                 label={input.label}
                 type={input.type}
                 // value={leftInputs[input.intputName]} // Ensure the value is correctly passed
@@ -812,7 +957,7 @@ alert("add")
           </Box>
 
           <Box sx={{ display: "flex", gap: 2 }}>
-            {leftArrOfInputs.slice(4).map((input, index) => (
+            {leftArrOfInputs.slice(4,7).map((input, index) => (
               <InputComponent
                 key={index}
                 handleChange={(e) => handleleftIputsChange(e, input.intputName)}
@@ -825,19 +970,25 @@ alert("add")
               />
             ))}
           </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <Button
+          <Box sx={{ display: "flex",alignItems:"center", gap: 2 }}>
+            {leftArrOfInputs.slice(7,9).map((input, index) => (
+              <InputComponent
+                key={index}
+                handleChange={input.handleChange}
+                label={input.label}
+                type={input.type}
+                value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                intputName={input.intputName}
+                inputOrSelect={input.inputOrSelect}
+                options={input.options}
+              />
+            ))}
+               <Button
               type="submit"
               variant="contained"
               color="primary"
               sx={{
-                mt: 1,
+                mt: 3,
                 fontWeight: "bold",
                 textTransform: "none",
                 bgcolor: "var(--black-button)",
@@ -846,12 +997,22 @@ alert("add")
                 },
               }}
               // onClick={handleOpen}
-              onClick={() => {
-                toggleDrawer("right", true)();
-              }}
+              // onClick={() => {
+              //   toggleDrawer("right", true)();
+              // }}
+              onClick={handleAddAccessory}
             >
               Add
             </Button>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+         
             <Button
               type="submit"
               variant="contained"
@@ -893,7 +1054,7 @@ alert("add")
               flexGrow: 1,
             }}
           >
-            {data.map((data, index) => (
+            {accessoriesList?.map((data, index) => (
               <Grid
                 md={4}
                 item
@@ -907,11 +1068,11 @@ alert("add")
                 <ProductInputCard
                   // handleUpdate={handleUpdate}
                   handleDelete={handleDelete}
-                  heading={data.heading}
+                  heading={data.name}
                   image={data.img}
-                  qty={data.qty}
+                  qty={data.quantity}
                   unit={data.unit}
-                  rate={data.rate}
+                  rate={data.price}
                   amount={data.amount}
                 />
               </Grid>
@@ -952,6 +1113,7 @@ alert("add")
             },
           }}
           // onClick={handleDownloadPdf}
+          onClick={hanldeAddDataToApi}
         >
           Create
         </Button>
@@ -1150,22 +1312,7 @@ alert("add")
           </tbody>
         </table>
       </div>
-      <div id="exclusion-terms-and-condition" style={{display:"none" }}>
-        <h5>EXCLUSIONS</h5>
-        <p>test</p>
-        <p>test</p>
-        <p>test</p>
-        <p>test</p>
-        <p>test</p>
-        <p>test</p>
-        <p>test</p>
-
-        {/* {Array(1).fill().map((_,index)=>(
-
-          <p key={index}>test</p>
-        )) */}
-        {/* } */}
-      </div>
+     
     </Box>
   );
 }

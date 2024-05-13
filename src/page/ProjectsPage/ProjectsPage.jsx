@@ -15,6 +15,7 @@ function ProjectsPage() {
   // Load client data from local storage when the component mounts
   useEffect(() => {
     
+    
     projectGetAPI().then((data)=>{
       setProjectData(data.responseData)
     })

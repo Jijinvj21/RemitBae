@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "./ProjectDataPage.scss";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, Modal, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import SimCardDownloadOutlinedIcon from "@mui/icons-material/SimCardDownloadOutlined";
 import {
   Table,
@@ -12,18 +12,46 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import { projectDataByIdAPI } from "../../service/api/admin";
+import { projectDataByIdAPI ,quotationGetAPI } from "../../service/api/admin";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 900,
+  bgcolor: "background.paper",
+  border: "0px solid #000",
+  borderRadius: "10px",
+  boxShadow: 24,
+  p: 4,
+};
 
 function ProjectDataPage() {
   const [toggle, setToggle] = useState(true);
   const [projectData, setProjectData] = useState({});
   const [totalAmount, setTotalAmount] = useState(0); // State to hold the total amount
+  const [quotationGetData, setQuotationGetData] = useState();
+  const [open, setOpen] = useState(false);
 
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const location = useLocation();
 
   useEffect(() => {
+
+    quotationGetAPI({ id: location?.state }).then((data)=>{
+console.log("location",data.data.responseData[0])
+setQuotationGetData(data.data.responseData)
+    })
+    .catch((err)=>{
+      console.log(err)
+    }
+    )
+
+
+
     projectDataByIdAPI({ id: location?.state })
       .then((data) => {
         setProjectData(data.data.responseData);
@@ -173,8 +201,16 @@ const downloadCSV = () => {
       <div className="top-section">
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <div className="data_show_card">
-            <p>Income</p>
-            <h6>{projectData?.total_income||0}</h6>
+            <p>Quotation Cost</p>
+            {quotationGetData && (
+  <div className="quotation-data">
+    {quotationGetData.map((quotation, index) => (
+      <div key={index}>
+        <p>{quotation.quote_amount}</p>
+      </div>
+    ))}
+  </div>
+)}
           </div>
           <div className="data_show_card">
             <p>Expence</p>
@@ -185,7 +221,7 @@ const downloadCSV = () => {
             <h6>{totalAmount}</h6> {/* Display total amount */}
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center",gap:"20px",paddingRight:"60px" }}>
           <div className="toggle_button ">
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <h4>With Tax</h4>
@@ -240,7 +276,7 @@ const downloadCSV = () => {
             </ToggleButtonGroup>
           </div>
           <button
-            className="data_show_card"
+            // className="data_show_card"
             style={{
               border: "none",
               cursor: "pointer",
@@ -256,14 +292,14 @@ const downloadCSV = () => {
                 marginTop: "10px",
               }}
             >
-              <SimCardDownloadOutlinedIcon style={{ fontSize: "30px" }} />
+              <SimCardDownloadOutlinedIcon style={{ fontSize: "40px" }} />
               <h6>Download</h6>
             </div>
           </button>
 
 
           <button
-        className="data_show_card"
+        // className="data_show_card"
         style={{
           border: "none",
           cursor: "pointer",
@@ -279,7 +315,7 @@ const downloadCSV = () => {
             marginTop: "10px",
           }}
         >
-          <SimCardDownloadOutlinedIcon style={{ fontSize: "30px" }} />
+          <SimCardDownloadOutlinedIcon style={{ fontSize: "40px" }} />
           <h6>Download CSV</h6>
         </div>
       </button>
@@ -287,6 +323,27 @@ const downloadCSV = () => {
 
 
 
+      <button
+        // className="data_show_card"
+        style={{
+          border: "none",
+          cursor: "pointer",
+          backgroundColor: "white",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: "10px",
+            fontSize:"20px"
+          }}
+          onClick={handleOpen}
+        >
+          <h6 >view</h6>
+        </div>
+      </button>
         </div>
       </div>
       {projectData?.transaction ? (
@@ -331,6 +388,60 @@ const downloadCSV = () => {
           <p>NO DATA</p>
         </div>
       )}
+
+<Modal
+  open={open}
+  onClose={handleClose}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+>
+  <Box sx={style}>
+    <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
+      <h4>Quotation</h4>
+    </Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <TableContainer component={Paper} id="pdf-content">
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Project</TableCell>
+              <TableCell>Start Date</TableCell>
+              <TableCell>Completion Time</TableCell>
+              <TableCell>Approved</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {quotationGetData?.map((row, index) => (
+              <TableRow key={index + 1}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{row.project}</TableCell>
+                <TableCell>
+                  {new Date(row.start_date).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {new Date(row.completion_time).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {row.approved ? "Approved" : "Not Approved"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
+  </Box>
+</Modal>
+
     </div>
   );
 }

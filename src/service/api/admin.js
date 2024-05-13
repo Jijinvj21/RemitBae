@@ -6,7 +6,7 @@ import axios from "axios";
 // };
 
 
-const BASE_URL = 'http://192.168.0.102:8085';
+const BASE_URL = 'http://192.168.0.103:8085';
 // const MASRE_TABLE_BASE_URL = 'http://192.168.0.103:8088';
 
 
@@ -85,6 +85,7 @@ export const projectGetAPI = async () => {
   }
 };
 
+
 export const countryOptionsGetAPI = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/master/country/list`,);
@@ -98,7 +99,7 @@ export const countryOptionsGetAPI = async () => {
 
 export const workTypeOptionsGetAPI = async () => {
   try {
-    const response = await axios.get(`${MASRE_TABLE_BASE_URL}/master/worktype/list`,);
+    const response = await axios.get(`${BASE_URL}/master/worktype/list`,);
     console.log(response)
     return response.data.responseData
   } catch (error) {
@@ -222,6 +223,29 @@ export const categeryGetAPI = async () => {
 export const stockJournalCreateAPI = async (stockJournalAdd) => {
   try {
     const response = await axios.post(`${BASE_URL}/product/ismaster/create`,stockJournalAdd);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const quotationCreateAPI = async (quotationAdd) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/quotation/create`,quotationAdd);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+
+export const quotationGetAPI = async (id) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/quotation/get`,id);
     console.log(response)
     return response
   } catch (error) {

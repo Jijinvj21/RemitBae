@@ -73,12 +73,12 @@ console.log("first")
 
     }
     console.log("projectAdd",projectAdd)
-//     projectCreateAPI(projectAdd).then((data)=>{
-// console.log(data)
-//     })
-//     .catch((err)=>{
-// console.log(err)
-//     })
+    projectCreateAPI(projectAdd).then((data)=>{
+console.log(data)
+    })
+    .catch((err)=>{
+console.log(err)
+    })
 
 
   
@@ -97,8 +97,8 @@ console.log("first")
       onKeyDown={toggleDrawer(anchor, true)}
     >
       <Box sx={{ my: 3 }}>
-        <h2> Products </h2>
-        <h4> Manage Products to the inventory </h4>
+        <h2> Create project </h2>
+        {/* <h4> Manage Products to the inventory </h4> */}
       </Box>
         <Grid container spacing={2}>
           {arrOfInputs?.map((input, index) => {
@@ -138,7 +138,7 @@ console.log("first")
               }}
               id="custom-input-demo"
               options={workTypeOptions}
-            //   value={selectedProduct}
+              // value={selectedProduct}
             onChange={(e,newValue)=>setWorkTypeSelected(newValue.value)}
             componentsProps={{
                 popper: {
