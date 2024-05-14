@@ -44,6 +44,9 @@ function QuotationGeneratorPage() {
 
   const [inputs, setInputs] = useState([""]); // State to store  Terms and Conditions values
   const [inputsExclusion, setInputsExclusion] = useState([""]); // State to store  Terms and Conditions values
+  const [selectedClient, setSelectedClient] = useState({});
+  const [selectedProduct, setSelectedProduct] = useState({});
+
 
   const [leftInputs, setLeftInputs] = useState({
     quantity: "",
@@ -61,7 +64,7 @@ function QuotationGeneratorPage() {
   });
   const [formData, setFormData] = useState([]);
   // adding data form local storage
-  const [selectedAccessory, setSelectedAccessory] = useState({ id: '', name: '' });
+  const [selectedAccessory, setSelectedAccessory] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [accessoriesList, setAccessoriesList] = useState([]);
 
@@ -201,8 +204,9 @@ alert("add")
         setClientOptions(partyData);
       })
       .catch((err) => {
-        console.log(err);
+        console.log("err",err);
       });
+      setClientOptions([{ value: -1, label: "None" },{ value: -2, label: "Add" }]);
   };
   const getProjectData = () => {
     projectGetAPI()
@@ -262,15 +266,19 @@ alert("add")
       ...leftInputs,
       [name]: value,
     });
+    // handleAddData()
   };
   const handleAddData = () => {
     console.log("firsttest")
     const productDatas = {
       ...leftInputs,
       accessorieslist: accessoriesList,
-      product:selectedAccessory.selectedOptionObject?.id?selectedAccessory.selectedOptionObject?.id:selectedAccessory.selectedOptionObject?.value
+      product:`${selectedProduct.selectedOptionObject?.value}`,
+      productname:selectedProduct.selectedOptionObject?.label,
+      productunit:selectedProduct.selectedOptionObject?.unit
+
     };
-    console.log("handleAddData",productDatas)
+    console.log("handleAddData",selectedProduct)
     setProductData([...productData, productDatas]);
 
   };
@@ -301,7 +309,7 @@ alert("add")
       console.log("event.target",e.target.value,selectedOptionObject)
 
      
-      setSelectedAccessory({ selectedOptionObject });
+      setSelectedClient({ selectedOptionObject });
   };
   // const handleProjectname = (e) => {
   //   console.log("e.target", e.target.value === "-2");
@@ -346,16 +354,17 @@ alert("add")
     if (selectedAccessory.selectedOptionObject.value !== '') {
       console.log(selectedAccessory.selectedOptionObject)
       const accessory = {
-        id: selectedAccessory.selectedOptionObject.value,
+        accessories: `${selectedAccessory.selectedOptionObject.value}`,
         name: selectedAccessory.selectedOptionObject.label,
-        quantity: parseInt(quantity),
-        price:selectedAccessory.selectedOptionObject.amount,
+        quantity: quantity,
+        price:`${selectedAccessory.selectedOptionObject.amount}`,
         unit:selectedAccessory.selectedOptionObject.unit,
       };
       console.log("accessory",[...accessoriesList, accessory])
       setAccessoriesList([...accessoriesList, accessory]);
       setSelectedAccessory({});
       setQuantity(1);
+      // handleAddData()
     }
   };
   const handleProductNameChange = (event) => {
@@ -363,7 +372,7 @@ alert("add")
     console.log("event.target",event.target.value,selectedOptionObject)
 
    
-    setSelectedAccessory({ selectedOptionObject });
+    setSelectedProduct({ selectedOptionObject });
   };
 
   const leftArrOfInputs = [
@@ -424,6 +433,7 @@ alert("add")
       intputName: "clientname",
       label: "Client Name",
       inputOrSelect: "select",
+      // value:selectedClient,
       options: clientOptions,
     },
     {
@@ -432,7 +442,7 @@ alert("add")
       label: "Project Details",
       // inputOrSelect: "select",
       // options: projectOptions,
-      value:selectedAccessory?.selectedOptionObject?.project,
+      value:selectedClient?.selectedOptionObject?.project,
       disabled:"disabled"
     },
     {
@@ -476,7 +486,7 @@ alert("add")
 
         <div style={{ width: "510px", paddingBottom: "50px" }}>
           <p style={{ textAlign: "end", paddingBottom: "5px" }}>
-            QUOTATION NO: QT / 24-25/020{" "}
+            QUOTATION NO: QT / 24-25/020
           </p>
           <p style={{ textAlign: "end" }}>Date: 08/05/2024 </p>
         </div>
@@ -689,7 +699,8 @@ pdf.text(`${inputText1}`, 50, 100, {
   const hanldeAddDataToApi=()=>{
   console.log(productData)
    const quotationData= {
-      id:selectedAccessory.selectedOptionObject?.value,
+      id:selectedClient?.selectedOptionObject.value,
+      client:selectedClient?.selectedOptionObject.project,
       quote_amount:rightIputs.quoteamount,
       completation_time: rightIputs.completiontime,
       start_date:rightIputs.startdate,
@@ -697,13 +708,13 @@ pdf.text(`${inputText1}`, 50, 100, {
       product_info: productData,
       
   }
-  console.log("quotationData",productData)
-//     quotationCreateAPI(quotationData).then((data)=>{
-// console.log(data)
-//     })
-//     .catch((err)=>{
-//       console.log(err)
-//     })
+  console.log("quotationData",quotationData)
+    quotationCreateAPI(quotationData).then((data)=>{
+console.log(data)
+})
+.catch((err)=>{
+  console.log(err)
+})
   }
   
   return (
@@ -1054,7 +1065,8 @@ pdf.text(`${inputText1}`, 50, 100, {
               flexGrow: 1,
             }}
           >
-            {accessoriesList?.map((data, index) => (
+            {/* // {productData?.map((data, index) => { */}
+            {accessoriesList?.map((data, index) =>(
               <Grid
                 md={4}
                 item
@@ -1072,7 +1084,7 @@ pdf.text(`${inputText1}`, 50, 100, {
                   image={data.img}
                   qty={data.quantity}
                   unit={data.unit}
-                  rate={data.price}
+                  rate={data.amount}
                   amount={data.amount}
                 />
               </Grid>

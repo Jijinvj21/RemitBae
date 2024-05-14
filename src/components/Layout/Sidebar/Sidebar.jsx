@@ -86,7 +86,7 @@ function Sidebar() {
           <MenuItem
             icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
           >
-            Payment out
+            Payment
           </MenuItem>
         </NavLink>
         <NavLink className="navelink" to="/admin/creadit-note">
