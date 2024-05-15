@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "./ProjectDataPage.scss";
 import { Box, Modal, ToggleButton, ToggleButtonGroup } from "@mui/material";
@@ -29,13 +29,20 @@ const style = {
 };
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { generateRandom6Digit } from "../../utils/randomWithDate";
 
 function ProjectDataPage() {
+  const pdftableRef = useRef();
+  const pdftable = pdftableRef.current;
+
+  
   const [toggle, setToggle] = useState(true);
   const [projectData, setProjectData] = useState({});
   const [totalAmount, setTotalAmount] = useState(0); // State to hold the total amount
   const [quotationGetData, setQuotationGetData] = useState();
   const [open, setOpen] = useState(false);
+  const [pdfData, setPdfData] = useState({});
+
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -44,7 +51,7 @@ function ProjectDataPage() {
   useEffect(() => {
     quotationGetAPI({ id: location?.state })
       .then((data) => {
-        console.log("location", data.data.responseData[0]);
+        console.log("quotationGetAPI", data.data.responseData      );
         setQuotationGetData(data.data.responseData);
       })
       .catch((err) => {
@@ -53,6 +60,7 @@ function ProjectDataPage() {
 
     projectDataByIdAPI({ id: location?.state })
       .then((data) => {
+        console.log("projectDataByIdAPI",data.data.responseData)
         setProjectData(data.data.responseData);
         // Calculate total amount when project data is fetched
         const totalWithoutTax = data.data.responseData?.transaction.reduce(
@@ -201,13 +209,129 @@ function ProjectDataPage() {
   const handlepdfgenerate = () => {
     const pdfpagedata = document.querySelector("#pagedatatoshow");
     const pdf = new jsPDF("p", "pt", "a4", true);
-    pdf.html(pdfpagedata, {
+    pdf.html(pdftable, {
       callback: () => {
         const blobURL = pdf.output("bloburl");
         window.open(blobURL, "_blank");
       },
     });
   };
+  const handleGetDataFormArray= async(index)=>{
+alert(index)
+await setPdfData(quotationGetData[index])
+handlepdfgenerate()
+  }
+
+  const items = Array(54).fill();
+
+const chunkedItems = [];
+const chunkSize = 20;
+
+for (let i = 0; i < items.length; i += chunkSize) {
+  chunkedItems.push(items.slice(i, i + chunkSize));
+}
+const subtotal = pdfData?.product_info?.reduce((acc, curr) => acc + (curr.amount * curr.quantity), 0);
+
+// const calculateTax = (tots, rate) => {
+//   const taxAmounts = tots.map(tot => {
+//     const total = parseFloat(tot);
+//     return total * (rate / 100);
+//   });
+
+//   const totalTaxAmount = taxAmounts.reduce((acc, amount) => acc + amount, 0);
+
+//   return {
+//     cgstRate: rate / 2,
+//     cgstAmount: totalTaxAmount / 2,
+//     sgstRate: rate / 2,
+//     sgstAmount: totalTaxAmount / 2
+//   };
+// };
+
+
+// const transformedData = quotationGetData.map(quotation => {
+//   console.log("quotation",quotation[0])
+//   return quotation.map(product => {
+//     return product.product_info.reduce((acc, item) => {
+//       const existingItem = acc.find(elem => elem.hsn === item.hsn);
+//       if (existingItem) {
+//         existingItem.tot += parseFloat(item.amount);
+//       } else {
+//         const taxRatePercentage = item.tax_rate ? parseFloat(item.tax_rate.percentage.replace("%", "")) : 0;
+//         const { cgstRate, cgstAmount, sgstRate, sgstAmount } = calculateTax(
+//           product.product_info.filter(d => d.hsn === item.hsn).map(d => d.amount),
+//           taxRatePercentage
+//         );
+//         acc.push({
+//           hsn: item.hsn,
+//           tot: parseFloat(item.amount),
+//           cgstRate,
+//           cgstAmount,
+//           sgstRate,
+//           sgstAmount
+//         });
+//       }
+//       return acc;
+//     }, []);
+//   });
+// });
+
+// const transformedData = quotationGetData?.map(quotation => {
+//   console.log("quotation",quotation);
+//   return quotation?.product_info?.map(product => {
+//     console.log("product",product);
+//     return product?.reduce((acc, item) => {
+//       // Your processing logic here
+//       // const existingItem = acc?.find(elem => elem.hsn === item.hsn);
+//       return acc;
+//     }, []);
+//   });
+// });
+ 
+const data = quotationGetData?.flatMap(quotation => quotation?.product_info || []);
+
+const calculateTax = (total, rate) => {
+  const subtotal = parseFloat(total);
+  const taxAmount = subtotal * (rate / 100);
+  
+  return {
+    cgstRate: rate / 2,
+    cgstAmount: taxAmount / 2,
+    sgstRate: rate / 2,
+    sgstAmount: taxAmount / 2
+  };
+};
+
+
+// Check if data is defined before using reduce
+const transformedData = data ? data.reduce((acc, item) => {
+  const existingItemIndex = acc.findIndex(elem => elem.hsn === item.hsn);
+  if (existingItemIndex !== -1) {
+    const existingItem = acc[existingItemIndex];
+    existingItem.total += parseFloat(item.amount);
+    // Calculate tax for the product
+    const tax = calculateTax(item.amount, parseFloat(item.tax_rate.percentage));
+    existingItem.cgstAmount += tax.cgstAmount;
+    existingItem.sgstAmount += tax.sgstAmount;
+  } else {
+    const { cgstRate, cgstAmount, sgstRate, sgstAmount } = calculateTax(
+      item.amount,
+      parseFloat(item.tax_rate.percentage)
+    );
+    acc.push({
+      hsn: item.hsn,
+      total: parseFloat(item.amount),
+      cgstRate,
+      cgstAmount,
+      sgstRate,
+      sgstAmount
+    });
+  }
+  return acc;
+}, []) : [];
+
+
+
 
   return (
     <div className="projectDatapage-section">
@@ -354,8 +478,8 @@ function ProjectDataPage() {
                 marginTop: "10px",
                 fontSize: "20px",
               }}
-              // onClick={handleOpen}
-              onClick={handlepdfgenerate}
+              onClick={handleOpen}
+              
             >
               <h5>View quotation</h5>
             </div>
@@ -457,7 +581,7 @@ function ProjectDataPage() {
                           <RemoveRedEyeOutlinedIcon />
                         </TableCell>
                         <TableCell>
-                          <FileDownloadOutlinedIcon />
+                          <FileDownloadOutlinedIcon  onClick={()=>handleGetDataFormArray(index)}/>
                         </TableCell>
                       </TableRow>
                     );
@@ -468,7 +592,7 @@ function ProjectDataPage() {
           </Box>
         </Box>
       </Modal>
-      <div id="pagedatatoshow" style={{ margin: "8px", width: "580px" }}>
+      <div ref={pdftableRef} id="pagedatatoshow"className="offscreen" style={{ margin: "8px", width: "580px" ,  }}>
         <h6 style={{ textAlign: "center", marginBottom: "10px" }}>
           Tax Invoice
         </h6>
@@ -479,8 +603,10 @@ function ProjectDataPage() {
               style={{ display: "flex", flexDirection: "column", width: "50%" }}
             >
               <div style={{ display: "flex", borderBottom: "1px solid" }}>
-                <div style={{ width: "100px", height: "100px" }}></div>
-                <div className="address">
+                <div style={{ width: "100px", height: "100px" }}>
+                  <img src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png" alt="img" width={90} height={90}/>
+                </div>
+                <div className="address" >
                   <h6>BILTREE</h6>
                   <h6>54/3175</h6>
                   <h6>MANGHAT ARCADE</h6>
@@ -491,31 +617,32 @@ function ProjectDataPage() {
                   <h6>E-Mail:info@biltree.in</h6>
                 </div>
               </div>
-              <div style={{ borderBottom: "1px solid" }}>
+              <div style={{ borderBottom: "1px solid", marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px" }}>
                 <h6>Consignee (Ship to)</h6>
-                <h5>CRAFT Hospital & Reseach Center</h5>
-                <h6>VII/772,3,4 CRAFT HOSPITAL AND RESEARCH</h6>
-                <h6>CENTRE, kodungallur.p.o Chanthppura</h6>
-                <h6>Kodungallur,Thrissur</h6>
-                <h6 style={{ display: "flex", gap: "20px" }}>
+                <h5>{projectData?.project?.client_name}</h5>
+                <h6>{projectData?.project?.address1}</h6>
+                <h6>{projectData?.project?.address2}</h6>
+                <h6>{projectData?.project?.phonenumber}</h6>
+
+                <h6 style={{ display: "flex", gap: "20px",marginBottom:"3px" }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
                 </h6>
-                <h6 style={{ display: "flex", gap: "10px" }}>
+                {/* <h6 style={{ display: "flex", gap: "10px" }}>
                   <span>State Name</span> <span>: Kerala,Code:32</span>
-                </h6>
+                </h6> */}
               </div>
-              <div>
+              <div style={{ marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px"}}>
                 <h6>Buyer (Bill to)</h6>
-                <h5>CRAFT Hospital & Reseach Center</h5>
-                <h6>VII/772,3,4 CRAFT HOSPITAL AND RESEARCH</h6>
-                <h6>CENTRE, kodungallur.p.o Chanthppura</h6>
-                <h6>Kodungallur,Thrissur</h6>
-                <h6 style={{ display: "flex", gap: "20px" }}>
+                <h5>{projectData?.project?.client_name}</h5>
+                <h6>{projectData?.project?.address1}</h6>
+                <h6>{projectData?.project?.address2}</h6>
+                <h6>{projectData?.project?.phonenumber}</h6>
+                <h6 style={{ display: "flex", gap: "20px", }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
                 </h6>
-                <h6 style={{ display: "flex", gap: "10px" }}>
+                {/* <h6 style={{ display: "flex", gap: "10px" }}>
                   <span>State Name</span> <span>: Kerala,Code:32</span>
-                </h6>
+                </h6> */}
               </div>
             </div>
             <div className="right" style={{ width: "50%" }}>
@@ -526,7 +653,7 @@ function ProjectDataPage() {
                       style={{ borderLeft: "1px solid black", padding: "8px" }}
                     >
                       <h6>Invoice No</h6>
-                      <h6>BT/23-24/33;</h6>
+                      <h6>{ generateRandom6Digit(new Date())}</h6>
                     </td>
                     <td
                       style={{
@@ -536,7 +663,7 @@ function ProjectDataPage() {
                       }}
                     >
                       <h6>Date</h6>
-                      <h6>30-Dec-23</h6>
+                      <h6>{new Date().toLocaleDateString()}</h6>
                     </td>
                   </tr>
                 </thead>
@@ -652,7 +779,7 @@ function ProjectDataPage() {
                     <td
                       style={{ borderLeft: "1px solid black", padding: "8px" }}
                     >
-                      <h6 style={{ marginBottom: "65px" }}>
+                      <h6 style={{ marginBottom: "75px" }}>
                         Terms of Delivery
                       </h6>
                     </td>
@@ -662,7 +789,7 @@ function ProjectDataPage() {
             </div>
           </div>
           <div className="middlesection">
-            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+          <table style={{ borderCollapse: "collapse", width: "100%" }}>
               <thead
                 style={{
                   borderBottom: "1px solid black",
@@ -703,45 +830,41 @@ function ProjectDataPage() {
                 </tr>
               </thead>
               <tbody>
-                {Array(4)
-                  .fill()
-                  .map((_, index) => (
+                {pdfData?.product_info?.map((data, index) => (
                     <tr key={index}>
-                      <td>
+                      <td style={{paddingLeft:"3px",paddingBottom:"5px"}}>
                         
-                        <h6> 1</h6>
+                        <h6>{index+1}</h6>
                       </td>
-                      <td style={{ borderLeft: "1px solid black" }}>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6> Product A</h6>
+                        <h6>{data.product}</h6>
                       </td>
-                      <td style={{ borderLeft: "1px solid black" }}>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6> 1234</h6>
+                        <h6> </h6>
                       </td>
-                      <td style={{ borderLeft: "1px solid black" }}>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6> 10</h6>
+                        <h6>{data.quantity}</h6>
                       </td>
-                      <td style={{ borderLeft: "1px solid black" }}>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6> 20</h6>
+                        <h6> {data.amount}</h6>
                       </td>
-                      <td style={{ borderLeft: "1px solid black" }}>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6> Unit</h6>
+                        <h6> nos</h6>
                       </td>
-                      <td style={{ borderLeft: "1px solid black" }}>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6> 200</h6>
+                        <h6>{data.amount*data.quantity} </h6>
                       </td>
                     </tr>
                   ))}
-                {Array(10)
-                  .fill()
-                  .map((_, index) => (
+                {/* {pdfData?.product_info?.map((data, index) => (
                     <tr key={index}>
-                      <td> </td>
+                      <td>cv </td>
                       <td
                         style={{
                           textAlign: "end",
@@ -794,8 +917,8 @@ function ProjectDataPage() {
                         <h6> 200</h6>
                       </td>
                     </tr>
-                  ))}
-                <tr>
+                  ))} */}
+                {/* <tr>
                   <td> </td>
                   <td
                     style={{ textAlign: "end", borderLeft: "1px solid black" }}
@@ -825,7 +948,7 @@ function ProjectDataPage() {
                     
                     <h6> 200</h6>
                   </td>
-                </tr>
+                </tr> */}
                 <tr
                   style={{
                     borderTop: "1px solid black",
@@ -834,7 +957,7 @@ function ProjectDataPage() {
                 >
                   <td> </td>
                   <td
-                    style={{ textAlign: "end", borderLeft: "1px solid black" }}
+                    style={{ textAlign: "end", borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"1px" }}
                   >
                     
                     <h6> Total</h6>
@@ -845,10 +968,10 @@ function ProjectDataPage() {
                     
                   </td>
                   <td
-                    style={{ textAlign: "end", borderLeft: "1px solid black" }}
+                    style={{ textAlign: "end", borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"1px" }}
                   >
                     
-                    <h6> 3Nos</h6>
+                    <h6>{pdfData?.product_info?.length} Nos</h6>
                   </td>
                   <td
                     style={{ textAlign: "end", borderLeft: "1px solid black" }}
@@ -857,20 +980,21 @@ function ProjectDataPage() {
                     style={{ textAlign: "end", borderLeft: "1px solid black" }}
                   ></td>
                   <td
-                    style={{ textAlign: "end", borderLeft: "1px solid black" }}
+                    style={{ textAlign: "end", borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"1px" }}
                   >
                     
-                    <h6> 16,28,651.000</h6>
+                    <h6> {subtotal}</h6>
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </table> 
           </div>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               marginTop: "10px",
+              marginLeft:"2px"
             }}
           >
             <h6>Amount Chargeable (in words)</h6>
@@ -927,34 +1051,37 @@ function ProjectDataPage() {
     
   </thead>
   <tbody style={{ borderBottom: "1px solid black"}}>
-    <tr>
+  {transformedData?.map(item => (
+    <tr key={item?.hsn}>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 1234</h6>
+        <h6> {item?.hsn}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 200</h6>
+        <h6> {item?.total}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 10</h6>
+        <h6> {item?.cgstRate}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 10</h6>
+        <h6> {item?.cgstAmount}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 20</h6>
+        <h6> {item?.sgstRate}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 20</h6>
+        <h6> {item?.sgstAmount}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> 20</h6>
+        <h6>{ item?.total+item?.sgstAmount+item?.cgstAmount}</h6>
       </td>
     </tr>
+            ))}
+
   </tbody>
 </table>
 
 
-          <div style={{ display: "flex", gap: "10px", marginTop: "5px" }}>
+          <div style={{ display: "flex", gap: "10px", marginTop: "5px",marginLeft:"2px" }}>
             
             <h6>Tax Amount (in words)</h6>
             <h6>
@@ -982,7 +1109,7 @@ function ProjectDataPage() {
             <h6>SWIFT Code</h6>
           </div>
           <div style={{display:'flex'}}>
-            <div className="leftsection" style={{width:"50%"}}>
+            <div className="leftsection" style={{width:"50%",marginLeft:"2px",marginBottom:"3px"}}>
 <h6 style={{borderBottom:"1px solid black",width:"60px"}}>Declaration</h6>
 
 <h6>we seclare that this invoice shows the actual price of the goods described and that all particulars are true and currect</h6>

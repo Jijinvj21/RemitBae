@@ -569,3 +569,6 @@ getDataFromAPI()
 }
 
 export default ManageProductsPage;
+
+
+

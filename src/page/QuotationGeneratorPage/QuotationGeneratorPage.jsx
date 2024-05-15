@@ -62,7 +62,7 @@ function QuotationGeneratorPage() {
     completiontime: "",
     startdate: "",
   });
-  const [formData, setFormData] = useState([]);
+  // const [formData, setFormData] = useState([]);
   // adding data form local storage
   const [selectedAccessory, setSelectedAccessory] = useState({});
   const [quantity, setQuantity] = useState(1);
@@ -87,7 +87,6 @@ function QuotationGeneratorPage() {
     right: false,
   });
   const [productData, setProductData] = useState([]);
-  const [clientNameSelect, setClientNameSelect] = useState({});
 
 
   const handleChange = (e) => {
@@ -351,10 +350,10 @@ alert("add")
 
 
   const handleAddAccessory = async() => {
-    if (selectedAccessory.selectedOptionObject.value !== '') {
-      console.log(selectedAccessory.selectedOptionObject)
+    console.log(selectedAccessory.selectedOptionObject)
+    if (selectedAccessory.selectedOptionObject?.value !== '') {
       const accessory = {
-        accessories: `${selectedAccessory.selectedOptionObject.value}`,
+        accessories: `${selectedAccessory.selectedOptionObject?.value}`,
         name: selectedAccessory.selectedOptionObject.label,
         quantity: quantity,
         price:`${selectedAccessory.selectedOptionObject.amount}`,
@@ -481,14 +480,14 @@ alert("add")
         />
         <div style={{ marginLeft: "50px" }}>
           <p style={{ paddingBottom: "5px" }}>To,</p>
-          <p>jijin vj</p>
+          <p>{selectedClient?.selectedOptionObject?.label}</p>
         </div>
 
         <div style={{ width: "510px", paddingBottom: "50px" }}>
           <p style={{ textAlign: "end", paddingBottom: "5px" }}>
             QUOTATION NO: QT / 24-25/020
           </p>
-          <p style={{ textAlign: "end" }}>Date: 08/05/2024 </p>
+          <p style={{ textAlign: "end" }}>Date: {new Date().toLocaleDateString()} </p>
         </div>
         <div
           style={{ marginLeft: "50px", width: "500px", paddingBottom: "200px" }}
@@ -580,6 +579,7 @@ alert("add")
               var td = data.cell.raw;
               var img = td.getElementsByTagName("img")[0];
               var imageSize = 35; // Increase image size here
+              console.log("img.src",img.src)
               pdf.addImage(
                 img.src,
                 data.cell.x + 35,
@@ -591,20 +591,20 @@ alert("add")
           },
         });
   
-        pdf.addPage();
-        pdf.addImage(
-          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-          30,
-          0,
-          100, // Width
-          50 // Height
-        );
-        pdf.autoTable({
-          html: "#tablethree", // Pass the HTML structure directly
-          useCss: true,
-          startY: 50,
-          theme: "grid",
-        });
+        // pdf.addPage();
+        // pdf.addImage(
+        //   "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+        //   30,
+        //   0,
+        //   100, // Width
+        //   50 // Height
+        // );
+        // pdf.autoTable({
+        //   html: "#tablethree", // Pass the HTML structure directly
+        //   useCss: true,
+        //   startY: 50,
+        //   theme: "grid",
+        // });
   
         if (img) {
           const imageUrls = img.map((file) => URL.createObjectURL(file));
@@ -708,7 +708,7 @@ pdf.text(`${inputText1}`, 50, 100, {
       product_info: productData,
       
   }
-  console.log("quotationData",quotationData)
+  console.log("quotationData",productData)
     quotationCreateAPI(quotationData).then((data)=>{
 console.log(data)
 })
@@ -1066,29 +1066,56 @@ console.log(data)
             }}
           >
             {/* // {productData?.map((data, index) => { */}
-            {accessoriesList?.map((data, index) =>(
-              <Grid
-                md={4}
-                item
-                key={index}
-                sx={{
-                  mx: "auto",
-                  px: "10px",
-                  py: 1,
-                }}
-              >
-                <ProductInputCard
-                  // handleUpdate={handleUpdate}
-                  handleDelete={handleDelete}
-                  heading={data.name}
-                  image={data.img}
-                  qty={data.quantity}
-                  unit={data.unit}
-                  rate={data.amount}
-                  amount={data.amount}
-                />
-              </Grid>
-            ))}
+            {productData.map((product, productIndex) => (
+  <div key={productIndex}>
+    {/* Render Product Input Card for the main product */}
+    <Grid
+      md={4}
+      item
+      sx={{
+        mx: "auto",
+        px: "10px",
+        py: 1,
+      }}
+    >
+      <ProductInputCard
+        handleDelete={handleDelete}
+        heading={product.productname}
+        image={product.img} // Assuming you have an image property in productData
+        qty={product.quantity}
+        unit={product.unit}
+        rate={product.amount}
+        amount={product.amount}
+      />
+    </Grid>
+
+    {/* Map over accessorieslist of the current product */}
+    {product.accessorieslist.map((accessory, accessoryIndex) => (
+      <Grid
+        md={4}
+        item
+        key={`${productIndex}-${accessoryIndex}`} // Use a unique key combining productIndex and accessoryIndex
+        sx={{
+          mx: "auto",
+          px: "10px",
+          py: 1,
+        }}
+      >
+        <ProductInputCard
+          handleDelete={handleDelete}
+          heading={accessory.name}
+          image={accessory.img} // Assuming you have an image property in accessorieslist
+          qty={accessory.quantity}
+          unit={accessory.unit}
+          rate={accessory.price}
+          amount={accessory.amount}
+        />
+      </Grid>
+    ))}
+  </div>
+))}
+
+
           </Box>
         </Box>
       </Box>
@@ -1159,94 +1186,136 @@ console.log(data)
       
 
       <div>
-        <table
-          align="center"
-          id="quatationgeneratorttable"
-          style={{ backgroundColor: "white", display:"none" }}
-        >
-          <thead style={{ backgroundColor: "yellow" }}>
-            <tr>
-              <th style={{ border: "2px solid" }}>SL NO</th>
-              <th style={{ border: "2px solid" }}>SCOPE OF WORK</th>
-              <th style={{ border: "2px solid" }}>SPECIFICATIONS</th>
-              <th style={{ border: "2px solid" }}>AMOUNT</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array(10)
-              .fill()
-              .map((item, index) => (
-                <>
-                  <tr>
-                    <td rowspan="4">{index + 1}</td>
-                    <td rowspan="4">test</td>
-                    <td>
-                      ertyu iosd fghjkl;dfg hjuiodf dkjjg woftw iosd fghjkl;dfg
-                      hjuiodf dkjjg woftw i fg kjdgv
-                    </td>
-                    <td>78</td>
-                  </tr>
-                  <tr>
-                    <td>hardware</td>
-                    <td>546</td>
-                  </tr>
-                  <tr>
-                    <td>installation</td>
-                    <td>97456 </td>
-                  </tr>
-                  <tr>
-                    <td>accessories</td>
-                    <td>321</td>
-                  </tr>
-                </>
-              ))}
-            <tr style={{ backgroundColor: "green" }}>
-              <td colspan="3" style={{ textAlign: "end" }}>
-                TOTAL
-              </td>
-              <td>321</td>
-            </tr>
-          </tbody>
-        </table>
+      <table
+  align="center"
+  id="quatationgeneratorttable"
+  style={{ backgroundColor: "white", display: "none" }}
+>
+  <thead style={{ backgroundColor: "yellow" }}>
+    <tr>
+      <th style={{ border: "2px solid" }}>SL NO</th>
+      <th style={{ border: "2px solid" }}>SCOPE OF WORK</th>
+      <th style={{ border: "2px solid" }}>SPECIFICATIONS</th>
+      <th style={{ border: "2px solid" }}>AMOUNT</th>
+    </tr>
+  </thead>
+  <tbody>
+    {productData?.map((item, index) => {
+      // Calculate the subtotal for each row
+      const subtotal =
+        parseFloat(item.amount) +
+        parseFloat(item.hardware) +
+        parseFloat(item.installation) +
+        parseFloat(item.accessories);
+      return (
+        <>
+          <tr>
+            <td rowspan="4">{index + 1}</td>
+            <td rowspan="4">{item.productname}</td>
+            <td>{item.description}</td>
+            <td>{item.amount}</td>
+          </tr>
+          <tr>
+            <td>hardware</td>
+            <td>{item.hardware}</td>
+          </tr>
+          <tr>
+            <td>installation</td>
+            <td>{item.installation} </td>
+          </tr>
+          <tr>
+            <td>accessories</td>
+            <td>{item.accessories}</td>
+          </tr>
+         
+        </>
+      );
+    })}
+    {/* Calculate and display the total */}
+    <tr style={{ backgroundColor: "green" }}>
+      <td colSpan="3" style={{ textAlign: "end" }}>
+        TOTAL
+      </td>
+      <td>
+        {/* Calculate the total by summing up subtotals */}
+        {productData.reduce((acc, item) => {
+          return (
+            acc +
+            parseFloat(item.amount) +
+            parseFloat(item.hardware) +
+            parseFloat(item.installation) +
+            parseFloat(item.accessories)
+          );
+        }, 0)}
+      </td>
+    </tr>
+  </tbody>
+</table>
+
       </div>
 
       <div>
-        <table id="accessoriestable" style={{ backgroundColor: "white",display:"none"  }}>
+    <table id="accessoriestable" style={{ backgroundColor: "white",display:"none"  }}>
           <thead>
             <tr>
               <th
                 colspan="3"
                 style={{ backgroundColor: "blue", border: "1px solid" }}
               >
-                ACCESSORIES LIST OF KITCHEN
+                ACCESSORIES LIST
               </th>
             </tr>
             <tr style={{ backgroundColor: "yellow" }}>
-              <th style={{ border: "1px solid" }}>SL No:</th>
+              <th style={{ border: "1px solid" }}>Product name</th>
+              <th style={{ border: "1px solid" }}>Product Name</th>
+
+              
               <th style={{ border: "1px solid" }}>Specification</th>
               <th style={{ border: "1px solid" }}>Image</th>
             </tr>
           </thead>
-          <tbody>
-            {Array(2)
-              .fill()
-              .map(() => (
-                <tr key={Math.random()}>
-                  <td>1</td>
-                  <td>SANDEM BOX</td>
-                  <td style={{ display: "flex", justifyContent: "center" }}>
-                    <img
-                      src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
-                      alt="Test image"
-                      height="50"
-                      width="100"
-                    />
-                  </td>
-                </tr>
-              ))}
-          </tbody>
+         
+      <tbody>
+                        {productData.map((item, index) => {
+                          console.log(item)
+                          return(
+                            <div key={index}>
+                                <tr>
+                                    <td>{item.productname}</td>
+                                   
+                                    <td>{item.amount}</td>
+                                    <td>{item.productunit}</td>
+                                </tr>
+                                 {   item.accessorieslist.map((accessory, i) => (
+                                        <tr key={`${index}-${i}`}>
+                                            <td>{accessory.name}</td>
+                                           
+                                            <td>{accessory.unit}</td>
+                                            <td style={{ display: "flex", justifyContent: "center" }}>
+                <img
+                  src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
+                  alt="Test image"
+                  height="50"
+                  width="100"
+                />
+              </td>                                                            </tr>
+                                    ))
+                                }
+                            </div>
+                        )})}
+                    </tbody>
+
+
+
+
+
+
+
         </table>
       </div>
+
+
+      
       <div>
         <table id="tablethree" style={{ backgroundColor: "white",display:"none"  }}>
           <thead style={{ backgroundColor: "yellow" }}>
