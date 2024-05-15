@@ -7,6 +7,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useEffect, useRef, useState } from "react";
+import React from 'react';
+
 import {
   clientDataGetAPI,
   productGetAPI,
@@ -16,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { renderToString } from "react-dom/server";
 import AddClientDrawer from "../../components/AddClientDrawer/AddClientDrawer";
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -528,7 +531,7 @@ alert("add")
   )
 
   const handleGenerate = async () => {
-    const pdftable = document.querySelector("#quatationgeneratorttable");
+    const pdftable = document.querySelector("#ALLPRODUCTtable");
     const pdflastpage = document.querySelector("#exclusion-terms-and-condition");
   
     const pdf = new jsPDF("p", "pt", "a4", true);
@@ -544,52 +547,51 @@ alert("add")
         );
         pdf.autoTable({
           html: pdftable, // Pass the HTML structure directly
-          useCss: true,
-          startY: 50,
-          theme: "grid",
+        
+          
         });
   
-        pdf.addPage();
-        pdf.addImage(
-          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-          30,
-          0,
-          100, // Width
-          50 // Height
-        );
-        pdf.autoTable({
-          html: "#accessoriestable", // Pass the HTML structure directly
-          useCss: true,
-          startY: 50,
-          theme: "grid",
-          bodyStyles: { minCellHeight: 15 },
-          columnStyles: {
-            2: {
-              cellWidth: 100,
-              valign: "center",
-              halign: "center",
-              minCellHeight: 50,
-              fontSize: 1,
-              textColor: "white",
-            },
-          },
-          didDrawCell: function (data) {
-            console.log("didDrawCell", data.cell);
-            if (data.column.index === 2 && data.cell.section === "body") {
-              var td = data.cell.raw;
-              var img = td.getElementsByTagName("img")[0];
-              var imageSize = 35; // Increase image size here
-              console.log("img.src",img.src)
-              pdf.addImage(
-                img.src,
-                data.cell.x + 35,
-                data.cell.y + 10,
-                imageSize, // Width
-                imageSize // Height
-              );
-            }
-          },
-        });
+        // pdf.addPage();
+        // pdf.addImage(
+        //   "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+        //   30,
+        //   0,
+        //   100, // Width
+        //   50 // Height
+        // );
+        // pdf.autoTable({
+        //   html: "#accessoriestable", // Pass the HTML structure directly
+        //   useCss: true,
+        //   startY: 50,
+        //   theme: "grid",
+        //   bodyStyles: { minCellHeight: 15 },
+        //   columnStyles: {
+        //     2: {
+        //       cellWidth: 100,
+        //       valign: "center",
+        //       halign: "center",
+        //       minCellHeight: 50,
+        //       fontSize: 1,
+        //       textColor: "white",
+        //     },
+        //   },
+        //   didDrawCell: function (data) {
+        //     console.log("didDrawCell", data.cell);
+        //     if (data.column.index === 2 && data.cell.section === "body") {
+        //       var td = data.cell.raw;
+        //       var img = td.getElementsByTagName("img")[0];
+        //       var imageSize = 35; // Increase image size here
+        //       console.log("img.src",img.src)
+        //       pdf.addImage(
+        //         img.src,
+        //         data.cell.x + 35,
+        //         data.cell.y + 10,
+        //         imageSize, // Width
+        //         imageSize // Height
+        //       );
+        //     }
+        //   },
+        // });
   
         // pdf.addPage();
         // pdf.addImage(
@@ -1185,134 +1187,40 @@ console.log(data)
       </div>
       
 
-      <div>
-      <table
-  align="center"
-  id="quatationgeneratorttable"
-  style={{ backgroundColor: "white", display: "none" }}
->
-  <thead style={{ backgroundColor: "yellow" }}>
+      <table id='ALLPRODUCTtable'>
+  <thead>
     <tr>
-      <th style={{ border: "2px solid" }}>SL NO</th>
-      <th style={{ border: "2px solid" }}>SCOPE OF WORK</th>
-      <th style={{ border: "2px solid" }}>SPECIFICATIONS</th>
-      <th style={{ border: "2px solid" }}>AMOUNT</th>
+      <th>Product Name</th>
+      <th>Quantity</th>
+      <th>Price</th>
+      <th>Unit</th>
+      <th>Image</th>
     </tr>
   </thead>
   <tbody>
-    {productData?.map((item, index) => {
-      // Calculate the subtotal for each row
-      const subtotal =
-        parseFloat(item.amount) +
-        parseFloat(item.hardware) +
-        parseFloat(item.installation) +
-        parseFloat(item.accessories);
-      return (
-        <>
-          <tr>
-            <td rowspan="4">{index + 1}</td>
-            <td rowspan="4">{item.productname}</td>
-            <td>{item.description}</td>
-            <td>{item.amount}</td>
+    {productData.map((item, index) => (
+      <React.Fragment key={index}>
+        <tr>
+          <td>{item.productname}</td>
+          <td>{item.quantity}</td>
+          <td>{item.amount}</td>
+          <td>{item.productunit}</td>
+          <td></td> 
+        </tr>
+        {item.accessorieslist.map((accessory, i) => (
+          <tr key={`${index}-${i}`}>
+            <td>{accessory.name}</td>
+            <td>{accessory.quantity}</td>
+            <td>{accessory.price}</td>
+            <td>{accessory.unit}</td>
+            <td></td> 
           </tr>
-          <tr>
-            <td>hardware</td>
-            <td>{item.hardware}</td>
-          </tr>
-          <tr>
-            <td>installation</td>
-            <td>{item.installation} </td>
-          </tr>
-          <tr>
-            <td>accessories</td>
-            <td>{item.accessories}</td>
-          </tr>
-         
-        </>
-      );
-    })}
-    {/* Calculate and display the total */}
-    <tr style={{ backgroundColor: "green" }}>
-      <td colSpan="3" style={{ textAlign: "end" }}>
-        TOTAL
-      </td>
-      <td>
-        {/* Calculate the total by summing up subtotals */}
-        {productData.reduce((acc, item) => {
-          return (
-            acc +
-            parseFloat(item.amount) +
-            parseFloat(item.hardware) +
-            parseFloat(item.installation) +
-            parseFloat(item.accessories)
-          );
-        }, 0)}
-      </td>
-    </tr>
+        ))}
+      </React.Fragment>
+    ))}
   </tbody>
 </table>
 
-      </div>
-
-      <div>
-    <table id="accessoriestable" style={{ backgroundColor: "white",display:"none"  }}>
-          <thead>
-            <tr>
-              <th
-                colspan="3"
-                style={{ backgroundColor: "blue", border: "1px solid" }}
-              >
-                ACCESSORIES LIST
-              </th>
-            </tr>
-            <tr style={{ backgroundColor: "yellow" }}>
-              <th style={{ border: "1px solid" }}>Product name</th>
-              <th style={{ border: "1px solid" }}>Product Name</th>
-
-              
-              <th style={{ border: "1px solid" }}>Specification</th>
-              <th style={{ border: "1px solid" }}>Image</th>
-            </tr>
-          </thead>
-         
-      <tbody>
-                        {productData.map((item, index) => {
-                          console.log(item)
-                          return(
-                            <div key={index}>
-                                <tr>
-                                    <td>{item.productname}</td>
-                                   
-                                    <td>{item.amount}</td>
-                                    <td>{item.productunit}</td>
-                                </tr>
-                                 {   item.accessorieslist.map((accessory, i) => (
-                                        <tr key={`${index}-${i}`}>
-                                            <td>{accessory.name}</td>
-                                           
-                                            <td>{accessory.unit}</td>
-                                            <td style={{ display: "flex", justifyContent: "center" }}>
-                <img
-                  src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
-                  alt="Test image"
-                  height="50"
-                  width="100"
-                />
-              </td>                                                            </tr>
-                                    ))
-                                }
-                            </div>
-                        )})}
-                    </tbody>
-
-
-
-
-
-
-
-        </table>
-      </div>
 
 
       
