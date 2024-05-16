@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { renderToString } from "react-dom/server";
 import AddClientDrawer from "../../components/AddClientDrawer/AddClientDrawer";
 
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -244,7 +245,8 @@ alert("add")
           label: entry.name,
           unit:entry.unit,
           amount:entry.rate,
-          image:entry.image
+          image:entry.image,
+          unit_id:entry.unit_id
         }));
         productsData.unshift({ value: -1, label: "None" });
 
@@ -298,7 +300,7 @@ alert("add")
   const handleInputChange = (index, value) => {
     console.log(index);
     const newInputs = [...inputs];
-    newInputs[index] = value;
+    newInputs[index] = '\u2022 ' +value;
     setInputs(newInputs);
     console.log(newInputs);
   };
@@ -325,7 +327,7 @@ alert("add")
   const handleExclusionInputChange = (index, value) => {
     console.log(index);
     const newInputs = [...inputsExclusion];
-    newInputs[index] = value;
+    newInputs[index] = '\u2022 ' +value;
     setInputsExclusion(newInputs);
     console.log(newInputs);
   };
@@ -362,7 +364,9 @@ alert("add")
         quantity: quantity,
         price:`${selectedAccessory.selectedOptionObject.amount}`,
         unit:selectedAccessory.selectedOptionObject.unit,
-        image:selectedAccessory.selectedOptionObject.image
+        image:selectedAccessory.selectedOptionObject.image,
+        unit_id:selectedAccessory.selectedOptionObject.unit_id
+
       };
       console.log("accessory",[...accessoriesList, accessory])
       setAccessoriesList([...accessoriesList, accessory]);
@@ -534,34 +538,58 @@ alert("add")
   )
 
   const handleGenerate = async () => {
+    
     const pdftable = document.querySelector("#ALLPRODUCTtable");
     const pdflastpage = document.querySelector("#exclusion-terms-and-condition");
-  
+    
     const pdf = new jsPDF("p", "pt", "a4", true);
+    const OPTITimesRoman = '../../assets/Fonts/OPTITimes-Roman.otf'; // Path to font file
+
+    // Embed font using addFileToVFS and addFont
+    pdf.addFileToVFS('OPTITimes-Roman.otf', OPTITimesRoman); // 'Metropolis-Regular.ttf' is the name you want to give to the font within the PDF
+    pdf.addFont('OPTITimes-Roman.otf', 'OPTITimesRomanfont', 'normal');
+    
+    pdf.setFont('OPTITimesRomanfont'); // Set the font before adding text
+
+
     pdf.html(pageone, {
       callback: async () => { // Make the callback function async
         pdf.addPage();
         pdf.addImage(
           "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
           30,
-          0,
+          30,
           100, // Width
-          50 // Height
+          60 // Height
         );
         pdf.autoTable({
           html: pdftable, // Pass the HTML structure directly
-          startY: 55,
+          startY: 100,
+          useCss:true,
           theme: "grid",
           headStyles: {
             fillColor: "yellow",
             textColor: "black",
+            lineWidth:2,
+            lineColor:"black",
+            // cellWidth:200
+            
+          },
+          columnStyles: {
+            0: {cellWidth: 100},
+            1: {cellWidth: 335},
+            2: {cellWidth: 80},
           },
           styles: {
+            lineWidth:1,
+            lineColor:"black",
             cellPadding: 5,
-            fontSize: 12,
-            valign: 'middle',
-            halign: 'center' // Set horizontal alignment to center
+            fontFamily:"Inter",
+            fontSize: 10,
+            // valign: 'middle',
+            // halign: 'center' // Set horizontal alignment to center
           },
+          
           // didDrawCell: function (data) {
           //   console.log("didDrawCell", data?.cell?.raw);
           //   if (data.column.index === 2 && data.cell.section === "body") {
@@ -688,7 +716,7 @@ alert("add")
           50 // Height
         ):""
   
-        const width = 305;
+        const width = 555;
         const padding = 40;
         const maxWidth = width - 2 * padding;
 
@@ -712,14 +740,27 @@ pdf.text(`${inputText1}`, 50, 100, {
 
         pdf.setFontSize(15);
   console.log("TERMS AND CONDITIONS",inputs[0]=='',inputs.length)
-  inputs[0]!=='' && pdf.text("TERMS AND CONDITIONS", padding, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+70, {
+  inputs[0]!=='' && pdf.text("TERMS AND CONDITIONS", padding, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+95, {
           maxWidth,
           lineHeightFactor: 1.5,
         });
         pdf.setFontSize(12);
         const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
-        pdf.text(`${inputText}`, 50, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+90, {
+        pdf.text(`${inputText}`, 50, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+115, {
           maxWidth,
+          lineHeightFactor: 1.5,
+          align: "left",
+        });
+        pdf.setFont("Inter","bold");
+        pdf.setFontSize(10);
+
+        pdf.text(`BILTREE - 1ST FLOOR MANGHAT ARCADE , KALOOR KADAVANTRA ROAD , KADAVANTRA - 20`, 65, 660, {
+          maxWidth:"1000",
+          lineHeightFactor: 1.5,
+          align: "left",
+        });
+        pdf.text(`PHONE : + 91 9447519770`, 245, 700, {
+          maxWidth:"1000",
           lineHeightFactor: 1.5,
           align: "left",
         });
@@ -740,6 +781,7 @@ pdf.text(`${inputText1}`, 50, 100, {
       start_date:rightIputs.startdate,
       terms_and_conditions: inputs,
       product_info: productData,
+      exclusion:inputsExclusion,
       
   }
   console.log("quotationData",productData)
@@ -750,6 +792,15 @@ console.log(data)
   console.log(err)
 })
   }
+
+  const grandTotal = productData.reduce((total, item) => {
+    const itemTotal =
+      parseInt(item.amount||0) +
+      parseInt(item.hardware||0) +
+      parseInt(item.installation||0) +
+      parseInt(item.accessories||0);
+    return total + itemTotal;
+  }, 0);
   
   return (
     <Box className="quotation-generator-page">
@@ -1223,52 +1274,75 @@ console.log(data)
       </div>
       
 
-      <table className="offscreen" id='ALLPRODUCTtable'>
-      <thead>
-  <tr style={{textAlign:"center"}}>
-    <th >Area of work</th>
-    <th>Specification</th>
-    <th>Amount</th>
-  </tr>
+      <table className="offscreen" id='ALLPRODUCTtable' style={{backgroundColor:"white"}}>
+      <thead >
+ 
 </thead>
-<tbody>
+<tbody >
   {productData.map((item, index) => (
     <React.Fragment key={index}>
+       <tr style={{textAlign:"center",backgroundColor:"#FFFF00"}}>
+    <th style={{width: "100px",paddingBottom:"5px",paddingTop:"5px"}} >AREA OF WORK</th>
+    <th  style={{paddingBottom:"5px",paddingTop:"5px"}}>SPECIFICATION</th>
+    <th  style={{paddingBottom:"5px",paddingTop:"5px"}}>AMOUNT</th>
+  </tr>
       <tr>
-        <td rowspan="4">{item.productname}</td>
-        <td>{item.description}</td>
-        <td>{item.amount}</td>
+  <td style={{textAlign:"center"}} rowspan="4">{item.productname}</td>
+  <td style={{ paddingLeft:"5px",paddingRight:"5px",  paddingBottom: "5px", paddingTop: "5px"}}>{item.description}</td>
+  <td style={{ paddingLeft:"5px",paddingRight:"5px",  paddingBottom: "5px", paddingTop: "5px"}}>{item.amount}</td>
+</tr>
+      <tr>
+        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >hardware</td>
+        <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.hardware}</td>
       </tr>
       <tr>
-        <td>hardware</td>
-        <td>{item.hardware}</td>
+        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >installation</td>
+        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.installation}</td>
       </tr>
       <tr>
-        <td>installation</td>
-        <td>{item.installation}</td>
+        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >accessories</td>
+        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.accessories}</td>
+      </tr>
+
+      <tr>
+      <td style={{backgroundColor:"#00B050",paddingBottom:"5px",paddingTop:"5px",paddingRight:"5px",fontWeight:"800",textAlign:"right " }} colspan="2"> TOTAL  </td>
+      <th style={{backgroundColor:"#00B050",paddingBottom:"5px",paddingTop:"5px",paddingRight:"5px",fontWeight:"800",textAlign:"right " }}>{
+        parseInt(item.amount||0)+parseInt(item.hardware||0)+parseInt(item.installation||0)+parseInt(item.accessories||0)
+      }</th>
+      </tr>
+      
+      <tr>
+      <td colSpan="12"> </td>
       </tr>
       <tr>
-        <td>accessories</td>
-        <td>{item.accessories}</td>
+      <td style={{backgroundColor:"#00B0F0",paddingBottom:"5px",paddingTop:"5px",fontWeight:"800",textAlign:"center "}} colSpan="12"> ACCESSORIES LIST OF  {item.productname.toUpperCase()} </td>
       </tr>
-      <tr>
-        <td colSpan="12"> Accessories list of {item.productname} </td>
-      </tr>
-      <tr>
-        <td> SL NO </td>
-        <td>Specification  </td>
-        <td> Image </td>
+      <tr style={{backgroundColor:"#FFFF00"}}>
+        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> SL NO </td>
+        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}>SPECIFICATION  </td>
+        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> IMAGE </td>
       </tr>
       {item.accessorieslist.map((accessory, i) => (
         <tr key={`${index}-${i}`}>
-          <td>{index+1}</td>
-          <td>{accessory.name}</td>
-          <td></td>
+          <td  style={{paddingBottom:"5px",paddingTop:"5px",textAlign:"center"}}>{index+1}</td>
+          <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}}>{accessory.name}</td>
+          <td  style={{paddingBottom:"5px",paddingTop:"5px"}}></td>
           
         </tr>
+        
       ))}
+     <tr>
+      <td colSpan="12"> </td>
+     
+
+      </tr>
+      
     </React.Fragment>
   ))}
+   <tr>
+      <td style={{backgroundColor:"#FF0000",paddingBottom:"5px",paddingTop:"5px",paddingRight:"10px",fontWeight:"800",textAlign:"right ",color:"white",border:"1px solid black" }} colspan="2"> GRAND TOTAL  </td>
+      <th style={{backgroundColor:"#FF0000",paddingBottom:"5px",paddingTop:"5px",paddingRight:"10px",fontWeight:"800",textAlign:"right ", color:"white",border:"1px solid black"}}>{grandTotal}</th>
+      </tr>
 </tbody>
 
 

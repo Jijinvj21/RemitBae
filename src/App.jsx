@@ -16,7 +16,6 @@ import PaymenyIn from "./page/PaymenyIn/PaymenyIn";
 import CreditNotePage from "./page/CreditNotePage/CreditNotePage";
 import ProjectDataPage from "./page/ProjectDataPage/ProjectDataPage";
 import PaymenyOut from "./page/PaymentOut/PaymentOut";
-
 function App() {
   return (
     <BrowserRouter>
