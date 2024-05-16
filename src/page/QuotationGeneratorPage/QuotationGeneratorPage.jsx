@@ -547,7 +547,12 @@ alert("add")
         );
         pdf.autoTable({
           html: pdftable, // Pass the HTML structure directly
-        
+          startY: 55,
+          theme: "grid",
+          headStyles: {
+            fillColor: "black",
+            textColor: "white",
+          },
           
         });
   
@@ -662,6 +667,12 @@ alert("add")
         const padding = 40;
         const maxWidth = width - 2 * padding;
 
+        const MetropolisRegularFont = '../../assets/Fonts/Metropolis-Regular.otf'; // Path to font file
+
+        // Embed font using addFileToVFS and addFont
+        pdf.addFileToVFS('Metropolis-Regular.ttf', MetropolisRegularFont); // 'Metropolis-Regular.ttf' is the name you want to give to the font within the PDF
+        pdf.addFont('Metropolis-Regular.ttf', 'custom', 'normal');
+        pdf.setFont('MetropolisRegularFont');
 
         pdf.setFontSize(15);
 
@@ -1187,7 +1198,7 @@ console.log(data)
       </div>
       
 
-      <table id='ALLPRODUCTtable'>
+      <table className="offscreen" id='ALLPRODUCTtable'>
   <thead>
     <tr>
       <th>Product Name</th>

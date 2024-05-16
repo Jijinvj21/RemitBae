@@ -1057,22 +1057,22 @@ const transformedData = data ? data.reduce((acc, item) => {
         <h6> {item?.hsn}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> {item?.total}</h6>
+        <h6> {item?.total.toFixed(2)}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
         <h6> {item?.cgstRate}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> {item?.cgstAmount}</h6>
+        <h6> {item?.cgstAmount.toFixed(2)}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
         <h6> {item?.sgstRate}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6> {item?.sgstAmount}</h6>
+        <h6> {item?.sgstAmount.toFixed(2)}</h6>
       </td>
       <td style={{ borderLeft: "1px solid black" }}>
-        <h6>{ item?.total+item?.sgstAmount+item?.cgstAmount}</h6>
+        <h6>{ (item?.total+item?.sgstAmount+item?.cgstAmount).toFixed(2)}</h6>
       </td>
     </tr>
             ))}
