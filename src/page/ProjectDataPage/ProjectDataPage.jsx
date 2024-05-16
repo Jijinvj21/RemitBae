@@ -338,22 +338,19 @@ const transformedData = data ? data.reduce((acc, item) => {
       <div className="top-section">
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <div className="data_show_card">
-            <p>Quotation Cost</p>
-            <div className="quotation-data">
-              {/* {quotationGetData && ( */}
-              <p>
+            <p>Quotation Value</p>
+            <p>
                 {quotationGetData?.find((quotation) => quotation.approved)
                   ?.quote_amount || 0}
               </p>
-              {/* )} */}
-            </div>
+           
           </div>
           <div className="data_show_card">
-            <p>Expence</p>
+            <p>Purchase / Expence</p>
             <h6>{projectData?.total_expenses || 0}</h6>
           </div>
           <div className="data_show_card">
-            <p>Total</p>
+            <p>Margin</p>
             <h6>{totalAmount}</h6> {/* Display total amount */}
           </div>
         </div>

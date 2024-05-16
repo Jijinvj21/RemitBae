@@ -253,3 +253,18 @@ export const quotationGetAPI = async (id) => {
     throw error.response.data;
   }
 };
+
+export const imageUploadtAPI = async (img) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/upload/image`,img, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};

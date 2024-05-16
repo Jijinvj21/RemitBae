@@ -1,19 +1,16 @@
 
-@font-face {
-    font-family: "MetropolisRegular";
-    src: local("MetropolisRegular"),
-      url("../../assets/Fonts/Metropolis-Regular.otf") format("opentype");
-    font-weight: normal;
-  }
+
 #quatationgenerator{
-    font-family: "MetropolisRegular";
+    font-family: "Inter" !important;
+
     font-weight: 600;
 }
 #ALLPRODUCTtable{
-    font-family: "MetropolisRegular";
+    font-family: "Inter" !important;
     font-weight: 600;
 }
 .quotation-generator-page{
+    font-family: "Inter" !important;
     // background: var(--bgwhite);
   border-radius: 10px;
   padding: 2px;

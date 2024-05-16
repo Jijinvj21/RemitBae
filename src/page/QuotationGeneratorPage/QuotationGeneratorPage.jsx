@@ -235,7 +235,7 @@ alert("add")
   const getProductsData = () => {
     productGetAPI()
       .then((data) => {
-        console.log("getProjectData:", data);
+        console.log("productGetAPI:", data);
         // setTaxOptions(data);
 
         // Transform data and set it to state
@@ -244,6 +244,7 @@ alert("add")
           label: entry.name,
           unit:entry.unit,
           amount:entry.rate,
+          image:entry.image
         }));
         productsData.unshift({ value: -1, label: "None" });
 
@@ -353,7 +354,7 @@ alert("add")
 
 
   const handleAddAccessory = async() => {
-    console.log(selectedAccessory.selectedOptionObject)
+    console.log("selectedAccessoryselectedOptionObject",selectedAccessory.selectedOptionObject)
     if (selectedAccessory.selectedOptionObject?.value !== '') {
       const accessory = {
         accessories: `${selectedAccessory.selectedOptionObject?.value}`,
@@ -361,10 +362,11 @@ alert("add")
         quantity: quantity,
         price:`${selectedAccessory.selectedOptionObject.amount}`,
         unit:selectedAccessory.selectedOptionObject.unit,
+        image:selectedAccessory.selectedOptionObject.image
       };
       console.log("accessory",[...accessoriesList, accessory])
       setAccessoriesList([...accessoriesList, accessory]);
-      setSelectedAccessory({});
+      setSelectedAccessory();
       setQuantity(1);
       // handleAddData()
     }
@@ -420,6 +422,7 @@ alert("add")
       intputName: " accessorieslist",
       label: " Accessories list",
       inputOrSelect: "select",
+      value:selectedAccessory,
       options: productsOptions,
     },
     {
@@ -495,13 +498,13 @@ alert("add")
         <div
           style={{ marginLeft: "50px", width: "500px", paddingBottom: "200px" }}
         >
-          <p style={{ paddingBottom: "5px" }}>
+          <p style={{ paddingBottom: "5px",lineHeight:"18px" }}>
             {" "}
             We thank you for giving us an opportunity to quote for the mentioned
             subject. With reference to your enquiry, please find.
           </p>
           <p style={{ paddingBottom: "5px" }}>Sir,</p>
-          <p style={{ paddingBottom: "5px" }}>
+          <p style={{ paddingBottom: "5px",lineHeight:"18px",fontFamily:"Inter" }}>
             Biltree was founded on the principle of providing quality work with
             an emphasis on cost- effectiveness and the highest quality work for
             its prospective clients in the quickest way possible. Our strength
@@ -550,10 +553,32 @@ alert("add")
           startY: 55,
           theme: "grid",
           headStyles: {
-            fillColor: "black",
-            textColor: "white",
+            fillColor: "yellow",
+            textColor: "black",
           },
-          
+          styles: {
+            cellPadding: 5,
+            fontSize: 12,
+            valign: 'middle',
+            halign: 'center' // Set horizontal alignment to center
+          },
+          // didDrawCell: function (data) {
+          //   console.log("didDrawCell", data?.cell?.raw);
+          //   if (data.column.index === 2 && data.cell.section === "body") {
+          //     var td = data.cell.raw;
+          //     console.log("didDrawCell2", td.getElementsByTagName("td"));
+          //     var img = td.getElementsByTagName("img")[0];
+          //     var imageSize = 35; // Increase image size here
+          //     // console.log("img.src",img.src);
+          //     pdf.addImage(
+          //       "https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png",
+          //       data.cell.x + 5,
+          //       data.cell.y + 5,
+          //       imageSize, // Width
+          //       imageSize // Height
+          //     );
+          //   }
+          // }
         });
   
         // pdf.addPage();
@@ -667,12 +692,8 @@ alert("add")
         const padding = 40;
         const maxWidth = width - 2 * padding;
 
-        const MetropolisRegularFont = '../../assets/Fonts/Metropolis-Regular.otf'; // Path to font file
-
-        // Embed font using addFileToVFS and addFont
-        pdf.addFileToVFS('Metropolis-Regular.ttf', MetropolisRegularFont); // 'Metropolis-Regular.ttf' is the name you want to give to the font within the PDF
-        pdf.addFont('Metropolis-Regular.ttf', 'custom', 'normal');
-        pdf.setFont('MetropolisRegularFont');
+       
+        pdf.setFont('Inter');
 
         pdf.setFontSize(15);
 
@@ -995,18 +1016,20 @@ console.log(data)
             ))}
           </Box>
           <Box sx={{ display: "flex",alignItems:"center", gap: 2 }}>
-            {leftArrOfInputs.slice(7,9).map((input, index) => (
+            {leftArrOfInputs.slice(7,9).map((input, index) => {
+              console.log(input)
+              return(
               <InputComponent
                 key={index}
                 handleChange={input.handleChange}
                 label={input.label}
                 type={input.type}
-                value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                value={input?.selectedOptionObject?.value} // Ensure the value is correctly passed
                 intputName={input.intputName}
                 inputOrSelect={input.inputOrSelect}
                 options={input.options}
               />
-            ))}
+            )})}
                <Button
               type="submit"
               variant="contained"
@@ -1079,7 +1102,9 @@ console.log(data)
             }}
           >
             {/* // {productData?.map((data, index) => { */}
-            {productData.map((product, productIndex) => (
+            {productData.map((product, productIndex) => {
+              console.log("firstproduct",product)
+              return(
   <div key={productIndex}>
     {/* Render Product Input Card for the main product */}
     <Grid
@@ -1096,7 +1121,7 @@ console.log(data)
         heading={product.productname}
         image={product.img} // Assuming you have an image property in productData
         qty={product.quantity}
-        unit={product.unit}
+        unit={product.productunit}
         rate={product.amount}
         amount={product.amount}
       />
@@ -1126,7 +1151,7 @@ console.log(data)
       </Grid>
     ))}
   </div>
-))}
+)})}
 
 
           </Box>
@@ -1199,37 +1224,54 @@ console.log(data)
       
 
       <table className="offscreen" id='ALLPRODUCTtable'>
-  <thead>
-    <tr>
-      <th>Product Name</th>
-      <th>Quantity</th>
-      <th>Price</th>
-      <th>Unit</th>
-      <th>Image</th>
-    </tr>
-  </thead>
-  <tbody>
-    {productData.map((item, index) => (
-      <React.Fragment key={index}>
-        <tr>
-          <td>{item.productname}</td>
-          <td>{item.quantity}</td>
-          <td>{item.amount}</td>
-          <td>{item.productunit}</td>
-          <td></td> 
+      <thead>
+  <tr style={{textAlign:"center"}}>
+    <th >Area of work</th>
+    <th>Specification</th>
+    <th>Amount</th>
+  </tr>
+</thead>
+<tbody>
+  {productData.map((item, index) => (
+    <React.Fragment key={index}>
+      <tr>
+        <td rowspan="4">{item.productname}</td>
+        <td>{item.description}</td>
+        <td>{item.amount}</td>
+      </tr>
+      <tr>
+        <td>hardware</td>
+        <td>{item.hardware}</td>
+      </tr>
+      <tr>
+        <td>installation</td>
+        <td>{item.installation}</td>
+      </tr>
+      <tr>
+        <td>accessories</td>
+        <td>{item.accessories}</td>
+      </tr>
+      <tr>
+        <td colSpan="12"> Accessories list of {item.productname} </td>
+      </tr>
+      <tr>
+        <td> SL NO </td>
+        <td>Specification  </td>
+        <td> Image </td>
+      </tr>
+      {item.accessorieslist.map((accessory, i) => (
+        <tr key={`${index}-${i}`}>
+          <td>{index+1}</td>
+          <td>{accessory.name}</td>
+          <td></td>
+          
         </tr>
-        {item.accessorieslist.map((accessory, i) => (
-          <tr key={`${index}-${i}`}>
-            <td>{accessory.name}</td>
-            <td>{accessory.quantity}</td>
-            <td>{accessory.price}</td>
-            <td>{accessory.unit}</td>
-            <td></td> 
-          </tr>
-        ))}
-      </React.Fragment>
-    ))}
-  </tbody>
+      ))}
+    </React.Fragment>
+  ))}
+</tbody>
+
+
 </table>
 
 
