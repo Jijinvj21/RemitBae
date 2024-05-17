@@ -481,7 +481,13 @@ alert("add")
     <div
         className="quatationgenerator"
         id="quatationgenerator"
-        style={{ fontSize: "12px" }}
+        style={{
+          fontSize: "13px",
+          fontFamily: "'Roboto'", // Corrected font family name
+          fontWeight: 400,
+          textAlign:"justify"
+         
+        }}
       >
         <img
           src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
@@ -502,13 +508,15 @@ alert("add")
         <div
           style={{ marginLeft: "50px", width: "500px", paddingBottom: "200px" }}
         >
-          <p style={{ paddingBottom: "5px",lineHeight:"18px" }}>
+          <p style={{ paddingBottom: "5px",lineHeight:"22px",textAlign:"justify",fontFamily: "'Roboto'", // Corrected font family name
+          fontWeight: 400, }}>
             {" "}
             We thank you for giving us an opportunity to quote for the mentioned
             subject. With reference to your enquiry, please find.
           </p>
           <p style={{ paddingBottom: "5px" }}>Sir,</p>
-          <p style={{ paddingBottom: "5px",lineHeight:"18px",fontFamily:"Inter" }}>
+          <p style={{ paddingBottom: "5px",lineHeight:"22px",fontFamily: "'Roboto'", // Corrected font family name
+          fontWeight: 400, }}>
             Biltree was founded on the principle of providing quality work with
             an emphasis on cost- effectiveness and the highest quality work for
             its prospective clients in the quickest way possible. Our strength
@@ -589,24 +597,26 @@ alert("add")
             // valign: 'middle',
             // halign: 'center' // Set horizontal alignment to center
           },
+   
           
-          // didDrawCell: function (data) {
-          //   console.log("didDrawCell", data?.cell?.raw);
-          //   if (data.column.index === 2 && data.cell.section === "body") {
-          //     var td = data.cell.raw;
-          //     console.log("didDrawCell2", td.getElementsByTagName("td"));
-          //     var img = td.getElementsByTagName("img")[0];
-          //     var imageSize = 35; // Increase image size here
-          //     // console.log("img.src",img.src);
-          //     pdf.addImage(
-          //       "https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png",
-          //       data.cell.x + 5,
-          //       data.cell.y + 5,
-          //       imageSize, // Width
-          //       imageSize // Height
-          //     );
-          //   }
-          // }
+          didDrawCell: async function (data) {
+            console.log("didDrawCell", data?.cell?.raw);
+            if (data.column.index === 2 && data.cell.section === "body") {
+              var td = data.cell.raw;
+              console.log("didDrawCell2", td.getElementsByTagName("td"));
+              // var img = td.getElementsByTagName("img")[0];
+              var imageSize = 35; // Increase image size here
+              var img =   data?.cell.raw.parentElement?.getElementsByTagName("td")[2]?.getElementsByTagName("img")[0]?.src;
+              console.log("img.src",img);
+              pdf.addImage(
+                img,
+                data.cell.x + 5,
+                data.cell.y + 5,
+                imageSize, // Width
+                imageSize // Height
+              );
+            }
+          }
         });
   
         // pdf.addPage();
@@ -1314,28 +1324,32 @@ console.log(data)
       <tr>
       <td colSpan="12"> </td>
       </tr>
-      <tr>
-      <td style={{backgroundColor:"#00B0F0",paddingBottom:"5px",paddingTop:"5px",fontWeight:"800",textAlign:"center "}} colSpan="12"> ACCESSORIES LIST OF  {item.productname.toUpperCase()} </td>
-      </tr>
-      <tr style={{backgroundColor:"#FFFF00"}}>
+    
+      {
+        item.accessorieslist.length===1 &&
+        <>
+        <tr>
+        <td style={{backgroundColor:"#00B0F0",paddingBottom:"5px",paddingTop:"5px",fontWeight:"800",textAlign:"center "}} colSpan="12"> ACCESSORIES LIST OF  {item.productname.toUpperCase()} </td>
+        </tr>
+        <tr style={{backgroundColor:"#FFFF00"}}>
         <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> SL NO </td>
         <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}>SPECIFICATION  </td>
         <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> IMAGE </td>
       </tr>
-      {item.accessorieslist.map((accessory, i) => (
+        </>
+      }
+      {item.accessorieslist.map((accessory, i) => {
+        console.log("accessory",accessory)
+        return(
         <tr key={`${index}-${i}`}>
           <td  style={{paddingBottom:"5px",paddingTop:"5px",textAlign:"center"}}>{index+1}</td>
           <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}}>{accessory.name}</td>
-          <td  style={{paddingBottom:"5px",paddingTop:"5px"}}></td>
+          <td  style={{paddingLeft:"30px",paddingRight:"10px",paddingBottom:"20px",paddingTop:"20px",display:"flex",justifyContent:"center"}}> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png" alt="image" width={50} height={50} /> </td>
           
         </tr>
         
-      ))}
-     <tr>
-      <td colSpan="12"> </td>
+      )})}
      
-
-      </tr>
       
     </React.Fragment>
   ))}

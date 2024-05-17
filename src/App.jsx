@@ -16,6 +16,7 @@ import PaymenyIn from "./page/PaymenyIn/PaymenyIn";
 import CreditNotePage from "./page/CreditNotePage/CreditNotePage";
 import ProjectDataPage from "./page/ProjectDataPage/ProjectDataPage";
 import PaymenyOut from "./page/PaymentOut/PaymentOut";
+import QuotationView from "./page/QuotationView/QuotationView";
 function App() {
   return (
     <BrowserRouter>
@@ -33,6 +34,8 @@ function App() {
           <Route path="payment-out" element={<PaymenyOut/>} />
           <Route path="creadit-note" element={<CreditNotePage/>} />
           <Route path="project-data" element={<ProjectDataPage />} />
+          <Route path="Quotation-View" element={<QuotationView />} />
+
 
 
           
