@@ -1326,7 +1326,7 @@ console.log(data)
       </tr>
     
       {
-        item.accessorieslist.length===1 &&
+        item.accessorieslist[0] &&(
         <>
         <tr>
         <td style={{backgroundColor:"#00B0F0",paddingBottom:"5px",paddingTop:"5px",fontWeight:"800",textAlign:"center "}} colSpan="12"> ACCESSORIES LIST OF  {item.productname.toUpperCase()} </td>
@@ -1336,7 +1336,7 @@ console.log(data)
         <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}>SPECIFICATION  </td>
         <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> IMAGE </td>
       </tr>
-        </>
+        </>)
       }
       {item.accessorieslist.map((accessory, i) => {
         console.log("accessory",accessory)
