@@ -79,7 +79,7 @@ function InputComponent({
             <label htmlFor="dropdown">{label}</label>
 
             <select value={value} onChange={handleChange}>
-  {options.map((option, index) => {
+  {options?.map((option, index) => {
     return (
       <option
         key={index}

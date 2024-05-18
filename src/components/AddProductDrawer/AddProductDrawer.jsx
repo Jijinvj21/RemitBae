@@ -44,6 +44,7 @@ function AddProductDrawer({
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           {arrOfInputs?.map((input, index) => {
+            console.log("input.options",input.options)
             return (
               <Grid item key={index} xs={6} md={6}>
                 <InputComponent

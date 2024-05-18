@@ -7,7 +7,7 @@ import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer
 import AddSquare from "../../assets/products/AddSquare.svg";
 import { Link } from "react-router-dom";
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
-import { categeryGetAPI, gstOptionsGetAPI, imageUploadtAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import { categeryGetAPI, gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 
 function ManageProductsPage() {
   const [myArray, setMyArray] = useState([]);
@@ -146,7 +146,6 @@ const getCategeryOptionsFormAPI = () => {
     quantity:"",
     rate:0,
     hsn:"",
-    // unit:"",
   });
   const [img, setImg] = useState(null);
   // const [selectTabs, setSelectTabs] = useState("add");
@@ -369,55 +368,43 @@ getDataFromAPI()
   
 
   const handleAdd = () => {
-
     const formData = new FormData();
+  
+    formData.append('name', ProductFormData.name);
+    formData.append('hsn', ProductFormData.hsn);
+    formData.append('rate', parseInt(ProductFormData.rate));
+    formData.append('quantity', parseInt(ProductFormData.quantity));
+    formData.append('unit', selectedValue);
+    formData.append('projectid', parseInt(projectValue));
+    formData.append('is_product', toggle);
+    formData.append('category_id', categoryValue);
+    // formData.append('gst', ((parseInt(ProductFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
+    formData.append('tax_rate', taxRateValue.id);
     formData.append('image', img);
-
-    imageUploadtAPI(formData).then((data)=>{
-console.log(data.data.responseData)
-
-const productadd = {
-  name: ProductFormData.name,
-  hsn: ProductFormData.hsn,
-  rate: parseInt(ProductFormData.rate),
-  quantity: parseInt(ProductFormData.quantity),
-  unit: selectedValue,
-  projectid:parseInt(projectValue),
-  is_product:toggle,
-  category_id:categoryValue,
-  // gst: ((parseInt(ProductFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100
-  tax_rate:{
-    id:taxRateValue?.id
-  },
-  image:data?.data?.responseData
-};
-productAddAPI(productadd).then((data) => {
-  if (data.status === 200) {
-    setProductFormData({
-      name: "",
-      qate: "",
-      quantity: "",
-      rate: "",
-      taxvalue: "",
-      hsn: "",
-
-    });
-    setSelectedValue("");
-    setTaxRateValue("");
-    alert("Product added successfully");
-    getDataFromAPI();
-  }
-})
-  .catch((err) => { console.log(err) });
-alert("problem in add product");
-
-
-    }).catch((err)=>{
-console.log(err)
-    })
-
-    
+  
+    productAddAPI(formData)
+      .then((data) => {
+        if (data.status === 200) {
+          setProductFormData({
+            name: "",
+            qate: "",
+            quantity: "",
+            rate: "",
+            taxvalue: "",
+            hsn: "",
+          });
+          setSelectedValue("");
+          setTaxRateValue("");
+          alert("Product added successfully");
+          getDataFromAPI();
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Problem in adding product");
+      });
   };
+  
   
   
   return (

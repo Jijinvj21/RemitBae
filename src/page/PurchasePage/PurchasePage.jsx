@@ -17,13 +17,19 @@ import { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import {
+  categeryGetAPI,
   clientDataGetAPI,
   countryOptionsGetAPI,
   createPartyAPI,
   createPurchaseAPI,
+  gstOptionsGetAPI,
   partyDataGetAPI,
+  productAddAPI,
   productGetAPI,
+  projectGetAPI,
+  unitsDataGetAPI,
 } from "../../service/api/admin";
+import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
 
 const style = {
   position: "absolute",
@@ -66,6 +72,119 @@ function PurchasePage() {
     address2: "",
     postalCode: "",
   });
+  const [toggle, setToggle] = useState(true);
+  const [ProductDrawerFormData, setProductDrawerFormData] = useState({
+    name:"",
+    quantity:"",
+    rate:0,
+    hsn:"",
+  });
+  const [categoryOptions,setCategoryOptions]=useState([])
+  const [projectOptions,setProjectOptions]=useState([])
+  const [unitOptions,setUnitOptions]=useState([])
+  const [taxRateValue, setTaxRateValue] = useState({});
+  const [selectedValue, setSelectedValue] = useState('');
+  const [state, setState] = useState({
+    right: false,
+  });
+  const [projectValue, setProjectValue] = useState('');
+  const [categoryValue, setCategoryValue] = useState('');
+  const [img, setImg] = useState(null);
+  const [taxOptions,setTaxOptions]=useState([])
+
+
+
+  const getTaxOptionsFormAPI = () => {
+    gstOptionsGetAPI().then((data) => {
+      console.log("tax:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const transformedData = data.map(entry => ({
+        value: entry.percentage,
+        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
+        taxlabel: entry.percentage,
+        id:entry.id
+
+      }));
+      console.log(transformedData)
+      setTaxOptions(transformedData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
+
+  const getCategeryOptionsFormAPI = () => {
+    categeryGetAPI()
+      .then((data) => {
+        console.log("category:", data);
+        
+        // Transform data and set it to state
+        const categoryOptions = data?.responseData.map(entry => ({
+          value: entry.id,
+          label:`${entry.name}`,
+          
+        }));
+        categoryOptions.unshift({ value: 0, label: "None" });
+  
+        console.log("categoryOptions",categoryOptions);
+        setCategoryOptions(categoryOptions);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  const getClientOptionsFormAPI = () => {
+    projectGetAPI()
+      .then((data) => {
+        console.log("projects:", data);
+        
+        // Transform data and set it to state
+        const projectdData = data?.responseData.map(entry => ({
+          value: entry.id,
+          label:`${entry.name} ( ${entry.client_name} )`,
+          
+        }));
+        projectdData.unshift({ value: 0, label: "None" });
+  
+        console.log("projectdData",projectdData);
+        setProjectOptions(projectdData);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  const getUnitOptionsFormAPI = () => {
+    unitsDataGetAPI()
+      .then((data) => {
+        console.log("units:", data);
+        
+        // Transform data and set it to state
+        const unitsdData = data?.responseData.map(entry => ({
+          value: entry.id,
+          label: entry.name ,
+          
+        }));
+        unitsdData.unshift({ value: 0, label: "None" })
+        console.log("unitsdData",unitsdData);
+        setUnitOptions(unitsdData);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+
+  useEffect(() => {
+    getTaxOptionsFormAPI()
+    getCategeryOptionsFormAPI()
+    getClientOptionsFormAPI()
+    getUnitOptionsFormAPI()
+  }, [])
+  
+
+
+
 
   // Function to handle input change for all fields
   const handlePartyFormChange = (e) => {
@@ -185,18 +304,21 @@ function PurchasePage() {
   //   }
   // };
 
+  const fetchData = async () => {
+    const response = await productGetAPI();
+    const products = response.responseData;
+    const productNames = products.map((product) => product.name);
+    const options = productNames.map((name, index) => ({
+      value: `option${index + 1}`,
+      label: name,
+    }));
+    options.unshift({ value: -2, label: "Add" });
+    setProductOptions(options);
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await productGetAPI();
-      const products = response.responseData;
-      const productNames = products.map((product) => product.name);
-      const options = productNames.map((name, index) => ({
-        value: `option${index + 1}`,
-        label: name,
-      }));
-      setProductOptions(options);
-    };
     fetchData();
+    setProductOptions([{ value: -2, label: "Add" }])
+
   }, []);
 
   useEffect(() => {
@@ -218,6 +340,12 @@ function PurchasePage() {
       // Handle the case where newValue is not defined
       return;
     }
+    if(newValue.value===-2){
+      console.log(newValue.value===-2);
+      toggleDrawer("right", true)();
+    }else{
+
+   
 
     setSelectedProduct(newValue);
 
@@ -247,6 +375,7 @@ function PurchasePage() {
       };
       setTableRows([...tableRows, newRow]);
     }
+  }
   };
   const handleChangeAmout = (e) => {
     setInputData(e.target.value);
@@ -331,6 +460,183 @@ function PurchasePage() {
         console.log(err);
       });
   };
+
+
+  const handleDrawerSelectChange = (event) => {
+    setSelectedValue(event.target.value);
+    console.log(event.target.value)
+  };
+
+  const handleDrawerChange = (e) => {
+    const { name, value } = e.target;
+    setProductDrawerFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
+  const toggleDrawer = (anchor, open) => (event) =>{
+    console.log(event)
+    console.log("Toggle Drawer:", anchor, open);
+    if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
+      return;
+    }
+    setState({ ...state, [anchor]: open });
+  };
+  const handleDrawerImageChange = (e) => {
+    const file = e.target.files[0];
+
+    setImg(file);
+  };
+  const handleTaxRateChange = (event) => {
+    console.log(event.target.value)
+    const selectedOptionObject = taxOptions.find(option => option.taxlabel == event.target.value);
+    console.log(selectedOptionObject);
+    // setTaxRateValue({
+    //   label: selectedOptionObject ? selectedOptionObject.label : "", // Handle case where selectedOptionObject is undefined
+    //   value: event.target.value
+    // });
+    setTaxRateValue(selectedOptionObject)
+  };
+  const handleSelectChange = (event) => {
+    setSelectedValue(event.target.value);
+    console.log(event.target.value)
+  };
+
+  const handleSelectProject = (event) => {
+    setProjectValue(event.target.value);
+    console.log(event.target.value)
+  };
+
+  const handleSelectCatogary = (event) => {
+    setCategoryValue(event.target.value);
+    console.log(event.target.value)
+  };
+
+
+  const handleDrawerAddProducts = () => {
+    const formData = new FormData();
+  
+    formData.append('name', ProductDrawerFormData.name);
+    formData.append('hsn', ProductDrawerFormData.hsn);
+    formData.append('rate', parseInt(ProductDrawerFormData.rate));
+    formData.append('quantity', parseInt(ProductDrawerFormData.quantity));
+    formData.append('unit', selectedValue);
+    formData.append('projectid', parseInt(projectValue));
+    formData.append('is_product', toggle);
+    formData.append('category_id', categoryValue);
+    // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
+    formData.append('tax_rate', taxRateValue.id);
+    formData.append('image', img);
+  
+    productAddAPI(formData)
+      .then((data) => {
+        fetchData()
+        if (data.status === 200) {
+          setProductDrawerFormData({
+            name: "",
+            qate: "",
+            quantity: "",
+            rate: "",
+            taxvalue: "",
+            hsn: "",
+          });
+          setSelectedValue("");
+          setTaxRateValue("");
+          alert("Product added successfully");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Problem in adding product");
+      });
+  };
+  const arrOfDrawerInputs = [
+    {
+      handleChange: handleDrawerChange,
+      intputName: "name",
+      label: " Product Name",
+      type: "text",
+      
+      
+    },
+    {
+      handleChange: handleDrawerChange,
+      intputName: "rate",
+      label: "Rate",
+      type: "number",
+    },
+    {
+      handleChange: handleDrawerChange,
+      intputName: "quantity",
+      label: "Quantity",
+      type: "number",
+    },
+    {handleChange:handleTaxRateChange,
+      intputName: "taxrate",
+      label: "Tax Rate",
+      
+
+      inputOrSelect:"select",
+      options:taxOptions 
+    },
+    {
+      intputName: "taxvalue",
+      label: " Tax Value",
+      // type: "number",
+      value: (((parseFloat(ProductDrawerFormData.rate || 0)) * parseFloat(ProductDrawerFormData.quantity || 0)) * (parseFloat(taxRateValue.value?.replace("%", "")) || 0) / 100),
+
+      disabled:"disabled"
+      
+    },
+    {
+      handleChange: handleDrawerChange,
+      intputName: "hsn",
+      label: "HSN",
+      type: "text",
+    },
+    {
+      handleChange: handleSelectChange,
+      intputName: "unit",
+      label: "Unit",
+      // type: "text",
+
+      inputOrSelect:"select",
+      options: unitOptions,
+      
+      
+    },
+    {
+      handleChange: handleSelectProject,
+      intputName: "project",
+      label: "Projects",
+      // type: "text",
+      // value:selectedValue,
+
+      inputOrSelect:"select",
+      options: projectOptions,
+      
+      
+    },
+    {
+      handleChange: handleSelectCatogary,
+      intputName: "categery",
+      label: "Categerys",
+      // type: "text",
+      // value:selectedValue,
+
+      inputOrSelect:"select",
+      options: categoryOptions,
+      
+      
+    },
+    
+  ];
+
+
+
+
+
+
   return (
     <div className="sales-table-container">
       <Box sx={{ width: "75%", mx: 1 }}>
@@ -615,6 +921,18 @@ function PurchasePage() {
           </Box>
         </Modal>
       </div>
+      <AddProductDrawer
+        handleSelectChange={handleDrawerSelectChange}
+        arrOfInputs={arrOfDrawerInputs}
+        toggleDrawer={toggleDrawer}
+        state={state}
+        ProductFormData={ProductDrawerFormData}
+        handleImageChange={handleDrawerImageChange}
+        handleAdd={handleDrawerAddProducts}
+        setToggle={setToggle}
+        toggle={toggle}
+        
+      />
     </div>
   );
 }
