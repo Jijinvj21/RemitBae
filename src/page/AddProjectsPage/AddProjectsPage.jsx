@@ -206,29 +206,32 @@ useEffect(() => {
     // },
   ];
   const handleAddClient = () => {
-
-    const projectAdd={
-      name:formData.project,         
-      client_name:formData.name,  
-      work_type:workTypeSelected,    
-      phonenumber:formData.mobile,  
-      email:formData.email,        
-	address1:formData.address1,     
-	address2:formData.address2,     
-	country:contrySelect,      
-	postal_code:formData.pinCode,   
-	has_plan_given:toggle, 
-
+    // Create a FormData object
+    const formDataObj = new FormData();
+  
+    // Append each field to the FormData object
+    formDataObj.append('name', formData.project);
+    formDataObj.append('client_name', formData.name);
+    formDataObj.append('work_type', workTypeSelected);
+    formDataObj.append('phonenumber', formData.mobile);
+    formDataObj.append('email', formData.email);
+    formDataObj.append('address1', formData.address1);
+    formDataObj.append('address2', formData.address2);
+    formDataObj.append('country', contrySelect);
+    formDataObj.append('postal_code', formData.pinCode);
+    formDataObj.append('has_plan_given', toggle);
+  
+    // Log FormData entries for debugging (optional)
+    for (let pair of formDataObj.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
     }
-    console.log(projectAdd)
-    projectCreateAPI(projectAdd).then((data)=>{
-console.log(data)
-    })
-    .catch((err)=>{
-console.log(err)
-    })
-
-
+  
+    // Send FormData to API
+    projectCreateAPI(formDataObj).then((data) => {
+      console.log(data);
+    }).catch((err) => {
+      console.log(err);
+    });
   
     // Reset form data and state variables
     setFormData({
@@ -245,11 +248,8 @@ console.log(err)
     setImg(null);
     setToggle(true);
     setErrors({});
-  
-    // Log to console for verification
-    // console.log("Client added:", newClient);
-    // console.log("All clients:", updatedClients);
   };
+  
   
   
 

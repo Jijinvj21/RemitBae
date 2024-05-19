@@ -59,21 +59,19 @@ function AddClientDrawer({
   }, [])
   const handleAddClient = () => {
 console.log("first")
-    const projectAdd={
-      name:projectFormData.project,         
-      client_name:projectFormData.name,  
-      work_type:workTypeSelected,    
-      phonenumber:projectFormData.mobile,  
-      email:projectFormData.email,        
-	address1:projectFormData.address1,     
-	address2:projectFormData.address2,     
-	country:contrySelect,      
-	postal_code:projectFormData.pinCode,   
-	has_plan_given:buttonToggle, 
+const formData = new FormData();
 
-    }
-    console.log("projectAdd",projectAdd)
-    projectCreateAPI(projectAdd).then((data)=>{
+formData.append('name', projectFormData.project);
+  formData.append('client_name', projectFormData.name);
+  formData.append('work_type', workTypeSelected);
+  formData.append('phonenumber', projectFormData.mobile);
+  formData.append('email', projectFormData.email);
+  formData.append('address1', projectFormData.address1);
+  formData.append('address2', projectFormData.address2);
+  formData.append('country', contrySelect);
+  formData.append('postal_code', projectFormData.pinCode);
+  formData.append('has_plan_given', buttonToggle);
+    projectCreateAPI(formData).then((data)=>{
 console.log(data)
     })
     .catch((err)=>{

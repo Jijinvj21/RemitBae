@@ -5,7 +5,6 @@ import AddSquare from "../../assets/products/AddSquare.svg";
 import { Box } from "@mui/material";
 import UserDataCard from "../../components/UserDataCard/UserDataCard";
 import { projectGetAPI } from "../../service/api/admin";
-projectGetAPI
 
 function ProjectsPage() {
 

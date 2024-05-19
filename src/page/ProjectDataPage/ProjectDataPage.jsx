@@ -577,7 +577,7 @@ const transformedData = data ? data.reduce((acc, item) => {
                           {row.approved ? "Approved" : "Not Approved"}
                         </TableCell>
                         <TableCell>
-                          <RemoveRedEyeOutlinedIcon   onClick={() => navigate("/admin/Quotation-View",{ state:{projectData,pdfData,subtotal,transformedData} })}/>
+                          <RemoveRedEyeOutlinedIcon   onClick={() => navigate("/admin/Quotation-View",{ state:{projectData,pdfData,subtotal,transformedData,quotationGetData} })}/>
                         </TableCell>
                         <TableCell>
                           <FileDownloadOutlinedIcon  onClick={()=>handleGetDataFormArray(index)}/>
