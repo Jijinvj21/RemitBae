@@ -46,6 +46,8 @@ function QuotationGeneratorPage() {
   const [clientOptions, setClientOptions] = useState([]);
   // const [projectOptions, setProjectOptions] = useState([]);
   const [productsOptions, setProductsOptions] = useState([]);
+  const [accessoriesProductsOptions, setAccessoriesProductsOptions] = useState([]);
+
 
   const [drawerImg, setDrawerImg] = useState("");
   const [projectImg, setProjectImg] = useState("");
@@ -381,7 +383,7 @@ alert("add")
         productsData.unshift({ value: -1, label: "None" });
         productsData.unshift({ value: -2, label: "Add" });
 
-        console.log(productsData);
+        console.log("productsData",data.responseData);
         setProductsOptions(productsData);
       })
       .catch((err) => {
@@ -390,7 +392,41 @@ alert("add")
       setProductsOptions([{ value: -1, label: "None" },{ value: -2, label: "Add" }])
   };
 
+  const getProductsDataforaccessories = () => {
+    productGetAPI()
+      .then((data) => {
+        console.log("productGetAPI:", data);
+        const filteredData = data.responseData.filter(entry => entry.is_master_product === false);
+
+        // Transform filtered data and set it to state
+        const productsData = filteredData.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+          unit: entry.unit,
+          amount: entry.rate,
+          image: entry.image,
+          unit_id: entry.unit_id,
+          is_master_product: entry.is_master_product
+        }));
+        productsData.unshift({ value: -1, label: "None" });
+        productsData.unshift({ value: -2, label: "Add" });
+  
+        console.log("productsData", filteredData);
+        setAccessoriesProductsOptions(productsData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+      setAccessoriesProductsOptions([{ value: -1, label: "None" },{ value: -2, label: "Add" }])
+  };
+
+
+
+
+
+
   useEffect(() => {
+    getProductsDataforaccessories()
     getProductsData();
     getProjectData();
     getCliendData();
@@ -564,7 +600,7 @@ alert("add")
       label: " Accessories list",
       inputOrSelect: "select",
       value:selectedAccessory,
-      options: productsOptions,
+      options: accessoriesProductsOptions,
     },
     {
       handleChange:handleQuantityChange,
