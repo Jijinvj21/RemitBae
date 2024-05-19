@@ -2,7 +2,6 @@ import { Box, Button, Grid, Modal, Typography } from "@mui/material";
 import "./QuotationGeneratorPage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import ProductInputCard from "../../components/ProductInputCard/ProductDataCard";
-import { data } from "../../dummy/productData";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
@@ -19,7 +18,7 @@ import {
   quotationCreateAPI,
   unitsDataGetAPI,
 } from "../../service/api/admin";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { renderToString } from "react-dom/server";
 import AddClientDrawer from "../../components/AddClientDrawer/AddClientDrawer";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
@@ -315,7 +314,7 @@ alert("add")
       setProjectImg(file);
     };
 
-  const handleOpen = () => setOpen(true);
+  // const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const getCliendData = () => {

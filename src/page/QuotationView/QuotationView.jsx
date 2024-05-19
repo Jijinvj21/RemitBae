@@ -2,7 +2,10 @@
 // import { generateRandom6Digit } from '../../utils/randomWithDate'
 // import { useLocation } from 'react-router-dom';
 
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { formatter } from "../../utils/moneyFormatter";
+import  "./QuotationView.scss"
 
 // function QuotationView() {
     // const location = useLocation();
@@ -564,11 +567,30 @@ import { useLocation } from "react-router-dom";
 
 function QuotationView() {
   const location = useLocation();
+  const [quotationGetData, setQuotationGetData] = useState([]);
+
   console.log("location",location.state)
+
+  useEffect(() => {
+    setQuotationGetData(location.state.quotationGetData)
+  }, [location.state])
+
+  const grandTotal =2000
+  // const grandTotal = quotationGetData.reduce((total, productGroup) => {
+  //   return total + productGroup.reduce((groupTotal, item) => {
+  //     const itemTotal =
+  //       parseInt(item.amount || 0) +
+  //       parseInt(item.hardware || 0) +
+  //       parseInt(item.installation || 0) +
+  //       parseInt(item.accessories || 0);
+  //     return groupTotal + itemTotal;
+  //   }, 0);
+  // }, 0);
+
   return (
-    <div>
+    <div  className="quatationgenerator">
       <div
-        className="quatationgenerator"
+       
         id="quatationgenerator"
         style={{
           fontSize: "13px",
@@ -631,83 +653,97 @@ function QuotationView() {
           <h5>PHONE: +91 9447519770 </h5>
         </div>
       </div>
-      {/* <table className="offscreen" id='ALLPRODUCTtable' style={{backgroundColor:"white"}}>
-      <thead >
- 
-</thead>
-<tbody >
-  {productData.map((item, index) => (
-    <React.Fragment key={index}>
-       <tr style={{textAlign:"center",backgroundColor:"#FFFF00"}}>
-    <th style={{width: "100px",paddingBottom:"5px",paddingTop:"5px"}} >AREA OF WORK</th>
-    <th  style={{paddingBottom:"5px",paddingTop:"5px"}}>SPECIFICATION</th>
-    <th  style={{paddingBottom:"5px",paddingTop:"5px"}}>AMOUNT</th>
-  </tr>
-      <tr>
-  <td style={{textAlign:"center"}} rowspan="4">{item.productname}</td>
-  <td style={{ paddingLeft:"5px",paddingRight:"5px",  paddingBottom: "5px", paddingTop: "5px"}}>{item.description}</td>
-  <td style={{ paddingLeft:"5px",paddingRight:"5px",  paddingBottom: "5px", paddingTop: "5px"}}>{item.amount}</td>
-</tr>
-      <tr>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >hardware</td>
-        <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.hardware}</td>
-      </tr>
-      <tr>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >installation</td>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.installation}</td>
-      </tr>
-      <tr>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >accessories</td>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.accessories}</td>
-      </tr>
+      <table className="offscreen" id='ALLPRODUCTtable' style={{ backgroundColor: "white",width:"100%",marginTop:"20px" }}>
+  <thead>
+    <tr style={{ textAlign: "center", backgroundColor: "#FFFF00" }}>
+      <th style={{ width: "200px", paddingBottom: "5px", paddingTop: "5px" }}>AREA OF WORK</th>
+      <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>SPECIFICATION</th>
+      <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>AMOUNT</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      quotationGetData?.map((productData, productIndex) =>
+        productData?.product_info?.map((item, itemIndex) => (
+          <React.Fragment key={`${productIndex}-${itemIndex}`}>
+            <tr>
+              <td style={{ textAlign: "center" }} rowSpan="4">{item.product}</td>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>{item.description}</td>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>{formatter.format(item.amount)}</td>
+            </tr>
+            <tr>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>hardware</td>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>{formatter.format(item.hardware)}</td>
+            </tr>
+            <tr>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>installation</td>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>{formatter.format(item.installation)}</td>
+            </tr>
+            <tr>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>accessories</td>
+              <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>{formatter.format(item.accessories)}</td>
+            </tr>
+            <tr>
+              <td style={{ backgroundColor: "#00B050", paddingBottom: "5px", paddingTop: "5px", paddingRight: "5px", fontWeight: "800", textAlign: "right" }} colSpan="2">TOTAL</td>
+              <th style={{ backgroundColor: "#00B050", paddingBottom: "5px", paddingTop: "5px", paddingRight: "5px", fontWeight: "800", textAlign: "right" }}>
+                {formatter.format(parseInt(item.amount || 0) + parseInt(item.hardware || 0) + parseInt(item.installation || 0) + parseInt(item.accessories || 0))}
+              </th>
+            </tr>
+            <tr>
+              <td colSpan="3"> </td>
+            </tr>
+            {
+              item.accessorieslist[0] && (
+                <>
+                  <tr>
+                    <td style={{ backgroundColor: "#00B0F0", paddingBottom: "5px", paddingTop: "5px", fontWeight: "800", textAlign: "center" }} colSpan="3">
+                      ACCESSORIES LIST OF {item.productname.toUpperCase()}
+                    </td>
+                  </tr>
+                  <tr style={{ backgroundColor: "#FFFF00" }}>
+                    <td style={{ paddingBottom: "5px", paddingTop: "5px", fontWeight: "800", textAlign: "center" }}>SL NO</td>
+                    <td style={{ paddingBottom: "5px", paddingTop: "5px", fontWeight: "800", textAlign: "center" }}>SPECIFICATION</td>
+                    <td style={{ paddingBottom: "5px", paddingTop: "5px", fontWeight: "800", textAlign: "center" }}>IMAGE</td>
+                  </tr>
+                </>
+              )
+            }
+            {
+              item.accessorieslist.map((accessory, accessoryIndex) => (
+                <tr key={`${productIndex}-${itemIndex}-${accessoryIndex}`}>
+                  <td style={{ paddingBottom: "5px", paddingTop: "5px", textAlign: "center" }}>{accessoryIndex + 1}</td>
+                  <td style={{ paddingLeft: "5px", paddingRight: "5px", paddingBottom: "5px", paddingTop: "5px" }}>{accessory.name}</td>
+                  <td style={{ paddingLeft: "30px", paddingRight: "10px", paddingBottom: "20px", paddingTop: "20px", display: "flex", justifyContent: "center" }}>
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png" alt="image" width={50} height={50} />
+                  </td>
+                </tr>
+              ))
+            }
+          </React.Fragment>
+        ))
+      )
+    }
+    <tr>
+      <td style={{ backgroundColor: "#FF0000", paddingBottom: "5px", paddingTop: "5px", paddingRight: "10px", fontWeight: "800", textAlign: "right", color: "white", border: "1px solid black" }} colSpan="2">
+        GRAND TOTAL
+      </td>
+      <th style={{ backgroundColor: "#FF0000", paddingBottom: "5px", paddingTop: "5px", paddingRight: "10px", fontWeight: "800", textAlign: "right", color: "white", border: "1px solid black" }}>
+        {formatter.format(grandTotal)}
+      </th>
+    </tr>
+  </tbody>
+</table>
+<div style={{display:"flex",justifyContent:"center",marginTop:"20px"}}>
 
-      <tr>
-      <td style={{backgroundColor:"#00B050",paddingBottom:"5px",paddingTop:"5px",paddingRight:"5px",fontWeight:"800",textAlign:"right " }} colspan="2"> TOTAL  </td>
-      <th style={{backgroundColor:"#00B050",paddingBottom:"5px",paddingTop:"5px",paddingRight:"5px",fontWeight:"800",textAlign:"right " }}>{
-        parseInt(item.amount||0)+parseInt(item.hardware||0)+parseInt(item.installation||0)+parseInt(item.accessories||0)
-      }</th>
-      </tr>
-      
-      <tr>
-      <td colSpan="12"> </td>
-      </tr>
-    
-      {
-        item.accessorieslist[0] &&(
-        <>
-        <tr>
-        <td style={{backgroundColor:"#00B0F0",paddingBottom:"5px",paddingTop:"5px",fontWeight:"800",textAlign:"center "}} colSpan="12"> ACCESSORIES LIST OF  {item.productname.toUpperCase()} </td>
-        </tr>
-        <tr style={{backgroundColor:"#FFFF00"}}>
-        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> SL NO </td>
-        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}>SPECIFICATION  </td>
-        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> IMAGE </td>
-      </tr>
-        </>)
-      }
-      {item.accessorieslist.map((accessory, i) => {
-        console.log("accessory",accessory)
-        return(
-        <tr key={`${index}-${i}`}>
-          <td  style={{paddingBottom:"5px",paddingTop:"5px",textAlign:"center"}}>{index+1}</td>
-          <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}}>{accessory.name}</td>
-          <td  style={{paddingLeft:"30px",paddingRight:"10px",paddingBottom:"20px",paddingTop:"20px",display:"flex",justifyContent:"center"}}> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png" alt="image" width={50} height={50} /> </td>
-          
-        </tr>
-        
-      )})}
-     
-      
-    </React.Fragment>
-  ))}
-   <tr>
-      <td style={{backgroundColor:"#FF0000",paddingBottom:"5px",paddingTop:"5px",paddingRight:"10px",fontWeight:"800",textAlign:"right ",color:"white",border:"1px solid black" }} colspan="2"> GRAND TOTAL  </td>
-      <th style={{backgroundColor:"#FF0000",paddingBottom:"5px",paddingTop:"5px",paddingRight:"10px",fontWeight:"800",textAlign:"right ", color:"white",border:"1px solid black"}}>{grandTotal}</th>
-      </tr>
-</tbody>
+<img src="https://drive.google.com/thumbnail?id=1ABF34lvIQ9ysDZpUI23CwvcfiMvbGfM-&sz=w1000" alt="Google Drive Image"/>
+</div>
 
-
-</table> */}
+<div>
+<h5>Terms And Conditions</h5>
+        {quotationGetData[0]?.terms_and_conditions.map((term, index) => (
+          <p key={index}>{term.replace(/[\[\]"]/g, '')}</p>
+        ))}
+</div>
     </div>
   )
 }
