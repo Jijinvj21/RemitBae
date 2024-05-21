@@ -9,11 +9,12 @@ import {
   TableHead,
   TableRow,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import "./PaymenyIn.scss";
 import { useEffect, useState } from "react";
 import InputComponent from "../../components/InputComponent/InputComponent";
-import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
+// import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useLocation } from "react-router-dom";
 import {
   partyDataGetAPI,
@@ -23,6 +24,8 @@ import {
 import { generateRandom6Digit } from "../../utils/randomWithDate";
 import jsPDF from "jspdf";
 import { renderToString } from "react-dom/server";
+import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
+
 
 function PaymenyIn() {
   const location = useLocation();
@@ -35,15 +38,21 @@ function PaymenyIn() {
   const [recived, setRecived] = useState("");
   const [ReceptNo, setReceptNo] = useState("");
   const [paymentData, setPaymenData] = useState([]);
+  const [loader, setLoader]=useState(false)
 
   const getpaymentDataGetAPI = () => {
-    paymentDataGetAPI({ payment_mode: "IN", project_id: 1 })
+    setLoader(true)
+    paymentDataGetAPI({ payment_mode: "IN", project_id: 2 })
       .then((data) => {
-        console.log(data.data.responseData);
+        setLoader(false)
+
+        console.log("data.data.responseData",data.data.responseData);
         setPaymenData(data.data.responseData);
       })
       .catch((err) => {
+        setLoader(false)
         console.log(err);
+
       });
   };
 
@@ -122,7 +131,7 @@ function PaymenyIn() {
       date: date,
       payment_type: parseInt(paymentSelect),
       party_id: partySelect,
-      project_id: 1,
+      project_id: 2,
       amount: parseInt(recived),
       payment_mode: "IN",
       description: textValue,
@@ -451,7 +460,7 @@ function PaymenyIn() {
               }}
               component="label"
             >
-              <img src={ImageAdd} alt="add img" />
+              {/* <img src={ImageAdd} alt="add img" /> */}
 
               <input type="file" hidden onChange={handleImageChange} />
             </Button>
@@ -535,6 +544,30 @@ function PaymenyIn() {
         </div>
       </div>
       <div className="table">
+      {
+         loader ? <Box  sx={{ 
+          my: 2, 
+          mx: "auto", 
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center" 
+        }}><CircularProgress color="inherit" /></Box> : 
+        paymentData===null? (
+          // Show a message when no products are available
+          <Box 
+            sx={{ 
+              my: 2, 
+              mx: "auto", 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "center" 
+            }}
+          >
+            <PlaylistAddRoundedIcon sx={{ mx: "auto" }} style={{ fontSize: "40px" }} />
+            <p style={{ textAlign: "center" }}>No receipt available</p>
+          </Box>
+        ) : (
+
         <TableContainer component={Paper} id="pdf-content">
           <Table>
             <TableHead>
@@ -573,13 +606,13 @@ function PaymenyIn() {
                           textTransform: "none",
                           color: "var(--black-button)",
                           fontWeight: "600",
-
+                          
                           "&:hover": {
                             background: "transparent",
                           },
                         }}
                         onClick={() => handleCreateReceipt(row)}
-                      >
+                        >
                         View
                       </Button>
                     </TableCell>
@@ -589,7 +622,9 @@ function PaymenyIn() {
             </TableBody>
           </Table>
         </TableContainer>
-      </div>
+      )
+    }
+    </div>
 
       <div></div>
     </div>

@@ -53,7 +53,7 @@ function ProjectDataPage() {
   useEffect(() => {
     quotationGetAPI({ id: location?.state })
       .then((data) => {
-        console.log("quotationGetAPI", data.data.responseData      );
+        console.log("projectDataByIdAPI", data.data.responseData      );
         setQuotationGetData(data.data.responseData);
       })
       .catch((err) => {

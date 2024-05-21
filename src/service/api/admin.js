@@ -6,8 +6,10 @@ import axios from "axios";
 // };
 
 
-const BASE_URL = 'http://192.168.0.102:8085';
+// const BASE_URL = 'http://192.168.0.103:8085';
 // const MASRE_TABLE_BASE_URL = 'http://192.168.0.103:8088';
+const BASE_URL = 'https://teqbae-accounts-rkkzm.ondigitalocean.app';
+
 
 
 export const productAddAPI = async (productAdd) => {

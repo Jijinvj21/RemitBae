@@ -1,4 +1,4 @@
-import { Box, Button, Pagination, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Pagination, Stack, Typography } from "@mui/material";
 import "./ManageProductsPage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ const [unitOptions,setUnitOptions]=useState([])
 const [projectOptions,setProjectOptions]=useState([])
 const [toggle, setToggle] = useState(true);
 const [categoryOptions,setCategoryOptions]=useState([])
+const [loader, setLoader]=useState(false)
 
 
 
@@ -90,15 +91,19 @@ const getCategeryOptionsFormAPI = () => {
 
 
   const getDataFromAPI = () => {
+    setLoader(true)
     productGetAPI().then((data) => {
-      console.log("productGetAPI:", data);
+      console.log("productGetAPI:", data.responseData);
       // setTaxOptions(data);
 
       // Transform data and set it to state
-     
+      setLoader(false)
+
       setMyArray(data.responseData);
     }).catch((err) => {
       console.log(err);
+      setLoader(false)
+
     });
   };
   const getTaxOptionsFormAPI = () => {
@@ -376,7 +381,7 @@ getDataFromAPI()
     formData.append('quantity', parseInt(ProductFormData.quantity));
     formData.append('unit', selectedValue);
     formData.append('projectid', parseInt(projectValue));
-    formData.append('is_product', toggle);
+    formData.append('is_master_product', toggle);
     formData.append('category_id', categoryValue);
     // formData.append('gst', ((parseInt(ProductFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append('tax_rate', taxRateValue.id);
@@ -492,48 +497,68 @@ getDataFromAPI()
           // overflow: "hidden", // Hide the scrollbar
         }}
       >
+<Box
+  sx={{
+    // The height is commented out; uncomment if needed
+    // height: 500, // Height of the inner container, larger than the outer container
+    overflowY: "auto", // Enable vertical scrolling
+    width: "100%", // Ensure full width
+    display: "flex",
+    flexWrap: "wrap", // Wrap items to next line if they overflow
+    // alignItems: "flex-start" // Uncomment if needed to align items at the start
+    // justifyContent: "flex-start" // Uncomment if needed to justify content at the start
+  }}
+>
+  {
+    loader ? <Box  sx={{ 
+      my: 2, 
+      mx: "auto", 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center" 
+    }}><CircularProgress color="inherit" /></Box> : // Show loader if loading
+    myArray===null? (
+      // Show a message when no products are available
+      <Box 
+        sx={{ 
+          my: 2, 
+          mx: "auto", 
+          display: "flex", 
+          flexDirection: "column", 
+          alignItems: "center" 
+        }}
+      >
+        <PlaylistAddRoundedIcon sx={{ mx: "auto" }} style={{ fontSize: "40px" }} />
+        <p style={{ textAlign: "center" }}>No products available</p>
+      </Box>
+    ) : (
+      // Map through the array and render product cards
+      myArray?.map((data, index) => (
         <Box
+          key={index}
           sx={{
-            // height: 500, // Height of the inner container, larger than the outer container
-            overflowY: "auto", // Enable scrolling
-            width: "100%", // Ensure full width
-            display: "flex",
-            // alignItems:"flex-start"
-            // justifyContent:"flex-start"
-            flexWrap: "wrap",
-     }}
+            px: "10px",
+            py: 1,
+            // flex: "1 0 1%", // Equivalent to flex: 1 0 calc(20% - 8px)
+            // maxWidth: "15%", // Equivalent to flex-basis: 20%
+          }}
         >
-          {myArray?.length===0 ?
-          <Box sx={{my:2, mx:"auto",display:"flex",flexDirection:"column",
-          alignItems:"center"}}>
-          <PlaylistAddRoundedIcon sx={{mx:"auto"}} style={{fontSize:"40px"}}/>
-          <p style={{textAlign:"center"}}>No products available</p>
-          </Box>:myArray?.map((data, index) => {
-            return(
-            <Box
-              item
-              key={index}
-              sx={{
-                // mx: "auto",
-                px: "10px",
-                py: 1,
-                // flex: "1 0 1%", // Equivalent to flex: 1 0 calc(20% - 8px)
-                // maxWidth: "15%", // Equivalent to flex-basis: 20%
-              }}
-            >
-              <ProductDataCard
-                handleUpdate={handleUpdate}
-                handleDelete={ (e)=>handleDelete(e,data.id)}
-                heading={data.name}
-                image={data.img}
-                qty={data.quantity}
-                unit={data.unit}
-                rate={data.rate}
-                amount={data.amount}
-              />
-            </Box>
-          )})}
+          <ProductDataCard
+            handleUpdate={handleUpdate}
+            handleDelete={(e) => handleDelete(e, data.id)}
+            heading={data.name}
+            image={data.img}
+            qty={data.quantity}
+            unit={data.unit}
+            rate={data.rate}
+            amount={data.amount}
+          />
         </Box>
+      ))
+    )
+  }
+</Box>
+
         <Box
           sx={{
             mt: 2,

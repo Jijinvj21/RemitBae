@@ -522,7 +522,7 @@ function PurchasePage() {
     formData.append('quantity', parseInt(ProductDrawerFormData.quantity));
     formData.append('unit', selectedValue);
     formData.append('projectid', parseInt(projectValue));
-    formData.append('is_product', toggle);
+    formData.append('is_master_product', toggle);
     formData.append('category_id', categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append('tax_rate', taxRateValue.id);

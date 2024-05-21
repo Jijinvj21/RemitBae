@@ -13,7 +13,7 @@ import {
 import "./PaymentOut.scss";
 import { useEffect, useState } from "react";
 import InputComponent from "../../components/InputComponent/InputComponent";
-import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
+// import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useLocation } from "react-router-dom";
 import {
   partyDataGetAPI,
@@ -467,7 +467,7 @@ function PaymentOut() {
               }}
               component="label"
             >
-              <img src={ImageAdd} alt="add img" />
+              {/* <img src={ImageAdd} alt="add img" /> */}
 
               <input type="file" hidden onChange={handleImageChange} />
             </Button>

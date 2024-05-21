@@ -73,9 +73,7 @@ function SalesPage() {
   const getTaxOptionsFormAPI = () => {
     gstOptionsGetAPI().then((data) => {
       console.log("tax:", data);
-      // setTaxOptions(data);
-
-      // Transform data and set it to state
+    
       const transformedData = data.map(entry => ({
         value: entry.percentage,
         label: entry.name?`${entry.name} ${entry.percentage}` :"none",
@@ -95,7 +93,6 @@ function SalesPage() {
       .then((data) => {
         console.log("category:", data);
         
-        // Transform data and set it to state
         const categoryOptions = data?.responseData.map(entry => ({
           value: entry.id,
           label:`${entry.name}`,
@@ -115,7 +112,6 @@ function SalesPage() {
       .then((data) => {
         console.log("projects:", data);
         
-        // Transform data and set it to state
         const projectdData = data?.responseData.map(entry => ({
           value: entry.id,
           label:`${entry.name} ( ${entry.client_name} )`,
@@ -313,7 +309,7 @@ function SalesPage() {
     const newArray = await rows.map(item => ({
       product_id: item.id,
       quantity: item.qty,
-      Price: item.qty * item.rate ,
+      Price: item.rate ,
       discount:item.amountafterdescount,
     }));
     const salesVoucher ={
@@ -396,7 +392,7 @@ function SalesPage() {
     formData.append('quantity', parseInt(ProductDrawerFormData.quantity));
     formData.append('unit', selectedValue);
     formData.append('projectid', parseInt(projectValue));
-    formData.append('is_product', toggle);
+    formData.append('is_master_product', toggle);
     formData.append('category_id', categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append('tax_rate', taxRateValue.id);

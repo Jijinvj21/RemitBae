@@ -86,6 +86,7 @@ function CreditNotePage() {
                             theme.palette.background.paper
                           ),
                       },
+                     
                     }}
                     id="custom-input-demo"
                     options={partyOptions}
@@ -195,6 +196,52 @@ function CreditNotePage() {
             </div>
           </div>
           <div className="center-section">
+          <Box sx={{ width: "100%", marginBottom: "10px", "& .css-g6k71e-MuiAutocomplete-root":{
+                        width: "100% !important",
+                        paddingTop:"10px"
+                      }, }}>
+          <p className="product-name">products</p>
+
+          <Autocomplete
+            sx={{
+              display: "inline-block",
+              "& input": {
+                width: "100%",
+                
+                border: "none",
+                bgcolor: "var(--inputbg-color)",
+                color: (theme) =>
+                  theme.palette.getContrastText(theme.palette.background.paper),
+              },
+              
+            }}
+            id="custom-input-demo"
+            // options={productOptions}
+            // value={selectedProduct}
+            // onChange={handleSelectedProductChange}
+            componentsProps={{
+              popper: {
+                modifiers: [
+                  {
+                    name: "offset",
+                    options: {
+                      offset: [0, -20],
+                    },
+                  },
+                ],
+              },
+            }}
+            renderInput={(params) => (
+              <div ref={params.InputProps.ref}>
+                <input
+                  type="text"
+                  {...params.inputProps}
+                  style={{ height: "10xp" }}
+                />
+              </div>
+            )}
+          />
+        </Box>
             <TransactionTable />
           </div>
           <div
