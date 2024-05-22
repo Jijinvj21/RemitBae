@@ -256,13 +256,48 @@ export const quotationGetAPI = async (id) => {
   }
 };
 
-export const imageUploadtAPI = async (img) => {
+// export const imageUploadtAPI = async (img) => {
+//   try {
+//     const response = await axios.post(`${BASE_URL}/upload/image`,img, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data'
+//       }
+//     });
+//     console.log(response)
+//     return response
+//   } catch (error) {
+//     console.error(error);
+//     throw error.response.data;
+//   }
+// };
+
+
+export const expenceGetAPI = async () => {
   try {
-    const response = await axios.post(`${BASE_URL}/upload/image`,img, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const response = await axios.get(`${BASE_URL}/voucher/expenses/item/getall`,);
+    return response.data
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+// voucher/expenses/item/add
+
+
+export const expensesTypeAddAPI = async (expenses) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/voucher/expenses/item/add`,expenses);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+};
+
+export const expensesDataAddAPI = async (expenses) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/voucher/expenses/add`,expenses);
     console.log(response)
     return response
   } catch (error) {

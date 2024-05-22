@@ -96,6 +96,28 @@ function Sidebar() {
             Credit Note
           </MenuItem>
         </NavLink>
+        <NavLink className="navelink" to="/admin/debit-note">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+        Debit Note
+          </MenuItem>
+        </NavLink>
+        <NavLink className="navelink" to="/admin/expense">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+        Expense
+          </MenuItem>
+        </NavLink>
+
+        <NavLink className="navelink" to="/admin/delivery-challan">
+          <MenuItem
+            icon={<DashboardOutlinedIcon style={{ fontSize: "20px" }} />}
+          >
+Delivery Challan
+          </MenuItem>
+        </NavLink>
         
         {/* Accounts */}
         <MenuItem className="sub_menus">Accounts </MenuItem>

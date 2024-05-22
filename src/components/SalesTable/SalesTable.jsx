@@ -504,6 +504,9 @@ const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(par
           "& .css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper ": {
             maxHeightheight: "calc(5% - 96px) !important",
           },
+          "& .css-74bi4q-MuiDataGrid-overlayWrapper":{
+              height: "60px",
+            },
         }}
       />
     </Box>

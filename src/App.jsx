@@ -17,6 +17,9 @@ import CreditNotePage from "./page/CreditNotePage/CreditNotePage";
 import ProjectDataPage from "./page/ProjectDataPage/ProjectDataPage";
 import PaymenyOut from "./page/PaymentOut/PaymentOut";
 import QuotationView from "./page/QuotationView/QuotationView";
+import DebitNotePage from "./page/DebitNotePage/DebitNotePage";
+import ExpencePage from "./page/ExpencePage/ExpencePage";
+import DeliveryChallan from "./page/DeliveryChallan/DeliveryChallan";
 function App() {
   return (
     <BrowserRouter>
@@ -33,8 +36,11 @@ function App() {
           <Route path="receipt" element={<PaymenyIn/>} />
           <Route path="payment-out" element={<PaymenyOut/>} />
           <Route path="creadit-note" element={<CreditNotePage/>} />
+          <Route path="debit-note" element={<DebitNotePage/>} />
           <Route path="project-data" element={<ProjectDataPage />} />
           <Route path="Quotation-View" element={<QuotationView />} />
+          <Route path="expense" element={<ExpencePage />} />
+          <Route path="delivery-challan" element={<DeliveryChallan />} />
 
 
 

@@ -1,5 +1,6 @@
+
 import { Autocomplete, Box, Button, Typography } from "@mui/material";
-import "./CreditNotePage.scss";
+import "./DebitNotePage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import { useEffect, useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
@@ -8,7 +9,7 @@ import TransactionTable from "../../components/TransactionTable/TransactionTable
 import { categeryGetAPI, gstOptionsGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
 
-function CreditNotePage() {
+function DebitNotePage() {
   const [partyOptions, setPartytOptions] = useState([]);
   const [textValue, setTextValue] = useState("");
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
@@ -407,7 +408,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
 
 
   return (
-    <div className="creaditnotepage">
+    <div className="debitnotepage">
       <h2>Creadit Note</h2>
       <div className="inner-section">
         <div
@@ -780,4 +781,4 @@ const toggleDrawer = (anchor, open) => (event) =>{
   );
 }
 
-export default CreditNotePage;
+export default DebitNotePage;
