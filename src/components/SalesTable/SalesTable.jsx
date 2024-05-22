@@ -483,6 +483,7 @@ const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(par
           {
             width: "100%",
           },
+          
       }}
     >
       <DataGrid
@@ -507,6 +508,10 @@ const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(par
           "& .css-74bi4q-MuiDataGrid-overlayWrapper":{
               height: "60px",
             },
+            "& .MuiDataGrid-columnHeaderTitleContainerContent":{
+              width: "100%",
+            },
+            
         }}
       />
     </Box>
