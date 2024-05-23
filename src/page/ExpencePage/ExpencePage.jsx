@@ -639,6 +639,7 @@ function ExpencePage() {
       quantity: item.qty,
       tax_rate_id: item.taxId,
       rate: item.rate,
+      discount:parseInt(item.descountvalue)
     }));
 
     console.log(rows);
