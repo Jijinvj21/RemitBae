@@ -53,6 +53,8 @@ function ExpencePage() {
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [totalValues, setTotalValues] = useState(0);
   const [isChecked, setIsChecked] = useState(false);
+
+  
   const handleCheckboxChange = (event) => {
     setIsChecked(event.target.checked);
   };
@@ -554,15 +556,19 @@ function ExpencePage() {
                     textAlign: "end",
                   }}
                 >
-                  <p>{rows[0].qty * rows[0].rate}</p>
+                  {/* <p>{parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))*2}</p> */}
+                  <p>{totalValues-(parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))*2)}</p>
                   {rows[0].taxApplied.includes("IGST") ? (
                     <>
-                      <p>{totalValues}</p>
+                      <p>{ (rows[0].qty * rows[0].rate)*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)}</p>
+                      {/* <p>{ parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))}</p> */}
                     </>
                   ) : (
                     <>
-                      <p>{( (rows[0].qty * rows[0].rate)-totalValues) / 2}</p>
-                      <p>{(  (rows[0].qty * rows[0].rate)-totalValues) / 2}</p>
+                                          {/* <p>{ parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))}</p> */}
+
+                      <p>{( (rows[0].qty * rows[0].rate)*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)) / 2}</p>
+                      <p>{(  (rows[0].qty * rows[0].rate)*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)) / 2}</p>
                     </>
                   )}
                 </div>
@@ -676,7 +682,7 @@ function ExpencePage() {
     <div className="expence-page">
       <div style={{ display: "flex" }}>
         <h2>Expense</h2>
-        <div
+        {/* <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -694,7 +700,7 @@ function ExpencePage() {
               />
             }
           />
-        </div>
+        </div> */}
       </div>
       <div className="inner-section">
         <div className="top-section">
