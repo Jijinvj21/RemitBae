@@ -560,12 +560,12 @@ function ExpencePage() {
               >
                 <p>{rows[0].qty*rows[0].rate}</p>
                 {rows[0].taxApplied.includes("IGST") ?<> 
-                          <p>{(rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)*((rows[0].taxApplied.match(/\d+/)[0])/100))}</p>
+                          <p>{totalValues}</p>
 
 </>:<>
                 
-<p>{((rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)*((rows[0].taxApplied.match(/\d+/)[0])/100)))/2}</p>
-<p>{((rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)*((rows[0].taxApplied.match(/\d+/)[0])/100)))/2}</p>
+<p>{(totalValues-rows[0].qty*rows[0].rate)/2}</p>
+<p>{(totalValues-rows[0].qty*rows[0].rate)/2}</p>
               </>
               }
               </div>
@@ -577,7 +577,7 @@ function ExpencePage() {
                   width: "136.5px",
                 }}
               >
-                                <p>{(rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)*((rows[0].taxApplied.match(/\d+/)[0])/100)))}</p>
+                                <p>{totalValues}</p>
 
               </div>
 </div>
@@ -585,12 +585,12 @@ function ExpencePage() {
               <div>
                 <hr style={{ width: "270px" }} />
                 <div style={{ display: "flex",marginLeft:"100px"}}> 
-                {rows[0].taxApplied.includes("IGST") ?<></>:
-                <p>{(rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)*((rows[0].taxApplied.match(/\d+/)[0])/100)))}</p>
+                {rows[0].taxApplied.includes("IGST") ?<><p>{totalValues}</p></>:
+                <p>{totalValues}</p>
 
                 }
                 <p style={{ marginLeft:"100px" }}>
-                {(rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)+((rows[0].qty*rows[0].rate)*((rows[0].taxApplied.match(/\d+/)[0])/100)))}
+                {totalValues}
                 </p>
                 </div>
                 <hr style={{ width: "270px", marginTop:"10px"}} />
