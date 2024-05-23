@@ -16,11 +16,8 @@ import {
   expenceGetAPI,
   expensesDataAddAPI,
   expensesTypeAddAPI,
- 
   partyDataGetAPI,
- 
   productGetAPI,
- 
   projectGetAPI,
 } from "../../service/api/admin";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
@@ -29,13 +26,9 @@ import { renderToString } from "react-dom/server";
 // import ExpenceTable from "../../components/ExpenceTable/ExpenceTable";
 import SalesTable from "../../components/SalesTable/SalesTable";
 
-
 function ExpencePage() {
-
   const [rows, setRows] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected products
-
-
 
   const [description, setDescription] = useState("");
   const [imgExpense, setImgExpense] = useState(null);
@@ -53,117 +46,116 @@ function ExpencePage() {
   const [expenetype, setExpenetype] = useState("None");
   const [paymentSelect, setPaymentSelect] = useState(0);
   const [expenceNo, setExpenceNo] = useState("");
-    // const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
-    const [partyOptions, setPartyOptions] = useState([]);
-    const [productOptions, setProductOptions] = useState([]);
-    const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
-    const [tableRows, setTableRows] = useState([]); // State to hold table rows
-    const [totalValues, setTotalValues] = useState(0);
-    const [isChecked, setIsChecked] = useState(false);
-    const handleCheckboxChange = (event) => {
-      setIsChecked(event.target.checked);
-    };
+  // const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected product
+  const [partyOptions, setPartyOptions] = useState([]);
+  const [productOptions, setProductOptions] = useState([]);
+  const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
+  const [tableRows, setTableRows] = useState([]); // State to hold table rows
+  const [totalValues, setTotalValues] = useState(0);
+  const [isChecked, setIsChecked] = useState(false);
+  const handleCheckboxChange = (event) => {
+    setIsChecked(event.target.checked);
+  };
 
-    useEffect(() => {
-      const updatedRows = rows.map((row) => {
-        const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
-        const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
-    
-        const totalWithoutTax = quantity * rate;
-    
-        const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
-    
-        let taxAppliedamount = 0; // Initializing taxAppliedamount variable
-        if (row.taxAppliedamount) {
-          taxAppliedamount =
-            parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
-        } else if (row.taxApplied?.value) {
-          taxAppliedamount =
-            parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
-        } else if (row.taxApplied) {
-          taxAppliedamount =
-            parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
-        }
-    
-        const total = (
-          (totalWithTax * taxAppliedamount) / 100 +
-          totalWithTax
-        ).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
-    
-        return {
-          ...row,
-          total: total,
-        };
-      });
-    
-      const grandTotal = updatedRows.reduce(
-        (sum, row) => sum + parseFloat(row.total),
-        0
-      ); // Summing up all row totals
-      const roundedGrandTotal = Math.round(grandTotal); // Rounding grandTotal to the nearest integer
-    
-      isChecked ? setRoundOff((grandTotal - roundedGrandTotal).toFixed(2)) : setRoundOff(0);
-      isChecked ? setTotalValues(roundedGrandTotal) : setTotalValues(grandTotal);
-    
-    }, [rows, isChecked]); // Update when rows or isChecked change
-    
+  useEffect(() => {
+    const updatedRows = rows.map((row) => {
+      const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
+      const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
 
-    const handleSelectedProductChange = async (event, newValue) => {
-      if (!newValue) {
-        // Handle the case where newValue is not defined
-        return;
+      const totalWithoutTax = quantity * rate;
+
+      const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
+
+      let taxAppliedamount = 0; // Initializing taxAppliedamount variable
+      if (row.taxAppliedamount) {
+        taxAppliedamount =
+          parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
+      } else if (row.taxApplied?.value) {
+        taxAppliedamount =
+          parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
+      } else if (row.taxApplied) {
+        taxAppliedamount =
+          parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
       }
-    
-      setSelectedProduct(newValue);
-      
-      if (newValue) {
-        // if(newValue.value===-2){
-        //   console.log(newValue.value===-2);
-        //   toggleDrawer("right", true)();
-        // }else{
-  
-          // Set the amount based on the selected product
-          const response = await productGetAPI();
-          console.log(response)
-          const products = response.responseData;
-    
-        const selectedProductData = products.find(
-          (product) => product.name === newValue?.label
-        );
-        console.log(selectedProductData)
-        setSelectedProductDetails(selectedProductData);
-        console.log(selectedProductData);
-        // Add selected product to the table rows
-        const newRow = {
-          id: 1,
-          itemName: selectedProductData.name,
-          qty: 1, // You can set default quantity here
-          unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
-          price: selectedProductData.price, // Assuming selectedProductData has a price property
-          discount: 0, // Assuming default discount is 0
-          taxApplied: 0, // Assuming default tax applied is 0
-          total: selectedProductData.price, // Assuming total is initially equal to price
-        };
-        setTableRows([...tableRows, newRow]);
-      // }
-      }
-    };
-    const fetchData = async () => {
+
+      const total = (
+        (totalWithTax * taxAppliedamount) / 100 +
+        totalWithTax
+      ).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
+
+      return {
+        ...row,
+        total: total,
+      };
+    });
+
+    const grandTotal = updatedRows.reduce(
+      (sum, row) => sum + parseFloat(row.total),
+      0
+    ); // Summing up all row totals
+    const roundedGrandTotal = Math.round(grandTotal); // Rounding grandTotal to the nearest integer
+
+    isChecked
+      ? setRoundOff((grandTotal - roundedGrandTotal).toFixed(2))
+      : setRoundOff(0);
+    isChecked ? setTotalValues(roundedGrandTotal) : setTotalValues(grandTotal);
+  }, [rows, isChecked]); // Update when rows or isChecked change
+
+  const handleSelectedProductChange = async (event, newValue) => {
+    if (!newValue) {
+      // Handle the case where newValue is not defined
+      return;
+    }
+
+    setSelectedProduct(newValue);
+
+    if (newValue) {
+      // if(newValue.value===-2){
+      //   console.log(newValue.value===-2);
+      //   toggleDrawer("right", true)();
+      // }else{
+
+      // Set the amount based on the selected product
       const response = await productGetAPI();
+      console.log(response);
       const products = response.responseData;
-      const productNames = products.map((product) => product.name);
-      const options = productNames.map((name, index) => ({
-        value: `option${index + 1}`,
-        label: name,
-      }));
-      options.unshift({ value: -2, label: "Add" });
-      setProductOptions(options);
-    };
-    useEffect(() => {
-      fetchData();
-      setProductOptions([{ value: -2, label: "Add" }])
-    }, []);
 
+      const selectedProductData = products.find(
+        (product) => product.name === newValue?.label
+      );
+      console.log(selectedProductData);
+      setSelectedProductDetails(selectedProductData);
+      console.log(selectedProductData);
+      // Add selected product to the table rows
+      const newRow = {
+        id: 1,
+        itemName: selectedProductData.name,
+        qty: 1, // You can set default quantity here
+        unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
+        price: selectedProductData.price, // Assuming selectedProductData has a price property
+        discount: 0, // Assuming default discount is 0
+        taxApplied: 0, // Assuming default tax applied is 0
+        total: selectedProductData.price, // Assuming total is initially equal to price
+      };
+      setTableRows([...tableRows, newRow]);
+      // }
+    }
+  };
+  const fetchData = async () => {
+    const response = await productGetAPI();
+    const products = response.responseData;
+    const productNames = products.map((product) => product.name);
+    const options = productNames.map((name, index) => ({
+      value: `option${index + 1}`,
+      label: name,
+    }));
+    options.unshift({ value: -2, label: "Add" });
+    setProductOptions(options);
+  };
+  useEffect(() => {
+    fetchData();
+    setProductOptions([{ value: -2, label: "Add" }]);
+  }, []);
 
   const handlepaymenttype = (e) => {
     setPaymentSelect(e.target.value);
@@ -214,12 +206,6 @@ function ExpencePage() {
     setTotal(e.target.value);
   };
 
-
-
-
-
- 
-
   const expenceGetAPIGET = () => {
     // Make both API calls concurrently
     Promise.all([expenceGetAPI(), projectGetAPI()])
@@ -264,25 +250,23 @@ function ExpencePage() {
   useEffect(() => {
     expenceGetAPIGET();
     partyDataGetAPI()
-    .then((data) => {
-      console.log("partyData:", data);
-      // setTaxOptions(data);
+      .then((data) => {
+        console.log("partyData:", data);
+        // setTaxOptions(data);
 
-      // Transform data and set it to state
-      const partyData = data.responseData.map((entry) => ({
-        value: entry.id,
-        label: entry.name,
-      }));
-      console.log(partyData);
-      partyData.unshift({ value: -2, label: "None" })
+        // Transform data and set it to state
+        const partyData = data.responseData.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+        }));
+        console.log(partyData);
+        partyData.unshift({ value: -2, label: "None" });
 
-      setPartyOptions(partyData);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-
-   
+        setPartyOptions(partyData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   const inputformodal = [
@@ -304,9 +288,6 @@ function ExpencePage() {
       ],
     },
   ];
-
-
-
 
   const handleInvoiceDateChange = (e) => {
     setInvoiceDate(e.target.value);
@@ -399,18 +380,18 @@ function ExpencePage() {
     setSelectedExpence({ selectedOptionObject });
   };
 
-  const handlePartyName= (e) => {
+  const handlePartyName = (e) => {
     console.log("e.target", e.target.value === "-2");
     // if (e.target.value === "-2") {
     //   handleOpen();
     // }
-   
+
     console.log("event.target", e.target.value);
     const selectedOptionObject = partyOptions.find(
       (option) => option.value == e.target.value
     );
 
-    setSelectedParty( selectedOptionObject );
+    setSelectedParty(selectedOptionObject);
   };
 
   const handleexpensesadd = () => {
@@ -500,19 +481,35 @@ function ExpencePage() {
               <hr style={{ width: "300px" }} />
               <p style={{ marginLeft: "20px" }}>Particulars</p>
               <hr style={{ width: "300px" }} />
-              <p style={{ fontSize: "13px", width: "600px" }}>{selectedExpence.selectedOptionObject.label}</p>
-              {rows[0].taxApplied.includes("IGST") ?<>                <p style={{ fontSize: "13px", width: "600px" }}>{rows[0].taxApplied}</p>
-</>:<>
-<p style={{ fontSize: "13px", width: "600px" }}>CGST@  
-  {(rows[0].taxApplied && rows[0].taxApplied.match(/\d+/)[0])/2} %
-</p>
-                <p style={{ fontSize: "13px", width: "600px" }}>SGST@  
-  {(rows[0].taxApplied && rows[0].taxApplied.match(/\d+/)[0])/2} %
-</p>
-              </>
-              }
-              <p style={{ fontSize: "13px", width: "600px" }}>{selectedParty.label}</p>
-
+              <p style={{ fontSize: "13px", width: "600px" }}>
+                {selectedExpence.selectedOptionObject.label}
+              </p>
+              {rows[0].taxApplied.includes("IGST") ? (
+                <>
+                  {" "}
+                  <p style={{ fontSize: "13px", width: "600px" }}>
+                    {rows[0].taxApplied}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: "13px", width: "600px" }}>
+                    CGST@
+                    {(rows[0].taxApplied &&
+                      rows[0].taxApplied.match(/\d+/)[0]) / 2}{" "}
+                    %
+                  </p>
+                  <p style={{ fontSize: "13px", width: "600px" }}>
+                    SGST@
+                    {(rows[0].taxApplied &&
+                      rows[0].taxApplied.match(/\d+/)[0]) / 2}{" "}
+                    %
+                  </p>
+                </>
+              )}
+              <p style={{ fontSize: "13px", width: "600px" }}>
+                {selectedParty.label}
+              </p>
 
               <p
                 style={{ marginLeft: "20px", fontSize: "13px", width: "600px" }}
@@ -531,9 +528,7 @@ function ExpencePage() {
               <div style={{ display: "flex" }}>
                 <div style={{ borderRight: "1px solid black" }}>
                   <hr style={{ width: "135px" }} />
-                  <p style={{ marginLeft: "20px", textAlign: "end" }}>
-                    Debit
-                  </p>
+                  <p style={{ marginLeft: "20px", textAlign: "end" }}>Debit</p>
                   <hr style={{ width: "135px" }} />
                 </div>
                 <div>
@@ -542,58 +537,60 @@ function ExpencePage() {
                   <hr style={{ width: "135px" }} />
                 </div>
               </div>
-<div  style={{
-                width: "50%",
-                display: "flex",
-                justifyContent: "space-between",
-              }}>
-
               <div
                 style={{
+                  width: "50%",
                   display: "flex",
-                  flexDirection:"column",
-                  borderRight: "1px solid black",
-                  height: "200px",
-                  width: "350.5px",
-                  textAlign:"end"
+                  justifyContent: "space-between",
                 }}
               >
-                <p>{rows[0].qty*rows[0].rate}</p>
-                {rows[0].taxApplied.includes("IGST") ?<> 
-                          <p>{totalValues}</p>
-
-</>:<>
-                
-<p>{(totalValues-rows[0].qty*rows[0].rate)/2}</p>
-<p>{(totalValues-rows[0].qty*rows[0].rate)/2}</p>
-              </>
-              }
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    borderRight: "1px solid black",
+                    height: "200px",
+                    width: "350.5px",
+                    textAlign: "end",
+                  }}
+                >
+                  <p>{rows[0].qty * rows[0].rate}</p>
+                  {rows[0].taxApplied.includes("IGST") ? (
+                    <>
+                      <p>{totalValues}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>{(totalValues - rows[0].qty * rows[0].rate) / 2}</p>
+                      <p>{(totalValues - rows[0].qty * rows[0].rate) / 2}</p>
+                    </>
+                  )}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    // borderRight: "1px solid black",
+                    height: "20px",
+                    width: "136.5px",
+                  }}
+                >
+                  <p>{totalValues}</p>
+                </div>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  // borderRight: "1px solid black",
-                  height: "20px",
-                  width: "136.5px",
-                }}
-              >
-                                <p>{totalValues}</p>
-
-              </div>
-</div>
 
               <div>
                 <hr style={{ width: "270px" }} />
-                <div style={{ display: "flex",marginLeft:"100px"}}> 
-                {rows[0].taxApplied.includes("IGST") ?<><p>{totalValues}</p></>:
-                <p>{totalValues}</p>
-
-                }
-                <p style={{ marginLeft:"100px" }}>
-                {totalValues}
-                </p>
+                <div style={{ display: "flex", marginLeft: "100px" }}>
+                  {rows[0].taxApplied.includes("IGST") ? (
+                    <>
+                      <p>{totalValues}</p>
+                    </>
+                  ) : (
+                    <p>{totalValues}</p>
+                  )}
+                  <p style={{ marginLeft: "100px" }}>{totalValues}</p>
                 </div>
-                <hr style={{ width: "270px", marginTop:"10px"}} />
+                <hr style={{ width: "270px", marginTop: "10px" }} />
               </div>
             </div>
           </div>
@@ -636,31 +633,35 @@ function ExpencePage() {
 
   const handleExpenseAdd = async () => {
     // Transform the rows array
-    const newArray = rows.map(item => ({
-      product_id:item.id,
-      unit_id:item.unit_id,
-      quantity:item.qty,
-      tax_rate_id:item.taxId,
-      rate:item.rate,
-
+    const newArray = rows.map((item) => ({
+      product_id: item.id,
+      unit_id: item.unit_id,
+      quantity: item.qty,
+      tax_rate_id: item.taxId,
+      rate: item.rate,
     }));
-  
-    
-    console.log(rows)
-  
-    const formData = new FormData();
-    formData.append('project_id', selectedExpence.selectedOptionObject.value);
-    formData.append('party_id', selectedParty.value);
-    formData.append('expenses_category_id', selectedExpence.selectedOptionObject.value);
-    formData.append('is_project_expense', selectedExpence.selectedOptionObject.isProjectExpance);
-    formData.append('date', invoiceDate);
-    formData.append('payment_type', paymentSelect);
-    formData.append('description', description);
-    formData.append('serial_no', expenceNo);
-    formData.append('expenses', JSON.stringify(newArray));
 
-    console.log(formData)
-  
+    console.log(rows);
+
+    const formData = new FormData();
+    formData.append("project_id", selectedExpence.selectedOptionObject.value);
+    formData.append("party_id", selectedParty.value);
+    formData.append(
+      "expenses_category_id",
+      selectedExpence.selectedOptionObject.value
+    );
+    formData.append(
+      "is_project_expense",
+      selectedExpence.selectedOptionObject.isProjectExpance
+    );
+    formData.append("date", invoiceDate);
+    formData.append("payment_type", paymentSelect);
+    formData.append("description", description);
+    formData.append("serial_no", expenceNo);
+    formData.append("expenses", JSON.stringify(newArray));
+
+    console.log(formData);
+
     expensesDataAddAPI(formData)
       .then((data) => {
         console.log(data);
@@ -669,8 +670,6 @@ function ExpencePage() {
         console.log(err);
       });
   };
-  
-
 
   return (
     <div className="expence-page">
@@ -698,8 +697,8 @@ function ExpencePage() {
       </div>
       <div className="inner-section">
         <div className="top-section">
-          <div style={{ display:"flex",gap:"10px" }}>
-          <InputComponent
+          <div style={{ display: "flex", gap: "10px" }}>
+            <InputComponent
               label="Expense Category"
               handleChange={handleExpencename}
               // intputName={input.intputName}
@@ -715,7 +714,6 @@ function ExpencePage() {
               // value={input.value}
               options={partyOptions}
             />
-          
           </div>
 
           <div className="rightinputs">
@@ -738,66 +736,65 @@ function ExpencePage() {
         </div>
 
         <div className="middle-section">
-          
           {/* <ExpenceTable rows={rows} setRows={setRows} setSelectedProduct={setSelectedProduct} selectedProduct={selectedProduct} /> */}
 
-          <Box sx={{  mx: 1 }}>
-        <Box sx={{ width: "100%", marginBottom: "10px" }}>
-          <p className="product-name">products</p>
+          <Box sx={{ mx: 1 }}>
+            <Box sx={{ width: "100%", marginBottom: "10px" }}>
+              <p className="product-name">products</p>
 
-          <Autocomplete
-            sx={{
-              display: "inline-block",
-              "& input": {
-                width: "100%",
-                border: "none",
-                bgcolor: "var(--inputbg-color)",
-                color: (theme) =>
-                  theme.palette.getContrastText(theme.palette.background.paper),
-              },
-              
-            }}
-            id="custom-input-demo"
-            options={productOptions}
-            value={selectedProduct}
-            onChange={handleSelectedProductChange}
-            componentsProps={{
-              popper: {
-                modifiers: [
-                  {
-                    name: "offset",
-                    options: {
-                      offset: [0, -20],
-                    },
+              <Autocomplete
+                sx={{
+                  display: "inline-block",
+                  "& input": {
+                    width: "100%",
+                    border: "none",
+                    bgcolor: "var(--inputbg-color)",
+                    color: (theme) =>
+                      theme.palette.getContrastText(
+                        theme.palette.background.paper
+                      ),
                   },
-                ],
-              },
-            }}
-            renderInput={(params) => (
-              <div ref={params.InputProps.ref}>
-                <input
-                  type="text"
-                  {...params.inputProps}
-                  style={{ height: "10xp" }}
-                />
-              </div>
-            )}
-          />
-        </Box>
-        <div style={{ overflow: "auto" }}>
-          <Box>
-            <SalesTable
-              selectedProductData={selectedProductDetails}
-              setTotalValues={setTotalValues}
-              totalValues={totalValues}
-              setRows={setRows}
-              rows={rows}
-            />{" "}
-            {/* Pass tableRows as props to SalesTable */}
+                }}
+                id="custom-input-demo"
+                options={productOptions}
+                value={selectedProduct}
+                onChange={handleSelectedProductChange}
+                componentsProps={{
+                  popper: {
+                    modifiers: [
+                      {
+                        name: "offset",
+                        options: {
+                          offset: [0, -20],
+                        },
+                      },
+                    ],
+                  },
+                }}
+                renderInput={(params) => (
+                  <div ref={params.InputProps.ref}>
+                    <input
+                      type="text"
+                      {...params.inputProps}
+                      style={{ height: "10xp" }}
+                    />
+                  </div>
+                )}
+              />
+            </Box>
+            <div style={{ overflow: "auto" }}>
+              <Box>
+                <SalesTable
+                  selectedProductData={selectedProductDetails}
+                  setTotalValues={setTotalValues}
+                  totalValues={totalValues}
+                  setRows={setRows}
+                  rows={rows}
+                />{" "}
+                {/* Pass tableRows as props to SalesTable */}
+              </Box>
+            </div>
           </Box>
-        </div>
-      </Box>
-        
         </div>
         <div className="bottom-section">
           <div>
@@ -864,8 +861,9 @@ function ExpencePage() {
               width: "40%",
             }}
           >
-            <InputComponent type="checkbox" 
-             handleChange={handleCheckboxChange}
+            <InputComponent
+              type="checkbox"
+              handleChange={handleCheckboxChange}
             />
             <InputComponent
               label="Round off"
@@ -915,7 +913,7 @@ function ExpencePage() {
           </Button>
         </div>
       </div>
-    
+
       <Modal
         open={open}
         onClose={handleClose}
