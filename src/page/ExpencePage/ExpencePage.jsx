@@ -557,18 +557,18 @@ function ExpencePage() {
                   }}
                 >
                   {/* <p>{parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))*2}</p> */}
-                  <p>{totalValues-(parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))*2)}</p>
+                  <p>{((rows[0].qty * rows[0].rate)-(rows[0].amountafterdescount||0))}</p>
                   {rows[0].taxApplied.includes("IGST") ? (
                     <>
-                      <p>{ (rows[0].qty * rows[0].rate)*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)}</p>
+                      <p>{ ((rows[0].qty * rows[0].rate)-(rows[0].amountafterdescount||0))*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)}</p>
                       {/* <p>{ parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))}</p> */}
                     </>
                   ) : (
                     <>
                                           {/* <p>{ parseFloat(rows[0].taxApplied.split("@")[1].replace("%", ""))}</p> */}
 
-                      <p>{( (rows[0].qty * rows[0].rate)*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)) / 2}</p>
-                      <p>{(  (rows[0].qty * rows[0].rate)*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))|| 0)/100)) / 2}</p>
+                      <p>{(((rows[0].qty * rows[0].rate)-(rows[0].amountafterdescount||0))*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))/2|| 0)/100))}</p>
+                      <p>{(((rows[0].qty * rows[0].rate)-(rows[0].amountafterdescount||0))*(( parseFloat(rows[0].taxApplied?.split("@")[1]?.replace("%", ""))/2|| 0)/100))}</p>
                     </>
                   )}
                 </div>
