@@ -561,8 +561,8 @@ function ExpencePage() {
                     </>
                   ) : (
                     <>
-                      <p>{(totalValues - rows[0].qty * rows[0].rate) / 2}</p>
-                      <p>{(totalValues - rows[0].qty * rows[0].rate) / 2}</p>
+                      <p>{( (rows[0].qty * rows[0].rate)-totalValues) / 2}</p>
+                      <p>{(  (rows[0].qty * rows[0].rate)-totalValues) / 2}</p>
                     </>
                   )}
                 </div>
