@@ -25,6 +25,7 @@ export default function FullFeaturedCrudGrid({
           value: entry.percentage,
           label: entry.name ? `${entry.name} ${entry.percentage}` : "none",
           taxlabel: entry.percentage,
+          id:entry.id
         }));
         setTaxOptions(transformedData);
       })
@@ -44,6 +45,8 @@ export default function FullFeaturedCrudGrid({
         itemCode: selectedProductData.itemCode,
         name: selectedProductData.name,
         unit: selectedProductData.unit,
+        unit_id: selectedProductData.unit_id,
+
         rate: selectedProductData.rate,
         taxApplied: ` ${selectedProductData.tax_rate?.name} ${selectedProductData.tax_rate?.percentage}`,
         qty: 1, 
@@ -307,13 +310,9 @@ export default function FullFeaturedCrudGrid({
       field: "taxApplied",
       headerName: "Tax Applied",
       flex: 2,
-      // editable: true,
       type: "text",
-      // valueOptions: ["Credit card", "Wire transfer", "Cash"],
       renderHeader: () => (
-        <div
-          style={{ width: "100%", display: "flex", flexDirection: "column" }}
-        >
+        <div style={{ width: "100%", display: "flex", flexDirection: "column" }}>
           <div style={{ margin: "auto" }}>Tax %</div>
           <hr style={{ width: "100%" }} />
           <div style={{ display: "flex" }}>
@@ -331,66 +330,56 @@ export default function FullFeaturedCrudGrid({
       ),
       renderCell: (params) => {
         const handleTaxChange = (event) => {
-          console.log("newvalue:", event.target.value);
+          const selectedTax = taxOptions.find(option => option.value === event.target.value);
           const editedRow = {
             ...params.row,
-            taxAppliedamount: event.target.value,
+            taxApplied: selectedTax ? `${selectedTax.label}` : '',
+            taxId: selectedTax ? selectedTax.id : "0",
           };
           const updatedRows = rows.map((row) =>
             row.id === params.row.id ? editedRow : row
           );
           setRows(updatedRows);
-          console.log(updatedRows);
         };
-
-        console.log(
-          "data to show in select",
-          params.row.taxAppliedamount
-                    ? params.row.taxAppliedamount.length
-                    : params.row.taxApplied.split("GST@ ")[1].length
-           
-        );
-        const calc=()=>{
-          const taxvalue=( params.row.taxApplied
+    
+        const calc = () => {
+          const taxValue = params.row.taxApplied
             ? params.row.taxAppliedamount
-              ? parseInt(params.row.taxAppliedamount?.replace("%", " "))
-              : parseFloat(
-                  params.row?.taxApplied?.split("@")[1].replace("%", "")
-                )
-            : parseInt(params.row.taxAppliedamount?.replace("%", " ")) )
-            const totalval=(params.row.qty*params.row.rate)
-const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(params.row.amountafterdescount ||0))
-            const taxApplied= ((totaldis*taxvalue) / 100);
-
-            return taxApplied;
-
+              ? parseFloat(params.row.taxAppliedamount)
+              : parseFloat(params.row.taxApplied.split(" ")[1])
+            : 0;
+    
+          const totalVal = (params.row.qty * params.row.rate);
+          const totalDiscount = totalVal - (params.row.amountafterdescount || 0);
+          const taxApplied = ((totalDiscount * taxValue) / 100);
+    
+          return taxApplied;
         }
+    
         return (
           <div style={{ width: "100%", display: "flex" }}>
-              <select
-                value={
-                  params.row.taxAppliedamount
-                    ? params.row.taxAppliedamount
-                    : params.row.taxApplied.split("GST@ ")[1]
-                }
-                onChange={handleTaxChange}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "none",
-                  backgroundColor: "white",
-                  margin: "0px",
-                }}
-              >
-                {taxOptions.map((option) => {
-                  console.log(taxOptions,"taxooo")
-                  return(
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                )})}
-              </select>
-              <div
+            <select
+              value={
+                params.row.taxAppliedamount
+                  ? params.row.taxAppliedamount
+                  : params.row.taxApplied.split(" ")[1]
+              }
+              onChange={handleTaxChange}
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "none",
+                backgroundColor: "white",
+                margin: "0px",
+              }}
+            >
+              {taxOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <div
               style={{
                 height: "50px",
                 width: "2px",
@@ -405,20 +394,17 @@ const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(par
                 border: "none",
                 paddingBottom: "20px",
                 paddingTop: "20px",
-                // height: "7.8px",
                 background: "white",
               }}
               type="text"
-              value={calc()
-              
-              }
+              value={calc()||0}
               disabled
             />
           </div>
         );
       },
     },
-    {
+        {
       field: "total",
       type: "number",
       headerName: "Total",

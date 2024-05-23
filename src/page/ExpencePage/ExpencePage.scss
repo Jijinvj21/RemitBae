@@ -57,5 +57,33 @@
       border: 1px solid black;
       border-radius: 20px;
     }
+    
+    .product-name{
+      color: rgba(0, 0, 0, 0.6);
+      font-weight: 900;
+      font-size: 14px;
+      line-height: 1.4375em;
+      letter-spacing: 0.00938em;
+      padding-bottom: 10px;
+     
+
+    }
+    .css-g6k71e-MuiAutocomplete-root {
+      width:100% ;
+      input{
+    background-color: var(--inputbg-color);
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    padding-left: 5px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+
+    margin-top: 4px;
+// width: 97%;     
+ }
+    }
+
   }
   

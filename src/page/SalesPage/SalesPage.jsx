@@ -16,7 +16,16 @@ import {
 import { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import InputComponent from "../../components/InputComponent/InputComponent";
-import { categeryGetAPI, clientDataGetAPI, createVoucherAPI, gstOptionsGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import {
+  categeryGetAPI,
+  clientDataGetAPI,
+  createVoucherAPI,
+  gstOptionsGetAPI,
+  productAddAPI,
+  productGetAPI,
+  projectGetAPI,
+  unitsDataGetAPI,
+} from "../../service/api/admin";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
 
 const style = {
@@ -43,67 +52,64 @@ function SalesPage() {
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [inputValue, setInputValue] = useState(""); // State to hold the value of the new input
   const [open, setOpen] = useState(false);
-  const [clinedOptions,setClientOptions]=useState([])
+  const [clinedOptions, setClientOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState("none");
   const [selectedCustomer, setSelectedCustomer] = useState("none");
   const [rows, setRows] = useState([]);
   const [toggle, setToggle] = useState(true);
   const [ProductDrawerFormData, setProductDrawerFormData] = useState({
-    name:"",
-    quantity:"",
-    rate:0,
-    hsn:"",
+    name: "",
+    quantity: "",
+    rate: 0,
+    hsn: "",
   });
-  const [categoryOptions,setCategoryOptions]=useState([])
-  const [projectOptions,setProjectOptions]=useState([])
-  const [unitOptions,setUnitOptions]=useState([])
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [projectOptions, setProjectOptions] = useState([]);
+  const [unitOptions, setUnitOptions] = useState([]);
   const [taxRateValue, setTaxRateValue] = useState({});
-  const [selectedValue, setSelectedValue] = useState('');
+  const [selectedValue, setSelectedValue] = useState("");
   const [state, setState] = useState({
     right: false,
   });
-  const [projectValue, setProjectValue] = useState('');
-  const [categoryValue, setCategoryValue] = useState('');
+  const [projectValue, setProjectValue] = useState("");
+  const [categoryValue, setCategoryValue] = useState("");
   const [img, setImg] = useState(null);
-  const [taxOptions,setTaxOptions]=useState([])
-
-
-
+  const [taxOptions, setTaxOptions] = useState([]);
 
   const getTaxOptionsFormAPI = () => {
-    gstOptionsGetAPI().then((data) => {
-      console.log("tax:", data);
-    
-      const transformedData = data.map(entry => ({
-        value: entry.percentage,
-        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
-        taxlabel: entry.percentage,
-        id:entry.id
+    gstOptionsGetAPI()
+      .then((data) => {
+        console.log("tax:", data);
 
-      }));
-      console.log(transformedData)
-      setTaxOptions(transformedData);
-    }).catch((err) => {
-      console.log(err);
-    });
-  }
+        const transformedData = data.map((entry) => ({
+          value: entry.percentage,
+          label: entry.name ? `${entry.name} ${entry.percentage}` : "none",
+          taxlabel: entry.percentage,
+          id: entry.id,
+        }));
+        console.log(transformedData);
+        setTaxOptions(transformedData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const getCategeryOptionsFormAPI = () => {
     categeryGetAPI()
       .then((data) => {
         console.log("category:", data);
-        
-        const categoryOptions = data?.responseData.map(entry => ({
+
+        const categoryOptions = data?.responseData.map((entry) => ({
           value: entry.id,
-          label:`${entry.name}`,
-          
+          label: `${entry.name}`,
         }));
         categoryOptions.unshift({ value: 0, label: "None" });
-  
-        console.log("categoryOptions",categoryOptions);
+
+        console.log("categoryOptions", categoryOptions);
         setCategoryOptions(categoryOptions);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   };
@@ -111,18 +117,17 @@ function SalesPage() {
     projectGetAPI()
       .then((data) => {
         console.log("projects:", data);
-        
-        const projectdData = data?.responseData.map(entry => ({
+
+        const projectdData = data?.responseData.map((entry) => ({
           value: entry.id,
-          label:`${entry.name} ( ${entry.client_name} )`,
-          
+          label: `${entry.name} ( ${entry.client_name} )`,
         }));
         projectdData.unshift({ value: 0, label: "None" });
-  
-        console.log("projectdData",projectdData);
+
+        console.log("projectdData", projectdData);
         setProjectOptions(projectdData);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   };
@@ -130,103 +135,95 @@ function SalesPage() {
     unitsDataGetAPI()
       .then((data) => {
         console.log("units:", data);
-        
+
         // Transform data and set it to state
-        const unitsdData = data?.responseData.map(entry => ({
+        const unitsdData = data?.responseData.map((entry) => ({
           value: entry.id,
-          label: entry.name ,
-          
+          label: entry.name,
         }));
-        unitsdData.unshift({ value: 0, label: "None" })
-        console.log("unitsdData",unitsdData);
+        unitsdData.unshift({ value: 0, label: "None" });
+        console.log("unitsdData", unitsdData);
         setUnitOptions(unitsdData);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   };
 
   const handleClose = () => setOpen(false);
 
-
   useEffect(() => {
-    getTaxOptionsFormAPI()
-    getUnitOptionsFormAPI()
-    getClientOptionsFormAPI()
-    getCategeryOptionsFormAPI()
-    clientDataGetAPI().then((data) => {
-      console.log("clientData:", data);
-      // setTaxOptions(data);
+    getTaxOptionsFormAPI();
+    getUnitOptionsFormAPI();
+    getClientOptionsFormAPI();
+    getCategeryOptionsFormAPI();
+    clientDataGetAPI()
+      .then((data) => {
+        console.log("clientData:", data);
+        // setTaxOptions(data);
 
-      // Transform data and set it to state
-      const clientData = data.responseData.map(entry => ({
-        value: entry.id,
-        label: `${entry.project_name} ( ${entry.name} )`,
-
-      }));
-      console.log(clientData)
-      setClientOptions(clientData);
-    }).catch((err) => {
-      console.log(err);
-    });
-  }, [])
+        // Transform data and set it to state
+        const clientData = data.responseData.map((entry) => ({
+          value: entry.id,
+          label: `${entry.project_name} ( ${entry.name} )`,
+        }));
+        console.log(clientData);
+        setClientOptions(clientData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
   useEffect(() => {
     const updatedRows = rows.map((row) => {
       const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
       const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
-      const discount = parseFloat(row.amountafterdescount) || 0; // Parsing discount to float, defaulting to 0 if NaN
-      const taxApplied = parseFloat(row.taxApplied?.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
-  
-      // Calculate total amount without tax
+
       const totalWithoutTax = quantity * rate;
-  
-      // Apply discount if applicable
-      // let discountedTotal = totalWithoutTax; // Commented out as it's not used
-  
-      // Apply tax
+
       const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
-  
+
       let taxAppliedamount = 0; // Initializing taxAppliedamount variable
       if (row.taxAppliedamount) {
-        taxAppliedamount = parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
+        taxAppliedamount =
+          parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
       } else if (row.taxApplied?.value) {
-        taxAppliedamount = parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
+        taxAppliedamount =
+          parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
       } else if (row.taxApplied) {
-        taxAppliedamount = parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
+        taxAppliedamount =
+          parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
       }
-  
-      // Calculate total with tax
-      const total = (((totalWithTax * taxAppliedamount) / 100) + totalWithTax).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
-  
+
+      const total = (
+        (totalWithTax * taxAppliedamount) / 100 +
+        totalWithTax
+      ).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
+
       return {
         ...row,
-        total: total, // Setting the total property of the row
+        total: total,
       };
     });
-  
-    // Sum up all total values
-    const grandTotal = updatedRows.reduce((sum, row) => sum + parseFloat(row.total), 0); // Summing up all row totals
-  
-    // Update the grand total value
+
+    const grandTotal = updatedRows.reduce(
+      (sum, row) => sum + parseFloat(row.total),
+      0
+    ); // Summing up all row totals
+
     setTotalValues(grandTotal);
   }, [rows]); // Update when rows change
-  
-
-
-
-
-
 
   const handleOptionSelect = (e) => {
     console.log(e.target.value);
-    console.log(e.target)
+    console.log(e.target);
     const selectedOption = e.target.value;
     if (selectedOption === "addNew") {
       setOpen(true);
     } else {
       setOpen(false);
       // Handle selection of other options
-      setSelectedCustomer(e.target.value)
+      setSelectedCustomer(e.target.value);
     }
   };
   const handleInputChange = (e) => {
@@ -253,7 +250,7 @@ function SalesPage() {
   };
   useEffect(() => {
     fetchData();
-    setProductOptions([{ value: -2, label: "Add" }])
+    setProductOptions([{ value: -2, label: "Add" }]);
   }, []);
 
   const handleSelectedProductChange = async (event, newValue) => {
@@ -261,80 +258,75 @@ function SalesPage() {
       // Handle the case where newValue is not defined
       return;
     }
-  
-    setSelectedProduct(newValue);
-    
-    if (newValue) {
-      if(newValue.value===-2){
-        console.log(newValue.value===-2);
-        toggleDrawer("right", true)();
-      }else{
 
+    setSelectedProduct(newValue);
+
+    if (newValue) {
+      if (newValue.value === -2) {
+        console.log(newValue.value === -2);
+        toggleDrawer("right", true)();
+      } else {
         // Set the amount based on the selected product
         const response = await productGetAPI();
-        console.log(response)
+        console.log(response);
         const products = response.responseData;
-  
-      const selectedProductData = products.find(
-        (product) => product.name === newValue?.label
-      );
-      console.log(selectedProductData)
-      setSelectedProductDetails(selectedProductData);
-      console.log(selectedProductData);
-      // Add selected product to the table rows
-      const newRow = {
-        id: 1,
-        itemName: selectedProductData.name,
-        qty: 1, // You can set default quantity here
-        unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
-        price: selectedProductData.price, // Assuming selectedProductData has a price property
-        discount: 0, // Assuming default discount is 0
-        taxApplied: 0, // Assuming default tax applied is 0
-        total: selectedProductData.price, // Assuming total is initially equal to price
-      };
-      setTableRows([...tableRows, newRow]);
-    }
+
+        const selectedProductData = products.find(
+          (product) => product.name === newValue?.label
+        );
+        console.log(selectedProductData);
+        setSelectedProductDetails(selectedProductData);
+        console.log(selectedProductData);
+        // Add selected product to the table rows
+        const newRow = {
+          id: 1,
+          itemName: selectedProductData.name,
+          qty: 1, // You can set default quantity here
+          unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
+          price: selectedProductData.price, // Assuming selectedProductData has a price property
+          discount: 0, // Assuming default discount is 0
+          taxApplied: 0, // Assuming default tax applied is 0
+          total: selectedProductData.price, // Assuming total is initially equal to price
+        };
+        setTableRows([...tableRows, newRow]);
+      }
     }
   };
-  
-  
-
 
   const handleChangeAmout = (e) => {
     setInputData(e.target.value);
   };
 
-
-  const handleAddVoucher= async()=>{
-    const newArray = await rows.map(item => ({
+  const handleAddVoucher = async () => {
+    const newArray = await rows.map((item) => ({
       product_id: item.id,
       quantity: item.qty,
-      Price: item.rate ,
-      discount:item.amountafterdescount,
+      Price: item.rate,
+      discount: item.amountafterdescount,
     }));
-    const salesVoucher ={
-      credit_sale:false,
-      payment_type:selectedOption==="cash"?5:10,
-      billing_address:"",
-      customer:parseInt(selectedCustomer),
-      total:parseFloat(totalValues),
-      product_details:newArray
-    }
-    
-    console.log(salesVoucher)
-    console.log(rows)
-    createVoucherAPI(salesVoucher).then((data)=>{
-      console.log(data)
-    })
-    .catch((err)=>{
-      console.log(err)
-    })
-  }
+    const salesVoucher = {
+      credit_sale: false,
+      payment_type: selectedOption === "cash" ? 5 : 10,
+      billing_address: "",
+      customer: parseInt(selectedCustomer),
+      total: parseFloat(totalValues),
+      product_details: newArray,
+    };
 
+    console.log(salesVoucher);
+    console.log(rows);
+    createVoucherAPI(salesVoucher)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const handleDrawerSelectChange = (event) => {
     setSelectedValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const handleDrawerChange = (e) => {
@@ -344,10 +336,14 @@ function SalesPage() {
       [name]: value,
     }));
   };
-  const toggleDrawer = (anchor, open) => (event) =>{
-    console.log(event)
+  const toggleDrawer = (anchor, open) => (event) => {
+    console.log(event);
     console.log("Toggle Drawer:", anchor, open);
-    if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
+    if (
+      event &&
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
       return;
     }
     setState({ ...state, [anchor]: open });
@@ -358,49 +354,50 @@ function SalesPage() {
     setImg(file);
   };
   const handleTaxRateChange = (event) => {
-    console.log(event.target.value)
-    const selectedOptionObject = taxOptions.find(option => option.taxlabel == event.target.value);
+    console.log(event.target.value);
+    const selectedOptionObject = taxOptions.find(
+      (option) => option.taxlabel == event.target.value
+    );
     console.log(selectedOptionObject);
     // setTaxRateValue({
     //   label: selectedOptionObject ? selectedOptionObject.label : "", // Handle case where selectedOptionObject is undefined
     //   value: event.target.value
     // });
-    setTaxRateValue(selectedOptionObject)
+    setTaxRateValue(selectedOptionObject);
   };
   const handleSelectChange = (event) => {
     setSelectedValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const handleSelectProject = (event) => {
     setProjectValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const handleSelectCatogary = (event) => {
     setCategoryValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
-
 
   const handleDrawerAddProducts = () => {
     const formData = new FormData();
-  
-    formData.append('name', ProductDrawerFormData.name);
-    formData.append('hsn', ProductDrawerFormData.hsn);
-    formData.append('rate', parseInt(ProductDrawerFormData.rate));
-    formData.append('quantity', parseInt(ProductDrawerFormData.quantity));
-    formData.append('unit', selectedValue);
-    formData.append('projectid', parseInt(projectValue));
-    formData.append('is_master_product', toggle);
-    formData.append('category_id', categoryValue);
+
+    formData.append("name", ProductDrawerFormData.name);
+    formData.append("hsn", ProductDrawerFormData.hsn);
+    formData.append("rate", parseInt(ProductDrawerFormData.rate));
+    formData.append("quantity", parseInt(ProductDrawerFormData.quantity));
+    formData.append("unit", selectedValue);
+    formData.append("projectid", parseInt(projectValue));
+    formData.append("is_master_product", toggle);
+    formData.append("category_id", categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
-    formData.append('tax_rate', taxRateValue.id);
-    formData.append('image', img);
-  
+    formData.append("tax_rate", taxRateValue.id);
+    formData.append("image", img);
+
     productAddAPI(formData)
       .then((data) => {
-        fetchData()
+        fetchData();
         if (data.status === 200) {
           setProductDrawerFormData({
             name: "",
@@ -426,8 +423,6 @@ function SalesPage() {
       intputName: "name",
       label: " Product Name",
       type: "text",
-      
-      
     },
     {
       handleChange: handleDrawerChange,
@@ -441,22 +436,25 @@ function SalesPage() {
       label: "Quantity",
       type: "number",
     },
-    {handleChange:handleTaxRateChange,
+    {
+      handleChange: handleTaxRateChange,
       intputName: "taxrate",
       label: "Tax Rate",
-      
 
-      inputOrSelect:"select",
-      options:taxOptions 
+      inputOrSelect: "select",
+      options: taxOptions,
     },
     {
       intputName: "taxvalue",
       label: " Tax Value",
       // type: "number",
-      value: (((parseFloat(ProductDrawerFormData.rate || 0)) * parseFloat(ProductDrawerFormData.quantity || 0)) * (parseFloat(taxRateValue.value?.replace("%", "")) || 0) / 100),
+      value:
+        (parseFloat(ProductDrawerFormData.rate || 0) *
+          parseFloat(ProductDrawerFormData.quantity || 0) *
+          (parseFloat(taxRateValue.value?.replace("%", "")) || 0)) /
+        100,
 
-      disabled:"disabled"
-      
+      disabled: "disabled",
     },
     {
       handleChange: handleDrawerChange,
@@ -470,10 +468,8 @@ function SalesPage() {
       label: "Unit",
       // type: "text",
 
-      inputOrSelect:"select",
+      inputOrSelect: "select",
       options: unitOptions,
-      
-      
     },
     {
       handleChange: handleSelectProject,
@@ -482,10 +478,8 @@ function SalesPage() {
       // type: "text",
       // value:selectedValue,
 
-      inputOrSelect:"select",
+      inputOrSelect: "select",
       options: projectOptions,
-      
-      
     },
     {
       handleChange: handleSelectCatogary,
@@ -494,12 +488,9 @@ function SalesPage() {
       // type: "text",
       // value:selectedValue,
 
-      inputOrSelect:"select",
+      inputOrSelect: "select",
       options: categoryOptions,
-      
-      
     },
-    
   ];
   return (
     <div className="sales-table-container">
@@ -573,15 +564,14 @@ function SalesPage() {
 
             <option value="addNew">Add New</option>
 
-            {clinedOptions
-              .map((option, index) => {
-                console.log(option)
-                return (
-                  <option key={index} value={option.value} label={option.label}>
-                    {option.label}
-                  </option>
-                );
-              })}
+            {clinedOptions.map((option, index) => {
+              console.log(option);
+              return (
+                <option key={index} value={option.value} label={option.label}>
+                  {option.label}
+                </option>
+              );
+            })}
           </select>
         </Box>
         <Box
@@ -638,7 +628,11 @@ function SalesPage() {
             }}
           >
             <p>Payment Method:</p>
-            <select style={{ width: "50%" }} value={selectedOption} onChange={(e)=> setSelectedOption(event.target.value)}>
+            <select
+              style={{ width: "50%" }}
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(event.target.value)}
+            >
               {/* {
               .map((_, index) => {
                 const option = { value: index, label: `Option ${index}` }; // Define your options here
@@ -744,7 +738,6 @@ function SalesPage() {
         handleAdd={handleDrawerAddProducts}
         setToggle={setToggle}
         toggle={toggle}
-        
       />
     </div>
   );
