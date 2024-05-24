@@ -6,9 +6,9 @@ import axios from "axios";
 // };
 
 
-// const BASE_URL = 'http://192.168.0.103:8085';
+const BASE_URL = 'http://192.168.0.112:80';
 // const MASRE_TABLE_BASE_URL = 'http://192.168.0.103:8088';
-const BASE_URL = 'https://teqbae-accounts-rkkzm.ondigitalocean.app';
+// const BASE_URL = 'https://teqbae-accounts-rkkzm.ondigitalocean.app';
 
 
 
@@ -305,3 +305,50 @@ export const expensesDataAddAPI = async (expenses) => {
     throw error.response.data;
   }
 };
+
+
+export const categoryDataAddAPI = async (catogery) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/project/category/create`,catogery);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+}
+
+export const categoryDataGetAPI = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/project/category/getall`);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+}
+
+
+export const creditDataAddAPI = async (creditData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/voucher/creditnote/add`,creditData);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+}
+
+
+export const debitDataAddAPI = async (debitData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/voucher/debitnote/add`,debitData);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+}

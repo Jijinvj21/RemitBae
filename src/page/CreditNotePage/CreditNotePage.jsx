@@ -722,7 +722,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
                 />
               </div>
 
-              <div
+              {/* <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -732,7 +732,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
               >
                 <p>Balance:</p>
                 <p>5284</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -22,8 +22,8 @@ function AddProductDrawer({
   handleSelectChange,
   updatetrue,
   handleUpdateData,
-  setToggle,
-  toggle,
+  // setToggle,
+  // toggle,
 }) {
   // draw
 
@@ -38,7 +38,7 @@ function AddProductDrawer({
       onKeyDown={toggleDrawer(anchor, true)}
     >
       <Box sx={{ my: 3 }}>
-        <h2> Products </h2>
+        <h2> Product / Material </h2>
         <h4> Manage Products to the inventory </h4>
       </Box>
       <form onSubmit={handleSubmit}>
@@ -64,55 +64,6 @@ function AddProductDrawer({
             );
           })}
          
-          <div className="toggle_button " style={{marginTop:"16px",marginLeft:"16px"}}>
-          
-<p style={{color:"#0009",fontWeight:800,fontSize:"14px"}}>Is products</p>
-            <ToggleButtonGroup
-              value={toggle ? "true" : "false"}
-              exclusive
-              onChange={(e, value) => setToggle(value === "true")}
-              aria-label="text alignment"
-            >
-              <ToggleButton
-                value="true"
-                aria-label="left aligned"
-                sx={{
-                  fontSize: "12px",
-                  borderRadius: "35px",
-                  width: "90px",
-                  height: "35px",
-                  textAlign: "center",
-                  marginTop: "5px",
-                  marginLeft: "10px",
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    color: "white",
-                    backgroundColor: "#8cdb7e",
-                  },
-                }}
-              >
-                <p>yes</p>
-              </ToggleButton>
-              <ToggleButton
-                value="false"
-                aria-label="centered"
-                sx={{
-                  fontSize: "12px",
-                  borderRadius: "35px",
-                  width: "90px",
-                  height: "35px",
-                  textAlign: "center",
-                  marginTop: "5px",
-                  marginLeft: "10px",
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    color: "white",
-                    backgroundColor: "#8cdb7e",
-                  },
-                }}
-              >
-                <p>no</p>
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </div>
 
           <Button
             disableRipple

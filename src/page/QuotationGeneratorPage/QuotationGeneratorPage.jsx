@@ -6,10 +6,12 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useEffect, useRef, useState } from "react";
-import React from 'react';
+import React from "react";
 
 import {
   categeryGetAPI,
+  categoryDataAddAPI,
+  categoryDataGetAPI,
   clientDataGetAPI,
   gstOptionsGetAPI,
   productAddAPI,
@@ -22,7 +24,7 @@ import {
 import { renderToString } from "react-dom/server";
 import AddClientDrawer from "../../components/AddClientDrawer/AddClientDrawer";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
-
+import AddStockJournalDrawer from "../../components/AddStockJournalDrawer/AddStockJournalDrawer";
 
 const style = {
   position: "absolute",
@@ -38,7 +40,6 @@ const style = {
 };
 
 function QuotationGeneratorPage() {
-
   const tableRef = useRef();
   const exclusionRef = useRef();
   const exclusionData = exclusionRef.current;
@@ -46,8 +47,9 @@ function QuotationGeneratorPage() {
   const [clientOptions, setClientOptions] = useState([]);
   // const [projectOptions, setProjectOptions] = useState([]);
   const [productsOptions, setProductsOptions] = useState([]);
-  const [accessoriesProductsOptions, setAccessoriesProductsOptions] = useState([]);
-
+  const [accessoriesProductsOptions, setAccessoriesProductsOptions] = useState(
+    []
+  );
 
   const [drawerImg, setDrawerImg] = useState("");
   const [projectImg, setProjectImg] = useState("");
@@ -56,7 +58,7 @@ function QuotationGeneratorPage() {
   const [inputsExclusion, setInputsExclusion] = useState([""]); // State to store  Terms and Conditions values
   const [selectedClient, setSelectedClient] = useState({});
   const [selectedProduct, setSelectedProduct] = useState({});
-
+  
 
   const [leftInputs, setLeftInputs] = useState({
     quantity: "",
@@ -65,7 +67,6 @@ function QuotationGeneratorPage() {
     hardware: "",
     installation: "",
     accessories: "",
-    
   });
   const [rightIputs, setRightIputs] = useState({
     quoteamount: "",
@@ -77,8 +78,9 @@ function QuotationGeneratorPage() {
   const [selectedAccessory, setSelectedAccessory] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [accessoriesList, setAccessoriesList] = useState([]);
-
-
+  const [areaOfWorkCategorySelected, setAreaOfWorkCategorySelected] =
+    useState();
+  const [areaOfWorkCategoryInput, setAreaOfWorkCategoryInput] = useState();
 
   const [open, setOpen] = useState(false);
   const [projectFormData, setProjectFormData] = useState({
@@ -90,7 +92,7 @@ function QuotationGeneratorPage() {
     pinCode: "",
     worktype: "",
     country: "",
-    project:"",
+    project: "",
   });
   const [toggle, setToggle] = useState(true);
   const [toggle2, setToggle2] = useState(true);
@@ -103,80 +105,83 @@ function QuotationGeneratorPage() {
   });
   const [productData, setProductData] = useState([]);
 
-
   const [ProductDrawerFormData, setProductDrawerFormData] = useState({
-    name:"",
-    quantity:"",
-    rate:0,
-    hsn:"",
+    name: "",
+    quantity: "",
+    rate: 0,
+    hsn: "",
   });
-  const [categoryOptions,setCategoryOptions]=useState([])
-  const [projectOptions,setProjectOptions]=useState([])
-  const [unitOptions,setUnitOptions]=useState([])
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [projectOptions, setProjectOptions] = useState([]);
+  const [unitOptions, setUnitOptions] = useState([]);
   const [taxRateValue, setTaxRateValue] = useState({});
-  const [selectedValue, setSelectedValue] = useState('');
- 
-  const [projectValue, setProjectValue] = useState('');
-  const [categoryValue, setCategoryValue] = useState('');
+  const [selectedValue, setSelectedValue] = useState("");
+
+  const [projectValue, setProjectValue] = useState("");
+  const [categoryValue, setCategoryValue] = useState("");
   const [img, setImg] = useState(null);
-  const [taxOptions,setTaxOptions]=useState([])
-
-
-
+  const [taxOptions, setTaxOptions] = useState([]);
 
   const getTaxOptionsFormAPI = () => {
-    gstOptionsGetAPI().then((data) => {
-      console.log("tax:", data);
-      // setTaxOptions(data);
+    gstOptionsGetAPI()
+      .then((data) => {
+        console.log("tax:", data);
+        // setTaxOptions(data);
 
-      // Transform data and set it to state
-      const transformedData = data.map(entry => ({
-        value: entry.percentage,
-        label: entry.name?`${entry.name} ${entry.percentage}` :"none",
-        taxlabel: entry.percentage,
-        id:entry.id
-
-      }));
-      console.log(transformedData)
-      setTaxOptions(transformedData);
-    }).catch((err) => {
-      console.log(err);
-    });
-  }
+        // Transform data and set it to state
+        const transformedData = data.map((entry) => ({
+          value: entry.percentage,
+          label: entry.name ? `${entry.name} ${entry.percentage}` : "none",
+          taxlabel: entry.percentage,
+          id: entry.id,
+        }));
+        console.log(transformedData);
+        setTaxOptions(transformedData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const getCategeryOptionsFormAPI = () => {
-    categeryGetAPI()
+    categoryDataGetAPI()
       .then((data) => {
-        console.log("category:", data);
-        
+        console.log("category:", data.data?.responseData);
+
         // Transform data and set it to state
-        const categoryOptions = data?.responseData.map(entry => ({
+        const categoryOptions = data.data?.responseData.map((entry) => ({
           value: entry.id,
-          label:`${entry.name}`,
-          
+          label: `${entry.name}`,
         }));
-        categoryOptions.unshift({ value: 0, label: "None" });
-  
-        console.log("categoryOptions",categoryOptions);
+        categoryOptions.unshift(
+          { value: 0, label: "None" },
+          { value: -2, label: "Add" }
+        );
+
+        console.log("categoryOptions", categoryOptions);
         setCategoryOptions(categoryOptions);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
+        setCategoryOptions(
+          { value: 0, label: "None" },
+          { value: -2, label: "Add" }
+        );
       });
   };
   // const getClientOptionsFormAPI = () => {
   //   projectGetAPI()
   //     .then((data) => {
   //       console.log("projects:", data);
-        
+
   //       // Transform data and set it to state
   //       const projectdData = data?.responseData.map(entry => ({
   //         value: entry.id,
   //         label:`${entry.name} ( ${entry.client_name} )`,
-          
+
   //       }));
   //       projectdData.unshift({ value: 0, label: "None" });
-  
+
   //       console.log("projectdData",projectdData);
   //       setProjectOptions(projectdData);
   //     })
@@ -188,133 +193,141 @@ function QuotationGeneratorPage() {
     unitsDataGetAPI()
       .then((data) => {
         console.log("units:", data);
-        
+
         // Transform data and set it to state
-        const unitsdData = data?.responseData.map(entry => ({
+        const unitsdData = data?.responseData.map((entry) => ({
           value: entry.id,
-          label: entry.name ,
-          
+          label: entry.name,
         }));
-        unitsdData.unshift({ value: 0, label: "None" })
-        console.log("unitsdData",unitsdData);
+        unitsdData.unshift({ value: 0, label: "None" });
+        console.log("unitsdData", unitsdData);
         setUnitOptions(unitsdData);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   };
 
   useEffect(() => {
-    getTaxOptionsFormAPI()
-    getCategeryOptionsFormAPI()
-    getUnitOptionsFormAPI()
-  }, [])
-  
-
+    getTaxOptionsFormAPI();
+    getCategeryOptionsFormAPI();
+    getUnitOptionsFormAPI();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log("name,value",name,value)
-    setProjectFormData(prevState => ({
+    console.log("name,value", name, value);
+    setProjectFormData((prevState) => ({
       ...prevState,
-      [name]: value
-    }));}
-    const toggleDrawer = (anchor, open) => (event) =>{
-      console.log(event)
-      console.log("Toggle Drawer:", anchor, open);
-      if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
-        return;
-      }
-      setState({ ...state, [anchor]: open });
-    };
+      [name]: value,
+    }));
+  };
+  const toggleDrawer = (anchor, open) => (event) => {
+    console.log(event);
+    console.log("Toggle Drawer:", anchor, open);
+    if (
+      event &&
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setState({ ...state, [anchor]: open });
+  };
 
-    const toggleDrawer2 = (anchor, open) => (event) =>{
-      console.log(event)
-      console.log("Toggle Drawer:", anchor, open);
-      if (event && event.type === "keydown" && (event.key === "Tab" || event.key === "Shift")) {
-        return;
-      }
-      setState2({ ...state2, [anchor]: open });
-    };
+  const toggleDrawer2 = (anchor, open) => (event) => {
+    console.log(event);
+    console.log("Toggle Drawer:", anchor, open);
+    if (
+      event &&
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setState2({ ...state2, [anchor]: open });
+  };
 
-    const handleAccessoryChange = (event) => {
-      const selectedOptionObject = productsOptions.find(option => option.value == event.target.value);
-      console.log("event.target",event.target.value,selectedOptionObject)
-      if(selectedOptionObject.value==-2){
-        console.log("event.target",event.target.value.value,selectedOptionObject.value)
-        console.log(selectedOptionObject.value==-2);
-        toggleDrawer2("right", true)();
-      }else{
-  
-    setSelectedAccessory({ selectedOptionObject });
-  }
-     
-    };
-  
-    const handleQuantityChange = (event) => {
-      setQuantity(event.target.value);
-    };
+  const handleAccessoryChange = (event) => {
+    const selectedOptionObject = productsOptions.find(
+      (option) => option.value == event.target.value
+    );
+    console.log("event.target", event.target.value, selectedOptionObject);
+    if (selectedOptionObject.value == -2) {
+      console.log(
+        "event.target",
+        event.target.value.value,
+        selectedOptionObject.value
+      );
+      console.log(selectedOptionObject.value == -2);
+      toggleDrawer2("right", true)();
+    } else {
+      setSelectedAccessory({ selectedOptionObject });
+    }
+  };
+
+  // const handleQuantityChange = (event) => {
+  //   setQuantity(event.target.value);
+  // };
   const arrOfInputs = [
     {
       handleChange: handleChange,
       intputName: "project",
       label: "Project Name",
       type: "text",
-      value:projectFormData.project
+      value: projectFormData.project,
     },
     {
       handleChange: handleChange,
       intputName: "name",
       label: "Client Name",
       type: "text",
-      value:projectFormData.name
+      value: projectFormData.name,
     },
     {
       handleChange: handleChange,
       intputName: "email",
       label: "Email",
       type: "email",
-      value:projectFormData.email
+      value: projectFormData.email,
     },
     {
       handleChange: handleChange,
       intputName: "mobile",
       label: "Mobile",
       type: "tel",
-      value:projectFormData.mobile
+      value: projectFormData.mobile,
     },
     {
       handleChange: handleChange,
       intputName: "address1",
       label: "Address 1",
       type: "text",
-      value:projectFormData.address1
+      value: projectFormData.address1,
     },
     {
       handleChange: handleChange,
       intputName: "address2",
       label: "Address 2",
       type: "text",
-      value:projectFormData.address2
+      value: projectFormData.address2,
     },
     {
       handleChange: handleChange,
       intputName: "pinCode",
       label: "Pin Code",
       type: "text",
-      value:projectFormData.pinCode
+      value: projectFormData.pinCode,
     },
-    
   ];
 
-
-    const handleAdd = () => {
-alert("add")
-    }
-    const handleprojectImageChange = (e) => {
-      const file = e.target.files[0];
-      setProjectImg(file);
-    };
+  const handleAdd = () => {
+    alert("add");
+  };
+  const handleprojectImageChange = (e) => {
+    const file = e.target.files[0];
+    setProjectImg(file);
+  };
 
   // const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -330,7 +343,6 @@ alert("add")
           value: entry.id,
           label: entry.name,
           project: entry.project_name,
-
         }));
         partyData.unshift({ value: -2, label: "Add" });
         partyData.unshift({ value: -1, label: "None" });
@@ -339,9 +351,12 @@ alert("add")
         setClientOptions(partyData);
       })
       .catch((err) => {
-        console.log("err",err);
+        console.log("err", err);
       });
-      setClientOptions([{ value: -1, label: "None" },{ value: -2, label: "Add" }]);
+    setClientOptions([
+      { value: -1, label: "None" },
+      { value: -2, label: "Add" },
+    ]);
   };
   const getProjectData = () => {
     projectGetAPI()
@@ -375,28 +390,60 @@ alert("add")
         const productsData = data.responseData.map((entry) => ({
           value: entry.id,
           label: entry.name,
-          unit:entry.unit,
-          amount:entry.rate,
-          image:entry.image,
-          unit_id:entry.unit_id
+          unit: entry.unit,
+          amount: entry.rate,
+          image: entry.image,
+          unit_id: entry.unit_id,
         }));
         productsData.unshift({ value: -1, label: "None" });
         productsData.unshift({ value: -2, label: "Add" });
 
-        console.log("productsData",data.responseData);
+        console.log("productsData", data.responseData);
         setProductsOptions(productsData);
       })
       .catch((err) => {
         console.log(err);
       });
-      setProductsOptions([{ value: -1, label: "None" },{ value: -2, label: "Add" }])
+    setProductsOptions([
+      { value: -1, label: "None" },
+      { value: -2, label: "Add" },
+    ]);
+  };
+
+  const getcategorysData = () => {
+    categoryDataGetAPI()
+      .then((data) => {
+        console.log("CatogarytGetAPI:", data);
+        // setTaxOptions(data);
+
+        // Transform data and set it to state
+        const productsData = data.responseData.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+          unit_id: entry.unit_id,
+        }));
+        productsData.unshift({ value: -1, label: "None" });
+        productsData.unshift({ value: -2, label: "Add" });
+
+        console.log("productsData", data.responseData);
+        setProductsOptions(productsData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setProductsOptions([
+      { value: -1, label: "None" },
+      { value: -2, label: "Add" },
+    ]);
   };
 
   const getProductsDataforaccessories = () => {
     productGetAPI()
       .then((data) => {
         console.log("productGetAPI:", data);
-        const filteredData = data.responseData.filter(entry => entry.is_master_product === false);
+        const filteredData = data.responseData.filter(
+          (entry) => entry.is_master_product === false
+        );
 
         // Transform filtered data and set it to state
         const productsData = filteredData.map((entry) => ({
@@ -406,27 +453,26 @@ alert("add")
           amount: entry.rate,
           image: entry.image,
           unit_id: entry.unit_id,
-          is_master_product: entry.is_master_product
+          is_master_product: entry.is_master_product,
         }));
         productsData.unshift({ value: -1, label: "None" });
         productsData.unshift({ value: -2, label: "Add" });
-  
+
         console.log("productsData", filteredData);
         setAccessoriesProductsOptions(productsData);
       })
       .catch((err) => {
         console.log(err);
       });
-      setAccessoriesProductsOptions([{ value: -1, label: "None" },{ value: -2, label: "Add" }])
+    setAccessoriesProductsOptions([
+      { value: -1, label: "None" },
+      { value: -2, label: "Add" },
+    ]);
   };
 
-
-
-
-
-
   useEffect(() => {
-    getProductsDataforaccessories()
+    getcategorysData();
+    getProductsDataforaccessories();
     getProductsData();
     getProjectData();
     getCliendData();
@@ -434,7 +480,7 @@ alert("add")
 
   const handleleftIputsChange = (e) => {
     const { name, value } = e.target;
-    console.log("name, value",name, value);
+    console.log("name, value", name, value);
     setLeftInputs({
       ...leftInputs,
       [name]: value,
@@ -442,22 +488,21 @@ alert("add")
     // handleAddData()
   };
   const handleAddData = () => {
-    console.log("firsttest")
+    console.log("firsttest");
     const productDatas = {
       ...leftInputs,
       accessorieslist: accessoriesList,
-      product:`${selectedProduct.selectedOptionObject?.value}`,
-      productname:selectedProduct.selectedOptionObject?.label,
-      productunit:selectedProduct.selectedOptionObject?.unit
-
+      product: `${selectedProduct.selectedOptionObject?.value}`,
+      productname: selectedProduct.selectedOptionObject?.label,
+      productunit: selectedProduct.selectedOptionObject?.unit,
+      category:`${areaOfWorkCategorySelected?.value}`
     };
-    console.log("handleAddData",selectedProduct)
+    console.log("handleAddData", selectedProduct);
     setProductData([...productData, productDatas]);
-
   };
   const handlerightIputsChange = (e) => {
     const { name, value } = e.target;
-    console.log("first",name, value)
+    console.log("first", name, value);
     setRightIputs((prevFormData) => ({
       ...prevFormData,
       [name]: value,
@@ -468,7 +513,7 @@ alert("add")
   const handleInputChange = (index, value) => {
     console.log(index);
     const newInputs = [...inputs];
-    newInputs[index] = '\u2022 ' +value;
+    newInputs[index] = "\u2022 " + value;
     setInputs(newInputs);
     console.log(newInputs);
   };
@@ -476,13 +521,14 @@ alert("add")
   const handleClientname = (e) => {
     console.log("e.target", e.target.value === "-2");
     if (e.target.value === "-2") {
-        toggleDrawer("right", true)();
-     }
-     const selectedOptionObject = clientOptions.find(option => option.value == e.target.value);
-      console.log("event.target",e.target.value,selectedOptionObject)
+      toggleDrawer("right", true)();
+    }
+    const selectedOptionObject = clientOptions.find(
+      (option) => option.value == e.target.value
+    );
+    console.log("event.target", e.target.value, selectedOptionObject);
 
-     
-      setSelectedClient({ selectedOptionObject });
+    setSelectedClient({ selectedOptionObject });
   };
   // const handleProjectname = (e) => {
   //   console.log("e.target", e.target.value === "-2");
@@ -495,7 +541,7 @@ alert("add")
   const handleExclusionInputChange = (index, value) => {
     console.log(index);
     const newInputs = [...inputsExclusion];
-    newInputs[index] = '\u2022 ' +value;
+    newInputs[index] = "\u2022 " + value;
     setInputsExclusion(newInputs);
     console.log(newInputs);
   };
@@ -516,27 +562,28 @@ alert("add")
   //   setImg(file);
   // };
   const handleImageChange = (e) => {
-    console.log("e.target.files",e.target.files)
+    console.log("e.target.files", e.target.files);
     const files = e.target.files; // Get all selected files
     const fileList = Array.from(files); // Convert FileList to array
     setImg(fileList); // Update state with array of files
   };
 
-
-  const handleAddAccessory = async() => {
-    console.log("selectedAccessoryselectedOptionObject",selectedAccessory.selectedOptionObject)
-    if (selectedAccessory.selectedOptionObject?.value !== '') {
+  const handleAddAccessory = async () => {
+    console.log(
+      "selectedAccessoryselectedOptionObject",
+      selectedAccessory.selectedOptionObject
+    );
+    if (selectedAccessory.selectedOptionObject?.value !== "") {
       const accessory = {
         accessories: `${selectedAccessory.selectedOptionObject?.value}`,
         name: selectedAccessory.selectedOptionObject.label,
         quantity: quantity,
-        price:`${selectedAccessory.selectedOptionObject.amount}`,
-        unit:selectedAccessory.selectedOptionObject.unit,
-        image:selectedAccessory.selectedOptionObject.image,
-        unit_id:selectedAccessory.selectedOptionObject.unit_id
-
+        price: `${selectedAccessory.selectedOptionObject.amount}`,
+        unit: selectedAccessory.selectedOptionObject.unit,
+        image: selectedAccessory.selectedOptionObject.image,
+        unit_id: selectedAccessory.selectedOptionObject.unit_id,
       };
-      console.log("accessory",[...accessoriesList, accessory])
+      console.log("accessory", [...accessoriesList, accessory]);
       setAccessoriesList([...accessoriesList, accessory]);
       setSelectedAccessory();
       setQuantity(1);
@@ -544,31 +591,76 @@ alert("add")
     }
   };
   const handleProductNameChange = (event) => {
-    const selectedOptionObject = productsOptions.find(option => option.value == event.target.value);
-    if(selectedOptionObject.value==-2){
-      console.log("event.target",event.target.value.value,selectedOptionObject.value)
-      console.log(selectedOptionObject.value==-2);
+    const selectedOptionObject = productsOptions.find(
+      (option) => option.value == event.target.value
+    );
+    if (selectedOptionObject.value == -2) {
+      console.log(
+        "event.target",
+        event.target.value.value,
+        selectedOptionObject.value
+      );
+      console.log(selectedOptionObject.value == -2);
       toggleDrawer2("right", true)();
-    }else{
+    } else {
+      setSelectedProduct({ selectedOptionObject });
+    }
+  };
 
-  setSelectedProduct({ selectedOptionObject });
-}
-   
+  const handleAreaOfWorkCategoryChange = (event) => {
+    if (event.target.value == -2) {
+      setOpen(true);
+      setAreaOfWorkCategorySelected({});
+    } else {
+      handleClose();
+      const selectedOptionObject = categoryOptions.find(
+        (option) => option.value == event.target.value
+      );
+      setAreaOfWorkCategorySelected(selectedOptionObject);
+    }
+  };
+
+  const areaOfWorkCategoryInputChange = (e) => {
+    setAreaOfWorkCategoryInput(e.target.value);
+  };
+
+  const handleAddAreaOfWorkCategory = () => {
+    const createData = {
+      project_id: selectedClient?.selectedOptionObject?.value,
+      name: areaOfWorkCategoryInput,
+    };
+    selectedClient?.selectedOptionObject?.value
+      ? categoryDataAddAPI(createData)
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+      : alert("Client not Selected");
   };
 
   const leftArrOfInputs = [
     {
-      handleChange:handleProductNameChange,
+      handleChange: handleAreaOfWorkCategoryChange,
+      intputName: "AreaOfWorkCategory",
+      label: "Area Of Work / Category",
+      inputOrSelect: "select",
+      // value: areaOfWorkCategorySelected,
+      options: categoryOptions,
+    },
+    {
+      // handleChange:handleProductNameChange,
       intputName: "productname",
       label: " Product Name",
       inputOrSelect: "select",
       options: productsOptions,
     },
-    {
-      intputName: "quantity",
-      label: " Quantity",
-      type: "number",
-    },
+    // {
+    //   intputName: "quantity",
+    //   label: " Quantity",
+    //   type: "number",
+    // },
     {
       intputName: "amount",
       label: " Amount",
@@ -595,19 +687,19 @@ alert("add")
       type: "number",
     },
     {
-      handleChange:handleAccessoryChange,
+      handleChange: handleAccessoryChange,
       intputName: " accessorieslist",
       label: " Accessories list",
       inputOrSelect: "select",
-      value:selectedAccessory,
+      value: selectedAccessory,
       options: accessoriesProductsOptions,
     },
-    {
-      handleChange:handleQuantityChange,
-      intputName: "accessoriesQuantity",
-      label: " Quantity",
-      type: "number",
-    },
+    // {
+    //   handleChange:handleQuantityChange,
+    //   intputName: "accessoriesQuantity",
+    //   label: " Quantity",
+    //   type: "number",
+    // },
   ];
   const RightArrOfInputs = [
     {
@@ -624,8 +716,8 @@ alert("add")
       label: "Project Details",
       // inputOrSelect: "select",
       // options: projectOptions,
-      value:selectedClient?.selectedOptionObject?.project,
-      disabled:"disabled"
+      value: selectedClient?.selectedOptionObject?.project,
+      disabled: "disabled",
     },
     {
       handleChange: handlerightIputsChange,
@@ -652,89 +744,101 @@ alert("add")
   };
   const pageone = renderToString(
     <div
-        className="quatationgenerator"
-        id="quatationgenerator"
-        style={{
-          fontSize: "13px",
-          fontFamily: "'Roboto'", // Corrected font family name
-          fontWeight: 400,
-          textAlign:"justify"
-         
-        }}
-      >
-        <img
-          src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
-          alt="logo"
-          style={{ marginLeft: "20px", height: "90px", paddingBottom: "50px" }}
-        />
-        <div style={{ marginLeft: "50px" }}>
-          <p style={{ paddingBottom: "5px" }}>To,</p>
-          <p>{selectedClient?.selectedOptionObject?.label}</p>
-        </div>
-
-        <div style={{ width: "510px", paddingBottom: "50px" }}>
-          <p style={{ textAlign: "end", paddingBottom: "5px" }}>
-            QUOTATION NO: QT / 24-25/020
-          </p>
-          <p style={{ textAlign: "end" }}>Date: {new Date().toLocaleDateString()} </p>
-        </div>
-        <div
-          style={{ marginLeft: "50px", width: "500px", paddingBottom: "200px" }}
-        >
-          <p style={{ paddingBottom: "5px",lineHeight:"22px",textAlign:"justify",fontFamily: "'Roboto'", // Corrected font family name
-          fontWeight: 400, }}>
-            {" "}
-            We thank you for giving us an opportunity to quote for the mentioned
-            subject. With reference to your enquiry, please find.
-          </p>
-          <p style={{ paddingBottom: "5px" }}>Sir,</p>
-          <p style={{ paddingBottom: "5px",lineHeight:"22px",fontFamily: "'Roboto'", // Corrected font family name
-          fontWeight: 400, }}>
-            Biltree was founded on the principle of providing quality work with
-            an emphasis on cost- effectiveness and the highest quality work for
-            its prospective clients in the quickest way possible. Our strength
-            is in achieving recognition for our ability to analyze the client's
-            requirements in collaboration with architects and consultants, as
-            well as developing an understanding of architectural and interior
-            concepts. We specialize in providing solutions’ that blend
-            aesthetically with interiors and exteriors, without sacrificing any
-            functional attributes. As a company, our goal is to ensure customer
-            satisfaction with the quality of our aesthetic. We also intend to
-            achieve fluency from design to design and installation. We will
-            maintain our loyalty and plough to build good and fair relationships
-            with our clients, founded on trust and loyalty.
-          </p>
-        </div>
-        <div
-          style={{ marginLeft: "50px", width: "500px", textAlign: "center" }}
-        >
-          <h5 style={{ paddingBottom: "10px" }}>
-            BILTREE -1ST FLOOR MANGHAT ARCADE, KALOOR KADAVANTRA ROAD,
-            KADAVANTRA -20{" "}
-          </h5>
-          <h5>PHONE: +91 9447519770 </h5>
-        </div>
+      className="quatationgenerator"
+      id="quatationgenerator"
+      style={{
+        fontSize: "13px",
+        fontFamily: "'Roboto'", // Corrected font family name
+        fontWeight: 400,
+        textAlign: "justify",
+      }}
+    >
+      <img
+        src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png"
+        alt="logo"
+        style={{ marginLeft: "20px", height: "90px", paddingBottom: "50px" }}
+      />
+      <div style={{ marginLeft: "50px" }}>
+        <p style={{ paddingBottom: "5px" }}>To,</p>
+        <p>{selectedClient?.selectedOptionObject?.label}</p>
       </div>
 
-  )
+      <div style={{ width: "510px", paddingBottom: "50px" }}>
+        <p style={{ textAlign: "end", paddingBottom: "5px" }}>
+          QUOTATION NO: QT / 24-25/020
+        </p>
+        <p style={{ textAlign: "end" }}>
+          Date: {new Date().toLocaleDateString()}{" "}
+        </p>
+      </div>
+      <div
+        style={{ marginLeft: "50px", width: "500px", paddingBottom: "200px" }}
+      >
+        <p
+          style={{
+            paddingBottom: "5px",
+            lineHeight: "22px",
+            textAlign: "justify",
+            fontFamily: "'Roboto'", // Corrected font family name
+            fontWeight: 400,
+          }}
+        >
+          {" "}
+          We thank you for giving us an opportunity to quote for the mentioned
+          subject. With reference to your enquiry, please find.
+        </p>
+        <p style={{ paddingBottom: "5px" }}>Sir,</p>
+        <p
+          style={{
+            paddingBottom: "5px",
+            lineHeight: "22px",
+            fontFamily: "'Roboto'", // Corrected font family name
+            fontWeight: 400,
+          }}
+        >
+          Biltree was founded on the principle of providing quality work with an
+          emphasis on cost- effectiveness and the highest quality work for its
+          prospective clients in the quickest way possible. Our strength is in
+          achieving recognition for our ability to analyze the client's
+          requirements in collaboration with architects and consultants, as well
+          as developing an understanding of architectural and interior concepts.
+          We specialize in providing solutions’ that blend aesthetically with
+          interiors and exteriors, without sacrificing any functional
+          attributes. As a company, our goal is to ensure customer satisfaction
+          with the quality of our aesthetic. We also intend to achieve fluency
+          from design to design and installation. We will maintain our loyalty
+          and plough to build good and fair relationships with our clients,
+          founded on trust and loyalty.
+        </p>
+      </div>
+      <div style={{ marginLeft: "50px", width: "500px", textAlign: "center" }}>
+        <h5 style={{ paddingBottom: "10px" }}>
+          BILTREE -1ST FLOOR MANGHAT ARCADE, KALOOR KADAVANTRA ROAD, KADAVANTRA
+          -20{" "}
+        </h5>
+        <h5>PHONE: +91 9447519770 </h5>
+      </div>
+    </div>
+  );
 
   const handleGenerate = async () => {
-    
     const pdftable = document.querySelector("#ALLPRODUCTtable");
-    const pdflastpage = document.querySelector("#exclusion-terms-and-condition");
-    
+    const pdflastpage = document.querySelector(
+      "#exclusion-terms-and-condition"
+    );
+
     const pdf = new jsPDF("p", "pt", "a4", true);
-    const OPTITimesRoman = '../../assets/Fonts/OPTITimes-Roman.otf'; // Path to font file
+    const OPTITimesRoman = "../../assets/Fonts/OPTITimes-Roman.otf"; // Path to font file
 
     // Embed font using addFileToVFS and addFont
-    pdf.addFileToVFS('OPTITimes-Roman.otf', OPTITimesRoman); // 'Metropolis-Regular.ttf' is the name you want to give to the font within the PDF
-    pdf.addFont('OPTITimes-Roman.otf', 'OPTITimesRomanfont', 'normal');
-    
-    pdf.setFont('OPTITimesRomanfont'); // Set the font before adding text
+    pdf.addFileToVFS("OPTITimes-Roman.otf", OPTITimesRoman); // 'Metropolis-Regular.ttf' is the name you want to give to the font within the PDF
+    pdf.addFont("OPTITimes-Roman.otf", "OPTITimesRomanfont", "normal");
 
+    pdf.setFont("OPTITimesRomanfont"); // Set the font before adding text
 
     pdf.html(pageone, {
-      callback: async () => { // Make the callback function async
+      callback: async () => {
+        // Make the callback function async
         pdf.addPage();
         pdf.addImage(
           "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
@@ -746,32 +850,30 @@ alert("add")
         pdf.autoTable({
           html: pdftable, // Pass the HTML structure directly
           startY: 100,
-          useCss:true,
+          useCss: true,
           theme: "grid",
           headStyles: {
             fillColor: "yellow",
             textColor: "black",
-            lineWidth:2,
-            lineColor:"black",
+            lineWidth: 2,
+            lineColor: "black",
             // cellWidth:200
-            
           },
           columnStyles: {
-            0: {cellWidth: 100},
-            1: {cellWidth: 335},
-            2: {cellWidth: 80},
+            0: { cellWidth: 100 },
+            1: { cellWidth: 335 },
+            2: { cellWidth: 80 },
           },
           styles: {
-            lineWidth:1,
-            lineColor:"black",
+            lineWidth: 1,
+            lineColor: "black",
             cellPadding: 5,
-            fontFamily:"Inter",
+            fontFamily: "Inter",
             fontSize: 10,
             // valign: 'middle',
             // halign: 'center' // Set horizontal alignment to center
           },
-   
-          
+
           didDrawCell: async function (data) {
             console.log("didDrawCell", data?.cell?.raw);
             if (data.column.index === 2 && data.cell.section === "body") {
@@ -779,8 +881,10 @@ alert("add")
               console.log("didDrawCell2", td.getElementsByTagName("td"));
               // var img = td.getElementsByTagName("img")[0];
               var imageSize = 35; // Increase image size here
-              var img =   data?.cell.raw.parentElement?.getElementsByTagName("td")[2]?.getElementsByTagName("img")[0]?.src;
-              console.log("img.src",img);
+              var img = data?.cell.raw.parentElement
+                ?.getElementsByTagName("td")[2]
+                ?.getElementsByTagName("img")[0]?.src;
+              console.log("img.src", img);
               pdf.addImage(
                 img,
                 data.cell.x + 5,
@@ -789,14 +893,13 @@ alert("add")
                 imageSize // Height
               );
             }
-          }
+          },
         });
-  
-  
+
         if (img) {
           const imageUrls = img.map((file) => URL.createObjectURL(file));
           pdf.addPage();
-  
+
           const addImageProcess = async (url) => {
             const response = await fetch(url);
             const blob = await response.blob();
@@ -808,14 +911,14 @@ alert("add")
               reader.readAsDataURL(blob);
             });
           };
-  
+
           const imageWidth = 575; // Set the width of the image
           const imageHeight = 820; // Set the height of the image
           const paddingX = 10; // Set the horizontal padding
           const paddingY = 10; // Set the vertical padding
           const marginLeft = 0; // Set the left margin
           const marginTop = 0; // Set the top margin
-  
+
           for (const [i, url] of imageUrls.entries()) {
             const image = await addImageProcess(url); // Await here
             pdf.addImage(
@@ -831,67 +934,89 @@ alert("add")
             }
           }
         }
-        console.log("inputsExclusion",inputsExclusion[0]!=='',inputsExclusion.length)
+        console.log(
+          "inputsExclusion",
+          inputsExclusion[0] !== "",
+          inputsExclusion.length
+        );
 
-  
-        inputsExclusion[0]!=='' || inputs[0]!==''? pdf.addPage():""
-        inputsExclusion[0]!=='' || inputs[0]!==''? pdf.addImage(
-          "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
-          30,
-          0,
-          100, // Width
-          50 // Height
-        ):""
-  
+        inputsExclusion[0] !== "" || inputs[0] !== "" ? pdf.addPage() : "";
+        inputsExclusion[0] !== "" || inputs[0] !== ""
+          ? pdf.addImage(
+              "https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png",
+              30,
+              0,
+              100, // Width
+              50 // Height
+            )
+          : "";
+
         const width = 555;
         const padding = 40;
         const maxWidth = width - 2 * padding;
 
-       
-        pdf.setFont('Inter');
+        pdf.setFont("Inter");
 
         pdf.setFontSize(15);
 
-        inputsExclusion[0]!==''&& pdf.text("EXCLUSIONS ", padding, 80, {
-    maxWidth,
-    lineHeightFactor: 1.5,
-  });
-pdf.setFontSize(12);
-console.log("inputsExclusion",inputsExclusion.length)
-const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
-pdf.text(`${inputText1}`, 50, 100, {
-  maxWidth,
-  lineHeightFactor: 1.5,
-  align: "left",
-});
-
-        pdf.setFontSize(15);
-  console.log("TERMS AND CONDITIONS",inputs[0]=='',inputs.length)
-  inputs[0]!=='' && pdf.text("TERMS AND CONDITIONS", padding, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+95, {
+        inputsExclusion[0] !== "" &&
+          pdf.text("EXCLUSIONS ", padding, 80, {
+            maxWidth,
+            lineHeightFactor: 1.5,
+          });
+        pdf.setFontSize(12);
+        console.log("inputsExclusion", inputsExclusion.length);
+        const inputText1 = inputsExclusion.join("\n"); // Convert the inputs array to a newline-separated string
+        pdf.text(`${inputText1}`, 50, 100, {
           maxWidth,
           lineHeightFactor: 1.5,
+          align: "left",
         });
+
+        pdf.setFontSize(15);
+        console.log("TERMS AND CONDITIONS", inputs[0] == "", inputs.length);
+        inputs[0] !== "" &&
+          pdf.text(
+            "TERMS AND CONDITIONS",
+            padding,
+            inputsExclusion.length * (inputsExclusion.length < 5 ? 25 : 20) +
+              95,
+            {
+              maxWidth,
+              lineHeightFactor: 1.5,
+            }
+          );
         pdf.setFontSize(12);
         const inputText = inputs.join("\n"); // Convert the inputs array to a newline-separated string
-        pdf.text(`${inputText}`, 50, ((inputsExclusion.length)*(inputsExclusion.length<5?25:20))+115, {
-          maxWidth,
-          lineHeightFactor: 1.5,
-          align: "left",
-        });
-        pdf.setFont("Inter","bold");
+        pdf.text(
+          `${inputText}`,
+          50,
+          inputsExclusion.length * (inputsExclusion.length < 5 ? 25 : 20) + 115,
+          {
+            maxWidth,
+            lineHeightFactor: 1.5,
+            align: "left",
+          }
+        );
+        pdf.setFont("Inter", "bold");
         pdf.setFontSize(10);
 
-        pdf.text(`BILTREE - 1ST FLOOR MANGHAT ARCADE , KALOOR KADAVANTRA ROAD , KADAVANTRA - 20`, 65, 660, {
-          maxWidth:"1000",
-          lineHeightFactor: 1.5,
-          align: "left",
-        });
+        pdf.text(
+          `BILTREE - 1ST FLOOR MANGHAT ARCADE , KALOOR KADAVANTRA ROAD , KADAVANTRA - 20`,
+          65,
+          660,
+          {
+            maxWidth: "1000",
+            lineHeightFactor: 1.5,
+            align: "left",
+          }
+        );
         pdf.text(`PHONE : + 91 9447519770`, 245, 700, {
-          maxWidth:"1000",
+          maxWidth: "1000",
           lineHeightFactor: 1.5,
           align: "left",
         });
-  
+
         const blobURL = pdf.output("bloburl");
         window.open(blobURL, "_blank");
       },
@@ -900,9 +1025,9 @@ pdf.text(`${inputText1}`, 50, 100, {
 
   const hanldeAddDataToApi = () => {
     console.log(productData);
-    
+
     const quotationData = {
-      id: selectedClient?.selectedOptionObject.value,
+      id: selectedClient?.selectedOptionObject?.value,
       client: selectedClient?.selectedOptionObject.project,
       quote_amount: rightIputs.quoteamount,
       completation_time: rightIputs.completiontime,
@@ -910,28 +1035,31 @@ pdf.text(`${inputText1}`, 50, 100, {
       terms_and_conditions: inputs,
       product_info: productData,
       exclusion: inputsExclusion,
-      image:img[0],
-      approved:false
+      image: img[0],
+      approved: false,
     };
-  
+
     console.log("quotationData", productData);
-  
+
     // Create FormData instance
     const formData = new FormData();
-  
-    // Append each key-value pair to formData
-    formData.append('id', quotationData.id);
-    formData.append('client', quotationData.client);
-    formData.append('quote_amount', quotationData.quote_amount);
-    formData.append('completation_time', quotationData.completation_time);
-    formData.append('start_date', quotationData.start_date);
-    formData.append('terms_and_conditions', JSON.stringify(quotationData.terms_and_conditions));
-    formData.append('product_info', JSON.stringify(quotationData.product_info));
-    formData.append('exclusion', JSON.stringify(quotationData.exclusion));
-    formData.append('image',quotationData.image);
-    formData.append('approved',quotationData.approved);
 
-  
+    // Append each key-value pair to formData
+    formData.append("id", quotationData.id);
+    // formData.append("categort", areaOfWorkCategorySelected?.value);
+    formData.append("client", quotationData.client);
+    formData.append("quote_amount", quotationData.quote_amount);
+    formData.append("completation_time", quotationData.completation_time);
+    formData.append("start_date", quotationData.start_date);
+    formData.append(
+      "terms_and_conditions",
+      JSON.stringify(quotationData.terms_and_conditions)
+    );
+    formData.append("product_info", JSON.stringify(quotationData.product_info));
+    formData.append("exclusion", JSON.stringify(quotationData.exclusion));
+    formData.append("image", quotationData.image);
+    formData.append("approved", quotationData.approved);
+
     // Call API with FormData
     quotationCreateAPI(formData)
       .then((data) => {
@@ -941,24 +1069,19 @@ pdf.text(`${inputText1}`, 50, 100, {
         console.log(err);
       });
   };
-  
 
   const grandTotal = productData.reduce((total, item) => {
     const itemTotal =
-      parseInt(item.amount||0) +
-      parseInt(item.hardware||0) +
-      parseInt(item.installation||0) +
-      parseInt(item.accessories||0);
+      parseInt(item.amount || 0) +
+      parseInt(item.hardware || 0) +
+      parseInt(item.installation || 0) +
+      parseInt(item.accessories || 0);
     return total + itemTotal;
   }, 0);
 
-
-
-
-
   const handleDrawerSelectChange = (event) => {
     setSelectedValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const handleDrawerChange = (e) => {
@@ -975,46 +1098,47 @@ pdf.text(`${inputText1}`, 50, 100, {
     setDrawerImg(file);
   };
   const handleTaxRateChange = (event) => {
-    console.log(event.target.value)
-    const selectedOptionObject = taxOptions.find(option => option.taxlabel == event.target.value);
+    console.log(event.target.value);
+    const selectedOptionObject = taxOptions.find(
+      (option) => option.taxlabel == event.target.value
+    );
     console.log(selectedOptionObject);
     // setTaxRateValue({
     //   label: selectedOptionObject ? selectedOptionObject.label : "", // Handle case where selectedOptionObject is undefined
     //   value: event.target.value
     // });
-    setTaxRateValue(selectedOptionObject)
+    setTaxRateValue(selectedOptionObject);
   };
   const handleSelectChange = (event) => {
     setSelectedValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const handleSelectProject = (event) => {
     setProjectValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
 
   const handleSelectCatogary = (event) => {
     setCategoryValue(event.target.value);
-    console.log(event.target.value)
+    console.log(event.target.value);
   };
-
 
   const handleDrawerAddProducts = () => {
     const formData = new FormData();
-  
-    formData.append('name', ProductDrawerFormData.name);
-    formData.append('hsn', ProductDrawerFormData.hsn);
-    formData.append('rate', parseInt(ProductDrawerFormData.rate));
-    formData.append('quantity', parseInt(ProductDrawerFormData.quantity));
-    formData.append('unit', selectedValue);
-    formData.append('projectid', parseInt(projectValue));
-    formData.append('is_product', toggle);
-    formData.append('category_id', categoryValue);
+
+    formData.append("name", ProductDrawerFormData?.name);
+    formData.append("hsn", ProductDrawerFormData?.hsn);
+    formData.append("rate", parseInt(ProductDrawerFormData.rate));
+    formData.append("quantity", parseInt(ProductDrawerFormData.quantity));
+    formData.append("unit", selectedValue);
+    formData.append("projectid", parseInt(projectValue));
+    formData.append("is_product", toggle);
+    formData.append("category_id", categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
-    formData.append('tax_rate', taxRateValue.id);
-    formData.append('image', drawerImg);
-  
+    formData.append("tax_rate", taxRateValue.id);
+    formData.append("image", drawerImg);
+
     productAddAPI(formData)
       .then((data) => {
         // fetchData()
@@ -1043,8 +1167,6 @@ pdf.text(`${inputText1}`, 50, 100, {
       intputName: "name",
       label: " Product Name",
       type: "text",
-      
-      
     },
     {
       handleChange: handleDrawerChange,
@@ -1058,22 +1180,25 @@ pdf.text(`${inputText1}`, 50, 100, {
       label: "Quantity",
       type: "number",
     },
-    {handleChange:handleTaxRateChange,
+    {
+      handleChange: handleTaxRateChange,
       intputName: "taxrate",
       label: "Tax Rate",
-      
 
-      inputOrSelect:"select",
-      options:taxOptions 
+      inputOrSelect: "select",
+      options: taxOptions,
     },
     {
       intputName: "taxvalue",
       label: " Tax Value",
       // type: "number",
-      value: (((parseFloat(ProductDrawerFormData.rate || 0)) * parseFloat(ProductDrawerFormData.quantity || 0)) * (parseFloat(taxRateValue.value?.replace("%", "")) || 0) / 100),
+      value:
+        (parseFloat(ProductDrawerFormData.rate || 0) *
+          parseFloat(ProductDrawerFormData.quantity || 0) *
+          (parseFloat(taxRateValue.value?.replace("%", "")) || 0)) /
+        100,
 
-      disabled:"disabled"
-      
+      disabled: "disabled",
     },
     {
       handleChange: handleDrawerChange,
@@ -1087,10 +1212,8 @@ pdf.text(`${inputText1}`, 50, 100, {
       label: "Unit",
       // type: "text",
 
-      inputOrSelect:"select",
+      inputOrSelect: "select",
       options: unitOptions,
-      
-      
     },
     {
       handleChange: handleSelectProject,
@@ -1099,10 +1222,8 @@ pdf.text(`${inputText1}`, 50, 100, {
       // type: "text",
       // value:selectedValue,
 
-      inputOrSelect:"select",
+      inputOrSelect: "select",
       options: projectOptions,
-      
-      
     },
     {
       handleChange: handleSelectCatogary,
@@ -1111,19 +1232,11 @@ pdf.text(`${inputText1}`, 50, 100, {
       // type: "text",
       // value:selectedValue,
 
-      inputOrSelect:"select",
+      inputOrSelect: "select",
       options: categoryOptions,
-      
-      
     },
-    
   ];
 
-
-
-
-
-  
   return (
     <Box className="quotation-generator-page">
       <h2> Quotation Generator</h2>
@@ -1145,8 +1258,6 @@ pdf.text(`${inputText1}`, 50, 100, {
                     options={input.options}
                     disabled={input.disabled}
                     value={input.value}
-
-
                   />
                 );
               })}
@@ -1198,10 +1309,7 @@ pdf.text(`${inputText1}`, 50, 100, {
           </Box>
 
           {/* EXCLUSIONS */}
-          <Box
-            sx={{
-            }}
-          >
+          <Box sx={{}}>
             <Typography
               className="Terms-label"
               variant="string"
@@ -1222,15 +1330,16 @@ pdf.text(`${inputText1}`, 50, 100, {
                 }}
               >
                 {inputsExclusion.map((input, index) => (
-    <InputComponent
-        key={index}
-        handleChange={(e) => handleExclusionInputChange(index, e.target.value)} // Pass index and value
-        label={input.label}
-        type={input.type}
-        intputName={input.intputName}
-    />
-))}
-
+                  <InputComponent
+                    key={index}
+                    handleChange={(e) =>
+                      handleExclusionInputChange(index, e.target.value)
+                    } // Pass index and value
+                    label={input.label}
+                    type={input.type}
+                    intputName={input.intputName}
+                  />
+                ))}
               </Box>
               <Button
                 variant="contained"
@@ -1248,11 +1357,10 @@ pdf.text(`${inputText1}`, 50, 100, {
                 }}
                 onClick={handleAddInputExclusion}
               >
-                
                 Add
               </Button>
             </Box>
-          </Box>  
+          </Box>
 
           <Box>
             <Typography
@@ -1335,8 +1443,8 @@ pdf.text(`${inputText1}`, 50, 100, {
                 key={index}
                 handleChange={input.handleChange}
                 label={input.label}
-                type={input.type}
-                // value={leftInputs[input.intputName]} // Ensure the value is correctly passed
+                type="text"
+                value={input.value}
                 intputName={input.intputName}
                 inputOrSelect={input.inputOrSelect}
                 options={input.options}
@@ -1345,7 +1453,20 @@ pdf.text(`${inputText1}`, 50, 100, {
           </Box>
 
           <Box sx={{ display: "flex", gap: 2 }}>
-            {leftArrOfInputs.slice(1, 3).map((input, index) => (
+            {leftArrOfInputs.slice(1, 2).map((input, index) => (
+              <InputComponent
+                key={index}
+                handleChange={handleProductNameChange}
+                label={input.label}
+                type={input.type}
+                // value={areaOfWorkCategorySelected} // Ensure the value is correctly passed
+                inputName={input.inputName} // Ensure the prop name is correct
+                inputOrSelect={input.inputOrSelect}
+                options={input.options}
+              />
+            ))}
+
+            {leftArrOfInputs.slice(2, 3).map((input, index) => (
               <InputComponent
                 key={index}
                 handleChange={(e) => handleleftIputsChange(e, input.intputName)}
@@ -1375,7 +1496,7 @@ pdf.text(`${inputText1}`, 50, 100, {
           </Box>
 
           <Box sx={{ display: "flex", gap: 2 }}>
-            {leftArrOfInputs.slice(4,7).map((input, index) => (
+            {leftArrOfInputs.slice(4, 7).map((input, index) => (
               <InputComponent
                 key={index}
                 handleChange={(e) => handleleftIputsChange(e, input.intputName)}
@@ -1388,23 +1509,25 @@ pdf.text(`${inputText1}`, 50, 100, {
               />
             ))}
           </Box>
-          
-          <Box sx={{ display: "flex",alignItems:"center", gap: 2 }}>
-            {leftArrOfInputs.slice(7,9).map((input, index) => {
-              console.log(input)
-              return(
-              <InputComponent
-                key={index}
-                handleChange={input.handleChange}
-                label={input.label}
-                type={input.type}
-                value={input?.selectedOptionObject?.value} // Ensure the value is correctly passed
-                intputName={input.intputName}
-                inputOrSelect={input.inputOrSelect}
-                options={input.options}
-              />
-            )})}
-               <Button
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {leftArrOfInputs.slice(7, 9).map((input, index) => {
+              console.log(input);
+              return (
+                <InputComponent
+                  key={index} // Ideally, you should use a unique identifier instead of index if available
+                  handleChange={input.handleChange}
+                  label={input.label}
+                  type={input.type}
+                  value={input?.selectedOptionObject?.value} // Ensure the value is correctly passed
+                  intputName={input.intputName}
+                  inputOrSelect={input.inputOrSelect}
+                  options={input.options}
+                />
+              );
+            })}
+
+            <Button
               type="submit"
               variant="contained"
               color="primary"
@@ -1421,7 +1544,7 @@ pdf.text(`${inputText1}`, 50, 100, {
               // onClick={() => {
               //   toggleDrawer("right", true)();
               // }}
-              onClick={handleAddAccessory}
+              onClick={()=>{handleAddAccessory()}}
             >
               Add
             </Button>
@@ -1433,7 +1556,6 @@ pdf.text(`${inputText1}`, 50, 100, {
               justifyContent: "space-between",
             }}
           >
-         
             <Button
               type="submit"
               variant="contained"
@@ -1477,57 +1599,56 @@ pdf.text(`${inputText1}`, 50, 100, {
           >
             {/* // {productData?.map((data, index) => { */}
             {productData.map((product, productIndex) => {
-              console.log("firstproduct",product)
-              return(
-  <div key={productIndex}>
-    {/* Render Product Input Card for the main product */}
-    <Grid
-      md={4}
-      item
-      sx={{
-        mx: "auto",
-        px: "10px",
-        py: 1,
-      }}
-    >
-      <ProductInputCard
-        handleDelete={handleDelete}
-        heading={product.productname}
-        image={product.img} // Assuming you have an image property in productData
-        qty={product.quantity}
-        unit={product.productunit}
-        rate={product.amount}
-        amount={product.amount}
-      />
-    </Grid>
+              console.log("firstproduct", product);
+              return (
+                <div key={productIndex}>
+                  {/* Render Product Input Card for the main product */}
+                  <Grid
+                    md={4}
+                    item
+                    sx={{
+                      mx: "auto",
+                      px: "10px",
+                      py: 1,
+                    }}
+                  >
+                    <ProductInputCard
+                      handleDelete={handleDelete}
+                      heading={product.productname}
+                      image={product.img} // Assuming you have an image property in productData
+                      qty={product.quantity}
+                      unit={product.productunit}
+                      rate={product.amount}
+                      amount={product.amount}
+                    />
+                  </Grid>
 
-    {/* Map over accessorieslist of the current product */}
-    {product.accessorieslist.map((accessory, accessoryIndex) => (
-      <Grid
-        md={4}
-        item
-        key={`${productIndex}-${accessoryIndex}`} // Use a unique key combining productIndex and accessoryIndex
-        sx={{
-          mx: "auto",
-          px: "10px",
-          py: 1,
-        }}
-      >
-        <ProductInputCard
-          handleDelete={handleDelete}
-          heading={accessory.name}
-          image={accessory.img} // Assuming you have an image property in accessorieslist
-          qty={accessory.quantity}
-          unit={accessory.unit}
-          rate={accessory.price}
-          amount={accessory.amount}
-        />
-      </Grid>
-    ))}
-  </div>
-)})}
-
-
+                  {/* Map over accessorieslist of the current product */}
+                  {product.accessorieslist.map((accessory, accessoryIndex) => (
+                    <Grid
+                      md={4}
+                      item
+                      key={`${productIndex}-${accessoryIndex}`} // Use a unique key combining productIndex and accessoryIndex
+                      sx={{
+                        mx: "auto",
+                        px: "10px",
+                        py: 1,
+                      }}
+                    >
+                      <ProductInputCard
+                        handleDelete={handleDelete}
+                        heading={accessory.name}
+                        image={accessory.img} // Assuming you have an image property in accessorieslist
+                        qty={accessory.quantity}
+                        unit={accessory.unit}
+                        rate={accessory.price}
+                        amount={accessory.amount}
+                      />
+                    </Grid>
+                  ))}
+                </div>
+              );
+            })}
           </Box>
         </Box>
       </Box>
@@ -1570,7 +1691,7 @@ pdf.text(`${inputText1}`, 50, 100, {
         </Button>
       </Box>
       <div>
-        <Modal
+        {/* <Modal
           open={open}
           onClose={handleClose}
           aria-labelledby="modal-modal-title"
@@ -1581,115 +1702,322 @@ pdf.text(`${inputText1}`, 50, 100, {
               <h4 style={{ textAlign: "center" }}>Add Accessories</h4>
             </div>
           </Box>
-        </Modal>
-        <AddClientDrawer 
-         setToggle={setToggle}
-         toggle={toggle}
-         handleAdd={handleAdd}
-         handleImageChange={handleprojectImageChange}
-                 arrOfInputs={arrOfInputs}
-                 projectFormData={projectFormData}
-        state={state}
-        toggleDrawer={toggleDrawer}
+        </Modal> */}
+        <AddClientDrawer
+          setToggle={setToggle}
+          toggle={toggle}
+          handleAdd={handleAdd}
+          handleImageChange={handleprojectImageChange}
+          arrOfInputs={arrOfInputs}
+          projectFormData={projectFormData}
+          state={state}
+          toggleDrawer={toggleDrawer}
         />
-        <AddProductDrawer
-        handleSelectChange={handleDrawerSelectChange}
-        arrOfInputs={arrOfDrawerInputs}
-        toggleDrawer={toggleDrawer2}
-        state={state2}
-        ProductFormData={ProductDrawerFormData}
-        handleImageChange={handleDrawerImageChange}
-        handleAdd={handleDrawerAddProducts}
-        setToggle={setToggle2}
-        toggle={toggle2}
         
-      />
+        <AddStockJournalDrawer handleSelectChange={handleDrawerSelectChange}
+          arrOfInputs={arrOfDrawerInputs}
+          toggleDrawer={toggleDrawer2}
+          state={state2}
+          ProductFormData={ProductDrawerFormData}
+          handleImageChange={handleDrawerImageChange}
+          handleAdd={handleDrawerAddProducts}
+          setToggle={setToggle2}
+          toggle={toggle2}/>
       </div>
-      
 
-      <table className="offscreen" id='ALLPRODUCTtable' style={{backgroundColor:"white"}}>
-      <thead >
- 
-</thead>
-<tbody >
-  {productData.map((item, index) => (
-    <React.Fragment key={index}>
-       <tr style={{textAlign:"center",backgroundColor:"#FFFF00"}}>
-    <th style={{width: "100px",paddingBottom:"5px",paddingTop:"5px"}} >AREA OF WORK</th>
-    <th  style={{paddingBottom:"5px",paddingTop:"5px"}}>SPECIFICATION</th>
-    <th  style={{paddingBottom:"5px",paddingTop:"5px"}}>AMOUNT</th>
-  </tr>
-      <tr>
-  <td style={{textAlign:"center"}} rowspan="4">{item.productname}</td>
-  <td style={{ paddingLeft:"5px",paddingRight:"5px",  paddingBottom: "5px", paddingTop: "5px"}}>{item.description}</td>
-  <td style={{ paddingLeft:"5px",paddingRight:"5px",  paddingBottom: "5px", paddingTop: "5px"}}>{item.amount}</td>
-</tr>
-      <tr>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >hardware</td>
-        <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.hardware}</td>
-      </tr>
-      <tr>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >installation</td>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.installation}</td>
-      </tr>
-      <tr>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >accessories</td>
-        <td style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}} >{item.accessories}</td>
-      </tr>
+      <table
+        className="offscreen"
+        id="ALLPRODUCTtable"
+        style={{ backgroundColor: "white" }}
+      >
+        <thead></thead>
+        <tbody>
+          {productData.map((item, index) => (
+            <React.Fragment key={index}>
+              <tr style={{ textAlign: "center", backgroundColor: "#FFFF00" }}>
+                <th
+                  style={{
+                    width: "100px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  AREA OF WORK
+                </th>
+                <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>
+                  SPECIFICATION
+                </th>
+                <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>
+                  AMOUNT
+                </th>
+              </tr>
+              <tr>
+                <td style={{ textAlign: "center" }} rowspan="4">
+                  {item.productname}
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.description}
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.amount}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  hardware
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.hardware}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  installation
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.installation}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  accessories
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.accessories}
+                </td>
+              </tr>
 
-      <tr>
-      <td style={{backgroundColor:"#00B050",paddingBottom:"5px",paddingTop:"5px",paddingRight:"5px",fontWeight:"800",textAlign:"right " }} colspan="2"> TOTAL  </td>
-      <th style={{backgroundColor:"#00B050",paddingBottom:"5px",paddingTop:"5px",paddingRight:"5px",fontWeight:"800",textAlign:"right " }}>{
-        parseInt(item.amount||0)+parseInt(item.hardware||0)+parseInt(item.installation||0)+parseInt(item.accessories||0)
-      }</th>
-      </tr>
-      
-      <tr>
-      <td colSpan="12"> </td>
-      </tr>
-    
-      {
-        item.accessorieslist[0] &&(
-        <>
-        <tr>
-        <td style={{backgroundColor:"#00B0F0",paddingBottom:"5px",paddingTop:"5px",fontWeight:"800",textAlign:"center "}} colSpan="12"> ACCESSORIES LIST OF  {item.productname.toUpperCase()} </td>
-        </tr>
-        <tr style={{backgroundColor:"#FFFF00"}}>
-        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> SL NO </td>
-        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}>SPECIFICATION  </td>
-        <td  style={{paddingBottom:"5px",paddingTop:"5px", fontWeight:"800",textAlign:"center "}}> IMAGE </td>
-      </tr>
-        </>)
-      }
-      {item.accessorieslist.map((accessory, i) => {
-        console.log("accessory",accessory)
-        return(
-        <tr key={`${index}-${i}`}>
-          <td  style={{paddingBottom:"5px",paddingTop:"5px",textAlign:"center"}}>{index+1}</td>
-          <td  style={{ paddingLeft:"5px",paddingRight:"5px", paddingBottom:"5px",paddingTop:"5px"}}>{accessory.name}</td>
-          <td  style={{paddingLeft:"30px",paddingRight:"10px",paddingBottom:"20px",paddingTop:"20px",display:"flex",justifyContent:"center"}}> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png" alt="image" width={50} height={50} /> </td>
-          
-        </tr>
-        
-      )})}
-     
-      
-    </React.Fragment>
-  ))}
-   <tr>
-      <td style={{backgroundColor:"#FF0000",paddingBottom:"5px",paddingTop:"5px",paddingRight:"10px",fontWeight:"800",textAlign:"right ",color:"white",border:"1px solid black" }} colspan="2"> GRAND TOTAL  </td>
-      <th style={{backgroundColor:"#FF0000",paddingBottom:"5px",paddingTop:"5px",paddingRight:"10px",fontWeight:"800",textAlign:"right ", color:"white",border:"1px solid black"}}>{grandTotal}</th>
-      </tr>
-</tbody>
+              <tr>
+                <td
+                  style={{
+                    backgroundColor: "#00B050",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                    paddingRight: "5px",
+                    fontWeight: "800",
+                    textAlign: "right ",
+                  }}
+                  colspan="2"
+                >
+                  {" "}
+                  TOTAL{" "}
+                </td>
+                <th
+                  style={{
+                    backgroundColor: "#00B050",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                    paddingRight: "5px",
+                    fontWeight: "800",
+                    textAlign: "right ",
+                  }}
+                >
+                  {parseInt(item.amount || 0) +
+                    parseInt(item.hardware || 0) +
+                    parseInt(item.installation || 0) +
+                    parseInt(item.accessories || 0)}
+                </th>
+              </tr>
 
+              <tr>
+                <td colSpan="12"> </td>
+              </tr>
 
-</table>
+              {item.accessorieslist[0] && (
+                <>
+                  <tr>
+                    <td
+                      style={{
+                        backgroundColor: "#00B0F0",
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                      colSpan="12"
+                    >
+                      {" "}
+                      ACCESSORIES LIST OF {item.productname.toUpperCase()}{" "}
+                    </td>
+                  </tr>
+                  <tr style={{ backgroundColor: "#FFFF00" }}>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                    >
+                      {" "}
+                      SL NO{" "}
+                    </td>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                    >
+                      SPECIFICATION{" "}
+                    </td>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                    >
+                      {" "}
+                      IMAGE{" "}
+                    </td>
+                  </tr>
+                </>
+              )}
+              {item.accessorieslist.map((accessory, i) => {
+                console.log("accessory", accessory);
+                return (
+                  <tr key={`${index}-${i}`}>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {index + 1}
+                    </td>
+                    <td
+                      style={{
+                        paddingLeft: "5px",
+                        paddingRight: "5px",
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                      }}
+                    >
+                      {accessory.name}
+                    </td>
+                    <td
+                      style={{
+                        paddingLeft: "30px",
+                        paddingRight: "10px",
+                        paddingBottom: "20px",
+                        paddingTop: "20px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {" "}
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png"
+                        alt="image"
+                        width={50}
+                        height={50}
+                      />{" "}
+                    </td>
+                  </tr>
+                );
+              })}
+            </React.Fragment>
+          ))}
+          <tr>
+            <td
+              style={{
+                backgroundColor: "#FF0000",
+                paddingBottom: "5px",
+                paddingTop: "5px",
+                paddingRight: "10px",
+                fontWeight: "800",
+                textAlign: "right ",
+                color: "white",
+                border: "1px solid black",
+              }}
+              colspan="2"
+            >
+              {" "}
+              GRAND TOTAL{" "}
+            </td>
+            <th
+              style={{
+                backgroundColor: "#FF0000",
+                paddingBottom: "5px",
+                paddingTop: "5px",
+                paddingRight: "10px",
+                fontWeight: "800",
+                textAlign: "right ",
+                color: "white",
+                border: "1px solid black",
+              }}
+            >
+              {grandTotal}
+            </th>
+          </tr>
+        </tbody>
+      </table>
 
-
-
-      
       <div>
-        <table id="tablethree" style={{ backgroundColor: "white",display:"none"  }}>
+        <table
+          id="tablethree"
+          style={{ backgroundColor: "white", display: "none" }}
+        >
           <thead style={{ backgroundColor: "yellow" }}>
             <tr>
               <th style={{ border: "2px solid" }}>Area of Work</th>
@@ -1765,7 +2093,57 @@ pdf.text(`${inputText1}`, 50, 100, {
           </tbody>
         </table>
       </div>
-     
+      <div>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
+              <h4> Add Area Of Work / Category</h4>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center",
+                my: 1,
+                gap: 1,
+              }}
+            >
+              <InputComponent
+                label="Area Of Work / Category"
+                intputName="AreaOfWorkCategory"
+                type="text"
+                value={areaOfWorkCategoryInput}
+                handleChange={areaOfWorkCategoryInputChange}
+                // inputOrSelect={data.inputOrSelect}
+                // options={data.option}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{
+                  mt: 3,
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  bgcolor: "var(--black-button)",
+                  "&:hover": {
+                    background: "var(--button-hover)",
+                  },
+                }}
+                onClick={handleAddAreaOfWorkCategory}
+              >
+                Add
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
+      </div>
     </Box>
   );
 }

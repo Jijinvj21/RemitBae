@@ -173,9 +173,28 @@ function PurchasePage() {
         console.log(err);
       });
   };
+  const partyDataGet=()=>{
+    partyDataGetAPI()
+    .then((data) => {
+      console.log("partyData:", data);
+      // setTaxOptions(data);
+
+      // Transform data and set it to state
+      const partyData = data.responseData.map((entry) => ({
+        value: entry.id,
+        label: entry.name,
+      }));
+      console.log(partyData);
+      setPartyOptions(partyData);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
 
 
   useEffect(() => {
+    partyDataGet()
     getTaxOptionsFormAPI()
     getCategeryOptionsFormAPI()
     getClientOptionsFormAPI()
@@ -206,7 +225,8 @@ function PurchasePage() {
     createPartyAPI(data)
       .then((data) => {
         console.log(data);
-
+alert("Party Added")
+partyDataGet()
         setOpen(false)
         setPartyData({
           name: "",
@@ -239,22 +259,7 @@ function PurchasePage() {
         console.log(err);
       });
 
-    partyDataGetAPI()
-      .then((data) => {
-        console.log("partyData:", data);
-        // setTaxOptions(data);
-
-        // Transform data and set it to state
-        const partyData = data.responseData.map((entry) => ({
-          value: entry.id,
-          label: entry.name,
-        }));
-        console.log(partyData);
-        setPartyOptions(partyData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  
 
     clientDataGetAPI()
       .then((data) => {
@@ -322,18 +327,45 @@ function PurchasePage() {
   }, []);
 
   useEffect(() => {
-    const calculateItemTotal = (item) => {
-      const { qty, rate, amountafterdescount, tax } = item;
-      console.log(qty, rate, amountafterdescount, tax);
-      const total = qty * rate - (amountafterdescount || 0) + (tax || 0);
-      console.log(total);
-      return total;
-    };
-    const itemTotals = rows.map(calculateItemTotal);
-    const grandTotal = itemTotals.reduce((acc, curr) => acc + curr, 0);
+    const updatedRows = rows.map((row) => {
+      const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
+      const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
+
+      const totalWithoutTax = quantity * rate;
+
+      const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
+
+      let taxAppliedamount = 0; // Initializing taxAppliedamount variable
+      if (row.taxAppliedamount) {
+        taxAppliedamount =
+          parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
+      } else if (row.taxApplied?.value) {
+        taxAppliedamount =
+          parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
+      } else if (row.taxApplied) {
+        taxAppliedamount =
+          parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
+      }
+
+      const total = (
+        (totalWithTax * taxAppliedamount) / 100 +
+        totalWithTax
+      ).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
+
+      return {
+        ...row,
+        total: total,
+      };
+    });
+
+    const grandTotal = updatedRows.reduce(
+      (sum, row) => sum + parseFloat(row.total),
+      0
+    ); // Summing up all row totals
 
     setTotalValues(grandTotal);
-  }, [rows]);
+  }, [rows]); // Update when rows change
+
 
   const handleSelectedProductChange = async (event, newValue) => {
     if (!newValue) {
@@ -438,19 +470,21 @@ function PurchasePage() {
       product_id: item.id,
       quantity: item.qty,
       Price: item.qty * item.rate,
-      discount: item.amountafterdescount,
+      discount: parseFloat(item?.descountvalue||0),
+      tax_rate:{id:item.taxId||1}
+
     }));
     const salesVoucher = {
       credit_sale: false,
       payment_type: selectedOption === "cash" ? 5 : 10,
       billing_address: "",
-      customer: parseInt(selectedCustomer),
+      client: parseInt(selectedCustomer),
       party: parseInt(selectedParty),
       total: parseFloat(totalValues),
       product_details: newArray,
     };
 
-    console.log(salesVoucher);
+    // console.log(salesVoucher);
     console.log(rows);
     createPurchaseAPI(salesVoucher)
       .then((data) => {
@@ -543,6 +577,7 @@ function PurchasePage() {
           setSelectedValue("");
           setTaxRateValue("");
           alert("Product added successfully");
+          fetchData()
         }
       })
       .catch((err) => {
@@ -685,6 +720,7 @@ function PurchasePage() {
           <Box>
             <SalesTable
               selectedProductData={selectedProductDetails}
+              setTotalValues={setTotalValues}
               totalValues={totalValues}
               rows={rows}
               setRows={setRows}

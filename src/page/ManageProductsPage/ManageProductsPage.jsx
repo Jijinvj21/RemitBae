@@ -7,7 +7,7 @@ import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer
 import AddSquare from "../../assets/products/AddSquare.svg";
 import { Link } from "react-router-dom";
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
-import { categeryGetAPI, gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import {  gstOptionsGetAPI, productAddAPI, productDeleteAPI, productGetAPI, productUpdateAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 
 function ManageProductsPage() {
   const [myArray, setMyArray] = useState([]);
@@ -16,8 +16,8 @@ const [taxOptions,setTaxOptions]=useState([])
 const [updatetrue,setUpdateTrue]=useState(false)
 const [unitOptions,setUnitOptions]=useState([])
 const [projectOptions,setProjectOptions]=useState([])
-const [toggle, setToggle] = useState(true);
-const [categoryOptions,setCategoryOptions]=useState([])
+// const [toggle, setToggle] = useState(true);
+// const [categoryOptions,setCategoryOptions]=useState([])
 const [loader, setLoader]=useState(false)
 
 
@@ -68,32 +68,32 @@ const getClientOptionsFormAPI = () => {
     });
 };
 
-const getCategeryOptionsFormAPI = () => {
-  categeryGetAPI()
-    .then((data) => {
-      console.log("category:", data);
+// const getCategeryOptionsFormAPI = () => {
+//   categeryGetAPI()
+//     .then((data) => {
+//       console.log("category:", data);
       
-      // Transform data and set it to state
-      const projectdData = data?.responseData.map(entry => ({
-        value: entry.id,
-        label:`${entry.name}`,
+//       // Transform data and set it to state
+//       const projectdData = data?.responseData.map(entry => ({
+//         value: entry.id,
+//         label:`${entry.name}`,
         
-      }));
-      projectdData.unshift({ value: 0, label: "None" });
+//       }));
+//       projectdData.unshift({ value: 0, label: "None" });
 
-      console.log(projectdData);
-      setCategoryOptions(projectdData);
-    })
-    .catch(err => {
-      console.log(err);
-    });
-};
+//       console.log(projectdData);
+//       setCategoryOptions(projectdData);
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// };
 
 
   const getDataFromAPI = () => {
     setLoader(true)
     productGetAPI().then((data) => {
-      console.log("productGetAPI:", data.responseData);
+      console.log("productGetAPI:", data.responseData.length);
       // setTaxOptions(data);
 
       // Transform data and set it to state
@@ -101,7 +101,7 @@ const getCategeryOptionsFormAPI = () => {
 
       setMyArray(data.responseData);
     }).catch((err) => {
-      console.log(err);
+      console.log("err",err);
       setLoader(false)
 
     });
@@ -126,7 +126,7 @@ const getCategeryOptionsFormAPI = () => {
     });
   }
   useEffect(() => {
-    getCategeryOptionsFormAPI()
+    // getCategeryOptionsFormAPI()
     getClientOptionsFormAPI()
     getUnitOptionsFormAPI()
     getUnitOptionsFormAPI()
@@ -141,10 +141,10 @@ const getCategeryOptionsFormAPI = () => {
   })
     const [selectedValue, setSelectedValue] = useState('');
     const [projectValue, setProjectValue] = useState('');
-    const [categoryValue, setCategoryValue] = useState('');
+    // const [categoryValue, setCategoryValue] = useState('');
 
 
-    const [taxRateValue, setTaxRateValue] = useState({});
+    const [taxRateValue, setTaxRateValue] = useState({value: '0%', label: 'IGST@ 0%', taxlabel: '0%', id: 3});
 
   const [ProductFormData, setProductFormData] = useState({
     name:"",
@@ -164,10 +164,10 @@ const getCategeryOptionsFormAPI = () => {
     console.log(event.target.value)
   };
 
-  const handleSelectCatogary = (event) => {
-    setCategoryValue(event.target.value);
-    console.log(event.target.value)
-  };
+  // const handleSelectCatogary = (event) => {
+  //   setCategoryValue(event.target.value);
+  //   console.log(event.target.value)
+  // };
 
 
 
@@ -231,7 +231,7 @@ const getCategeryOptionsFormAPI = () => {
     {
       handleChange: handleChange,
       intputName: "name",
-      label: " Product Name",
+      label: "Material Name",
       type: "text",
       value:updateData?.name||ProductFormData.name
       
@@ -256,8 +256,7 @@ const getCategeryOptionsFormAPI = () => {
       intputName: "taxrate",
       label: "Tax Rate",
       // type: "number",
-      // value:taxRateValue.label,
-
+      value: taxRateValue?.value || "",
       inputOrSelect:"select",
       options:taxOptions    },
     {
@@ -273,6 +272,7 @@ const getCategeryOptionsFormAPI = () => {
       intputName: "hsn",
       label: "HSN",
       type: "text",
+      value:ProductFormData.hsn
     },
     {
       handleChange: handleSelectChange,
@@ -291,25 +291,25 @@ const getCategeryOptionsFormAPI = () => {
       intputName: "project",
       label: "Projects",
       // type: "text",
-      // value:selectedValue,
+      value:projectValue,
 
       inputOrSelect:"select",
       options: projectOptions,
       
       
     },
-    {
-      handleChange: handleSelectCatogary,
-      intputName: "categery",
-      label: "Categerys",
-      // type: "text",
-      // value:selectedValue,
+    // {
+    //   handleChange: handleSelectCatogary,
+    //   intputName: "categery",
+    //   label: "Category",
+    //   // type: "text",
+    //   value:categoryValue,
 
-      inputOrSelect:"select",
-      options: categoryOptions,
+    //   inputOrSelect:"select",
+    //   options: categoryOptions,
       
       
-    },
+    // },
     
   ];
 
@@ -374,15 +374,14 @@ getDataFromAPI()
 
   const handleAdd = () => {
     const formData = new FormData();
-  
+    
     formData.append('name', ProductFormData.name);
     formData.append('hsn', ProductFormData.hsn);
     formData.append('rate', parseInt(ProductFormData.rate));
     formData.append('quantity', parseInt(ProductFormData.quantity));
     formData.append('unit', selectedValue);
     formData.append('projectid', parseInt(projectValue));
-    formData.append('is_master_product', toggle);
-    formData.append('category_id', categoryValue);
+    formData.append('is_master_product', false);
     // formData.append('gst', ((parseInt(ProductFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append('tax_rate', taxRateValue.id);
     formData.append('image', img);
@@ -390,25 +389,29 @@ getDataFromAPI()
     productAddAPI(formData)
       .then((data) => {
         if (data.status === 200) {
-          setProductFormData({
+          setProductFormData((prevData) => ({
+            ...prevData,
             name: "",
             qate: "",
             quantity: "",
             rate: "",
             taxvalue: "",
             hsn: "",
-          });
+          }));
           setSelectedValue("");
-          setTaxRateValue("");
-          alert("Product added successfully");
+          setTaxRateValue({value: '0%', label: 'IGST@ 0%', taxlabel: '0%', id: 3})     
+          setProjectValue({}) 
+          setCategoryValue({})
+               alert("Product added successfully");
           getDataFromAPI();
         }
       })
       .catch((err) => {
         console.log(err);
-        alert("Problem in adding product");
+        alert("Problem in adding product",selectedValue);
       });
   };
+  
   
   
   
@@ -517,7 +520,7 @@ getDataFromAPI()
       flexDirection: "column", 
       alignItems: "center" 
     }}><CircularProgress color="inherit" /></Box> : // Show loader if loading
-    myArray===null? (
+    myArray==0? (
       // Show a message when no products are available
       <Box 
         sx={{ 
@@ -589,8 +592,8 @@ getDataFromAPI()
         handleAdd={handleAdd}
         updatetrue={updatetrue}
         handleUpdateData={handleUpdateData}
-        setToggle={setToggle}
-        toggle={toggle}
+        // setToggle={setToggle}
+        // toggle={toggle}
         
         // updateData={updateData}
       />

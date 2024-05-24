@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 // import { AiOutlineFileAdd } from "react-icons/ai";
 import TransactionTable from "../../components/TransactionTable/TransactionTable";
-import { categeryGetAPI, gstOptionsGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import { categeryGetAPI, debitDataAddAPI, gstOptionsGetAPI, partyDataGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
 
 function DebitNotePage() {
@@ -37,8 +37,34 @@ function DebitNotePage() {
   const [img, setImg] = useState(null);
   const [taxOptions,setTaxOptions]=useState([])
   const [toggle, setToggle] = useState(true);
+  const [partySelect, setPartySelect] = useState();
+  const [receiptNo, setReceiptNo] = useState("");
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
+  const [date, setDate] = useState("");
+  const [stateOfSupply, setStateOfSupply] = useState("");
 
+  const partyDataGet=()=>{
+    partyDataGetAPI()
+    .then((data) => {
+      console.log("partyData:", data);
+      // setTaxOptions(data);
 
+      // Transform data and set it to state
+      const partyData = data.responseData.map((entry) => ({
+        value: entry.id,
+        label: entry.name,
+      }));
+      console.log(partyData);
+      setPartytOptions(partyData);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+useEffect(() => {
+  partyDataGet()
+}, [])
 
   const handleDrawerImageChange = (e) => {
     const file = e.target.files[0];
@@ -226,8 +252,17 @@ const toggleDrawer = (anchor, open) => (event) =>{
   setState({ ...state, [anchor]: open });
 };
 
-  const handleTextChange = (event) => {
-    setTextValue(event.target.value);
+  const handlereceiptnoChange = (event) => {
+    setReceiptNo(event.target.value);
+  };
+  const handleinvoicenoChange = (event) => {
+    setInvoiceNo(event.target.value);
+  };
+  const handleinvoicedateChange = (event) => {
+    setInvoiceDate(event.target.value);
+  };
+  const handledataChange = (event) => {
+    setDate(event.target.value);
   };
   const topleftsideinput = [
     {
@@ -250,17 +285,17 @@ const toggleDrawer = (anchor, open) => (event) =>{
       label: "Date",
       type: "date",
     },
-    {
-      intputName: "stateofsupply",
-      label: "State of supply",
-      inputOrSelect: "select",
-      options: [
-        { value: "option1", label: "Option 1" },
-        { value: "option2", label: "Option 2" },
-        { value: "option3", label: "Option 3" },
-        { value: "Account", label: "Account" },
-      ],
-    },
+    // {
+    //   intputName: "stateofsupply",
+    //   label: "State of supply",
+    //   inputOrSelect: "select",
+    //   options: [
+    //     { value: "option1", label: "Option 1" },
+    //     { value: "option2", label: "Option 2" },
+    //     { value: "option3", label: "Option 3" },
+    //     { value: "Account", label: "Account" },
+    //   ],
+    // },
   ];
   const handleDrawerChange = (e) => {
     const { name, value } = e.target;
@@ -405,7 +440,27 @@ const toggleDrawer = (anchor, open) => (event) =>{
     console.log(event.target.value)
   };
 
+  const handleAddDebitNote=()=>{
+    const datatopass={
+      customer:partySelect.value,
+      description:"",
+      payment_type:"",
+      total_amount:"",
+      invoice_no:"",
+      date:"",
+      product_details:[],
+    }
 
+    debitDataAddAPI(datatopass).then((res)=>{
+console.log(res)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  }
+const handleSelectedPartyChange=(event, newValue)=>{
+  setPartySelect(newValue)
+}
 
   return (
     <div className="debitnotepage">
@@ -451,7 +506,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
                     id="custom-input-demo"
                     options={partyOptions}
                     //   value={selectedProduct}
-                    //   onChange={handleSelectedProductChange}
+                      onChange={handleSelectedPartyChange}
                     componentsProps={{
                       popper: {
                         modifiers: [
@@ -491,23 +546,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
                   intputName="phoneno"
                 />
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <label style={{ fontSize: "12px" }} htmlFor="textarea">
-                  Billing Address
-                </label>
-                <textarea
-                  id="textarea"
-                  value={textValue}
-                  onChange={handleTextChange}
-                  rows={5} // Set the number of visible rows
-                  cols={30} // Set the number of visible columns
-                />
-              </div>
+            
             </div>
             <div className="left" style={{display:"flex",flexDirection:"column",gap:10}}>
               <div style={{display:"flex", gap:10}}>
@@ -544,7 +583,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
                   );
                 })}
                 </div>
-                <InputComponent
+                {/* <InputComponent
                     handleChange={topleftsideinput[0].handleChange}
                     state={topleftsideinput[0].state}
                     label={topleftsideinput[0].label}
@@ -552,7 +591,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
                     intputName={topleftsideinput[0].intputName}
                     inputOrSelect={topleftsideinput[0].inputOrSelect}
                     options={topleftsideinput[0].options}
-                    />
+                    /> */}
             </div>
           </div>
           <div className="center-section">
@@ -714,16 +753,16 @@ const toggleDrawer = (anchor, open) => (event) =>{
                   intputName="total"
                 />
               </div>
-              <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
+              {/* <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
                 <InputComponent type="checkbox" />
                 <InputComponent
                   label="Paid amount"
                   type="number"
                   intputName="paidamount"
                 />
-              </div>
+              </div> */}
 
-              <div
+              {/* <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -733,7 +772,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
               >
                 <p>Balance:</p>
                 <p>5284</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -760,6 +799,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
               textTransform: "none",
               bgcolor: "var(--black-button)",
             }}
+            onClick={handleAddDebitNote}
           >
             Save
           </Button>

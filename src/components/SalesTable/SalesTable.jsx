@@ -39,7 +39,7 @@ export default function FullFeaturedCrudGrid({
 
   React.useEffect(() => {
     if (selectedProductData) {
-      console.log(selectedProductData);
+      console.log("selectedProductData",selectedProductData,` ${selectedProductData.tax_rate?.name} ${selectedProductData.tax_rate?.percentage}`);
       const newRow = {
         id: selectedProductData.id,
         itemCode: selectedProductData.itemCode,
@@ -359,11 +359,11 @@ export default function FullFeaturedCrudGrid({
         return (
           <div style={{ width: "100%", display: "flex" }}>
             <select
-              value={
-                params.row.taxAppliedamount
-                  ? params.row.taxAppliedamount
-                  : params.row.taxApplied.split(" ")[1]
-              }
+            value={
+              params.row.taxAppliedamount
+                ? params.row.taxAppliedamount
+                : params.row.taxApplied.split("GST@ ")[1]
+            }
               onChange={handleTaxChange}
               style={{
                 width: "100%",

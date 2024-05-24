@@ -1,21 +1,39 @@
+
+
+
 import { Autocomplete, Box, Button, Grid, Typography } from "@mui/material";
-import "./StockJournalPage.scss";
-import InputComponent from "../../components/InputComponent/InputComponent";
-import ProductInputCard from "../../components/ProductInputCard/ProductDataCard";
+import Drawer from "@mui/material/Drawer";
+import InputComponent from "../InputComponent/InputComponent";
+// import { FormControl } from "@mui/base/FormControl";
+import bulkUpload from "../../assets/products/bulkUpload.svg";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
+import { useEffect, useState } from "react";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { gstOptionsGetAPI, productGetAPI, projectGetAPI, stockJournalCreateAPI, unitsDataGetAPI } from "../../service/api/admin";
+
+// import InputComponent from "../../components/InputComponent/InputComponent";
+import ProductInputCard from "../../components/ProductInputCard/ProductDataCard";
+// import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 import { useNavigate } from "react-router-dom";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-import { useEffect, useState } from "react";
 import PlaylistAddRoundedIcon from "@mui/icons-material/PlaylistAddRounded";
-import {
-  gstOptionsGetAPI,
-  productGetAPI,
-  projectGetAPI,
-  stockJournalCreateAPI,
-  unitsDataGetAPI,
-} from "../../service/api/admin";
 
-function StockJournalPage() {
+function AddStockJournalDrawer({
+//   handleSubmit,
+//   arrOfInputs,
+  toggleDrawer,
+  state,
+//   ProductFormData,
+//   updateData,
+//   handleImageChange,
+//   handleAdd,
+//   handleSelectChange,
+//   updatetrue,
+//   handleUpdateData,
+  // setToggle,
+  // toggle,
+}) {
+  // draw
   const navigate = useNavigate();
   const [productOptions, setProductOptions] = useState([]);
   const [projectOptions, setProjectOptions] = useState([]);
@@ -304,11 +322,21 @@ function StockJournalPage() {
     }
   };
   
-  return (
-    <Box className="stockjournl-page">
+
+  
+
+  const list = (anchor) => (
+    <Box
+      sx={{ width: 800, mx: 5, my: 3 }}
+      role="presentation"
+      onClick={toggleDrawer(anchor, true)}
+      onKeyDown={toggleDrawer(anchor, true)}
+    >
+
+<Box className="stockjournl-page">
       <h2> Stock Journal</h2>
       <h4> Enter the product details to create a new product </h4>
-      <Button
+      {/* <Button
         disableRipple
         sx={{
           mb: 2,
@@ -323,9 +351,9 @@ function StockJournalPage() {
       >
         <KeyboardBackspaceIcon />
         Back
-      </Button>
+      </Button> */}
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Box className="input-box">
+        <Box className="input-box" sx={{width:"30% !important"}}>
           <Box sx={{ width: "100%" }}>
             <p className="product-name">product</p>
 
@@ -580,8 +608,45 @@ function StockJournalPage() {
         </Box>
       </Box>
     </Box>
+
+
+
+
+
+
+
+
+
+
+      
+    </Box>
+  );
+  return (
+    <Drawer
+      // sx={{
+      //   width: 700,
+      //   flexShrink: 0,
+      //   '& .MuiDrawer-paper': {
+      //     width: 700,
+      //     boxSizing: 'border-box',
+      //   },
+      // }}
+      sx={{
+        "& .MuiDrawer-root": {
+          position: "absolute",
+        },
+        "& .MuiPaper-root": {
+          position: "absolute",
+        },
+      }}
+      anchor="right"
+      open={state["right"]}
+      onClose={toggleDrawer("right", false)}
+      className="drawer-component"
+    >
+      {list("right")}
+    </Drawer>
   );
 }
-// }
 
-export default StockJournalPage;
+export default AddStockJournalDrawer;

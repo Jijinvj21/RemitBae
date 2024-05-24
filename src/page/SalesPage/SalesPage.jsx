@@ -13,7 +13,7 @@ import {
   OutlinedInput,
 } from "@mui/material";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "@mui/material/Modal";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import {
@@ -42,6 +42,7 @@ const style = {
 };
 
 function SalesPage() {
+  const selectRef = useRef(null);
   const [productOptions, setProductOptions] = useState([]);
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
   const [totalValues, setTotalValues] = useState(0);
@@ -220,6 +221,7 @@ function SalesPage() {
     const selectedOption = e.target.value;
     if (selectedOption === "addNew") {
       setOpen(true);
+      selectRef.current.value = "select";
     } else {
       setOpen(false);
       // Handle selection of other options
@@ -265,6 +267,7 @@ function SalesPage() {
       if (newValue.value === -2) {
         console.log(newValue.value === -2);
         toggleDrawer("right", true)();
+        setSelectedProduct()
       } else {
         // Set the amount based on the selected product
         const response = await productGetAPI();
@@ -288,6 +291,8 @@ function SalesPage() {
           taxApplied: 0, // Assuming default tax applied is 0
           total: selectedProductData.price, // Assuming total is initially equal to price
         };
+        setSelectedProduct()
+        
         setTableRows([...tableRows, newRow]);
       }
     }
@@ -318,6 +323,9 @@ function SalesPage() {
     createVoucherAPI(salesVoucher)
       .then((data) => {
         console.log(data);
+        setSelectedOption({})
+        setSelectedCustomer({})
+        setRows([])
       })
       .catch((err) => {
         console.log(err);
@@ -509,6 +517,7 @@ function SalesPage() {
                   theme.palette.getContrastText(theme.palette.background.paper),
               },
             }}
+            
             id="custom-input-demo"
             options={productOptions}
             value={selectedProduct}
@@ -559,7 +568,7 @@ function SalesPage() {
           }}
         >
           <p className="head-p-tag">Customer Details</p>
-          <select style={{ width: "100%" }} onChange={handleOptionSelect}>
+          <select  value={selectedCustomer} ref={selectRef} style={{ width: "100%" }} onChange={handleOptionSelect}>
             <option value="select">Select</option>
 
             <option value="addNew">Add New</option>
