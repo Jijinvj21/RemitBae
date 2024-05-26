@@ -458,16 +458,17 @@ const handleTotalChange = (e) => {
     const newArray = await rows.map((item) => ({
       product_id: item.id,
       quantity: item.qty,
-      Price: item.rate,
-      discount: item.amountafterdescount,
+      Price: item.qty * item.rate,
+      discount: parseFloat(item?.descountvalue||0),
+      tax_rate:{id:item.taxId||1}
+
     }));
     const data={
-      date:dueDate,
-      delivery_challen_id:challanNo,
-      net_tota:"",
-      state:"",
-      phonenumber:"",
-      party:partySelect,
+      due_date:dueDate,
+      date:invoiceDate,
+      challan_no:challanNo,
+      state_id:"",
+      party_id:partySelect,
       description:description,
       products:newArray
 
