@@ -141,7 +141,8 @@ function PaymenyIn() {
     paymentInAPI(data)
       .then((data) => {
         console.log("paymentInAPI", data);
-
+        alert("Receipt added")
+  
         getpaymentDataGetAPI();
         const currentDate = new Date();
         const random6Digit = generateRandom6Digit(currentDate);
@@ -152,12 +153,12 @@ function PaymenyIn() {
         setPartySelect(0);
         setRecived("");
         setTextValue("");
-        setTextValue("");
       })
       .catch((err) => {
         console.log(err);
       });
   };
+  
 
   const handleCreateReceipt = (row) => {
     const string = renderToString(
