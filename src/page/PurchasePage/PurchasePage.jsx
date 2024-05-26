@@ -35,7 +35,7 @@ const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
-  transform: "translate(-50%, -50%)",
+  transform: "translate(-50%, -50%)", 
   width: 400,
   bgcolor: "background.paper",
   // border: '2px solid #000',
@@ -375,6 +375,8 @@ partyDataGet()
     if(newValue.value===-2){
       console.log(newValue.value===-2);
       toggleDrawer("right", true)();
+      setSelectedProduct()
+
     }else{
 
    
@@ -405,6 +407,8 @@ partyDataGet()
         taxApplied: 0, // Assuming default tax applied is 0
         total: selectedProductData.price, // Assuming total is initially equal to price
       };
+      setSelectedProduct()
+
       setTableRows([...tableRows, newRow]);
     }
   }
@@ -489,9 +493,11 @@ partyDataGet()
     createPurchaseAPI(salesVoucher)
       .then((data) => {
         console.log(data);
+        alert("Bill created")
         setRows([])
-        selectedCustomer()
-        setSelectedParty()
+        selectedCustomer({})
+        setSelectedParty({})
+        setSelectedProduct()
       })
       .catch((err) => {
         console.log(err);
@@ -749,7 +755,7 @@ partyDataGet()
           }}
         >
           <p className="head-p-tag">Clinet Details</p>
-          <select style={{ width: "100%" }} onChange={handleOptionSelect}>
+          <select value={selectedCustomer} style={{ width: "100%" }} onChange={handleOptionSelect}>
           <option value="" label="None">
                   None
                 </option>

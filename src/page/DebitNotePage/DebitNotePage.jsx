@@ -457,35 +457,57 @@ const handleDateChange = (event) => {
     console.log(event.target.value)
   };
 
-  const handleAddDebitNote= async()=>{
+  const handleAddDebitNote = async () => {
     const newArray = await rows.map((item) => ({
-      product_id: item.id,
-      quantity: item.qty,
-      Price: item.qty * item.rate,
-      discount: parseFloat(item?.descountvalue||0),
-      tax_rate:{id:item.taxId||1}
-
+        product_id: item.id,
+        quantity: item.qty,
+        Price: item.qty * item.rate,
+        discount: parseFloat(item?.descountvalue || 0),
+        tax_rate_id: (item.taxId || 1 )
     }));
-    const datatopass={
-      customer:partySelect.value,
-      description:textValue,
-      payment_type:paymentSelect,
-      total_amount:"",
-      invoice_no:invoiceNo,
-      recipes_no:receiptNo,
-      invoice_date:invoiceDate,
-      date:date,
-      phone:phoneNumber,
-      product_details:newArray,
+
+    const datatopass = {
+        customer: partySelect.value,
+        description: textValue,
+        payment_type: paymentSelect,
+        total_amount: "",
+        invoice_no: invoiceNo,
+        recipes_no: receiptNo,
+        invoice_date: invoiceDate,
+        date: date,
+        phone: phoneNumber,
+        product_details: newArray,
+    };
+
+    // Convert datatopass object to FormData
+    const formData = new FormData();
+    formData.append('customer', datatopass.customer);
+    formData.append('description', datatopass.description);
+    formData.append('payment_type', datatopass.payment_type);
+    formData.append('total_amount', datatopass.total_amount);
+    formData.append('invoice_no', datatopass.invoice_no);
+    formData.append('recipes_no', datatopass.recipes_no);
+    formData.append('invoice_date', datatopass.invoice_date);
+    formData.append('date', datatopass.date);
+    formData.append('phone', datatopass.phone);
+
+    // Append product details
+        formData.append(`product_details`, JSON.stringify(datatopass.product_details));
+       
+
+    // Log the FormData entries (for debugging purposes)
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
     }
 
-    debitDataAddAPI(datatopass).then((res)=>{
-console.log(res)
-    })
-    .catch((err)=>{
-      console.log(err)
-    })
-  }
+    // Send the FormData using the API function
+    debitDataAddAPI(formData).then((res) => {
+        console.log(res);
+    }).catch((err) => {
+        console.log(err);
+    });
+};
+
 const handleSelectedPartyChange=(event, newValue)=>{
   setPartySelect(newValue)
 }
