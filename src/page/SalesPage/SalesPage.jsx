@@ -553,7 +553,7 @@ function SalesPage() {
               totalValues={totalValues}
               setRows={setRows}
               rows={rows}
-            />{" "}
+            />
             {/* Pass tableRows as props to SalesTable */}
           </Box>
         </div>

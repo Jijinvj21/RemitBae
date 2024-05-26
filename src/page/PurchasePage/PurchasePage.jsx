@@ -489,6 +489,9 @@ partyDataGet()
     createPurchaseAPI(salesVoucher)
       .then((data) => {
         console.log(data);
+        setRows([])
+        selectedCustomer()
+        setSelectedParty()
       })
       .catch((err) => {
         console.log(err);

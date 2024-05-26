@@ -2,10 +2,13 @@ import { Autocomplete, Box, Button, Typography } from "@mui/material";
 import "./DeliveryChallan.scss";
 import { useEffect, useState } from "react";
 import InputComponent from "../../components/InputComponent/InputComponent";
-import TransactionTable from "../../components/TransactionTable/TransactionTable";
+// import TransactionTable from "../../components/TransactionTable/TransactionTable";
+import SalesTable from "../../components/SalesTable/SalesTable";
+
 import {
   categeryGetAPI,
   gstOptionsGetAPI,
+  partyDataGetAPI,
   productAddAPI,
   productGetAPI,
   projectGetAPI,
@@ -43,14 +46,41 @@ function DeliveryChallan() {
   const [toggle, setToggle] = useState(true);
 
   const [challanNo, setChallanNo] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState();
   const [dueDate, setDueDate] = useState("");
   const [stateOfSupply, setStateOfSupply] = useState("");
   const [description, setDescription] = useState("");
 const [imgDelivery, setImgDelivery] = useState(null);
 const [roundOff, setRoundOff] = useState(0);
 const [total, setTotal] = useState(0);
+const [partySelect, setPartySelect] = useState(0);
 
+
+useEffect(() => {
+  const now = new Date();
+ 
+  setInvoiceDate(now.toLocaleDateString());
+
+  partyDataGetAPI()
+  .then((data) => {
+    console.log("partyData:", data);
+    // setTaxOptions(data);
+
+    // Transform data and set it to state
+    const partyData = data.responseData.map((entry) => ({
+      value: entry.id,
+      label: entry.name,
+    }));
+    console.log(partyData);
+    setPartyOptions(partyData);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+}, []);
+const handleSetParty = (e, data) => {
+  setPartySelect(data.value);
+};
 
 const handleDescriptionChange = (e) => {
   setDescription(e.target.value);
@@ -405,7 +435,7 @@ const handleTotalChange = (e) => {
     {
       handleChange: handleInvoiceDateChange,
       label: "Invoice Date",
-      type: "date",
+      type: "text",
       value: invoiceDate,
     },
     {
@@ -423,6 +453,33 @@ const handleTotalChange = (e) => {
       value: stateOfSupply,
     },
   ];
+
+  const deliveryChallanAdd= async()=>{
+    const newArray = await rows.map((item) => ({
+      product_id: item.id,
+      quantity: item.qty,
+      Price: item.rate,
+      discount: item.amountafterdescount,
+    }));
+    const data={
+      date:dueDate,
+      delivery_challen_id:challanNo,
+      net_tota:"",
+      state:"",
+      phonenumber:"",
+      party:partySelect,
+      description:description,
+      products:newArray
+
+    }
+    console.log(data)
+//     deliveryChallanAddAPI(data).then((res)=>{
+// console.log(res)
+//     })
+//     .catch((err)=>{
+// console.log(err)
+//     })
+  }
 
   return (
     <div className="deliverychallan-page">
@@ -449,7 +506,7 @@ const handleTotalChange = (e) => {
               id="custom-input-demo"
               options={partyOptions}
               //   value={selectedProduct}
-              // onChange={handleSetParty}
+              onChange={handleSetParty}
               componentsProps={{
                 popper: {
                   modifiers: [
@@ -552,12 +609,19 @@ const handleTotalChange = (e) => {
               )}
             />
           </Box>
-          <TransactionTable
+          {/* <TransactionTable
             selectedProductData={selectedProductDetails}
             totalValues={totalValues}
             rows={rows}
             setRows={setRows}
-          />
+          /> */}
+                <SalesTable
+              selectedProductData={selectedProductDetails}
+              setTotalValues={setTotalValues}
+              totalValues={totalValues}
+              setRows={setRows}
+              rows={rows}
+            />
         </div>
         <div className="bottom-section">
   <div>
@@ -655,6 +719,8 @@ const handleTotalChange = (e) => {
               textTransform: "none",
               bgcolor: "var(--black-button)",
             }}
+            
+            onClick={deliveryChallanAdd}
           >
             Save
           </Button>

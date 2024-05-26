@@ -6,9 +6,9 @@ import axios from "axios";
 // };
 
 
-const BASE_URL = 'http://192.168.0.112:80';
+// const BASE_URL = 'http://192.168.0.100:80';
 // const MASRE_TABLE_BASE_URL = 'http://192.168.0.103:8088';
-// const BASE_URL = 'https://teqbae-accounts-rkkzm.ondigitalocean.app';
+const BASE_URL = 'https://teqbae-accounts-rkkzm.ondigitalocean.app';
 
 
 
@@ -345,6 +345,17 @@ export const creditDataAddAPI = async (creditData) => {
 export const debitDataAddAPI = async (debitData) => {
   try {
     const response = await axios.post(`${BASE_URL}/voucher/debitnote/add`,debitData);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+}
+
+export const deliveryChallanAddAPI = async (deliveryChallanData) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/voucher/delivery-challan/add`,deliveryChallanData);
     console.log(response)
     return response
   } catch (error) {

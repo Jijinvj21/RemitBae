@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 // import { AiOutlineFileAdd } from "react-icons/ai";
 import TransactionTable from "../../components/TransactionTable/TransactionTable";
-import { categeryGetAPI, gstOptionsGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import { categeryGetAPI, creditDataAddAPI, gstOptionsGetAPI, partyDataGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
 
 function CreditNotePage() {
   const [partyOptions, setPartytOptions] = useState([]);
   const [textValue, setTextValue] = useState("");
+  const [billingTextValue, setBillingTextValue] = useState("");
+
   const [selectedProductDetails, setSelectedProductDetails] = useState(null); // State to hold selected product
   const [totalValues, setTotalValues] = useState([]);
   const [rows, setRows] = useState([]);
@@ -36,7 +38,19 @@ function CreditNotePage() {
   const [img, setImg] = useState(null);
   const [taxOptions,setTaxOptions]=useState([])
   const [toggle, setToggle] = useState(true);
+  const [partySelect, setPartySelect] = useState();
+  const [phoneNumber, setPhoneNumber] = useState(0);
+  const [receiptNo, setReceiptNo] = useState("");
+  const [invoiceNo, setInvoiceNo] = useState("");
+  const [invoiceDate, setInvoiceDate] = useState("");
+  const [date, setDate] = useState("");
+    const [stateOfSupply, setStateOfSupply] = useState("");
 
+    const [paymentSelect, setPaymentSelect] = useState(0);
+
+    const handlepaymenttype = (e) => {
+      setPaymentSelect(e.target.value);
+    };
 
 
   const handleDrawerImageChange = (e) => {
@@ -190,7 +204,24 @@ function CreditNotePage() {
       });
   };
 
+  const partyDataGet=()=>{
+    partyDataGetAPI()
+    .then((data) => {
+      console.log("partyData:", data);
+      // setTaxOptions(data);
 
+      // Transform data and set it to state
+      const partyData = data.responseData.map((entry) => ({
+        value: entry.id,
+        label: entry.name,
+      }));
+      console.log(partyData);
+      setPartytOptions(partyData);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
 
 
 
@@ -207,6 +238,7 @@ function CreditNotePage() {
   setProductOptions(options);
 };
 useEffect(() => {
+  partyDataGet()
   fetchData();
   setProductOptions([{ value: -2, label: "Add" }])
   getTaxOptionsFormAPI()
@@ -228,26 +260,49 @@ const toggleDrawer = (anchor, open) => (event) =>{
   const handleTextChange = (event) => {
     setTextValue(event.target.value);
   };
+  const handleBillingTextChange = (event) => {
+    setBillingTextValue(event.target.value);
+  }
+  
+const handleReceiptNoChange = (event) => {
+  setReceiptNo(event.target.value);
+};
+
+const handleInvoiceNoChange = (event) => {
+  setInvoiceNo(event.target.value);
+};
+
+const handleInvoiceDateChange = (event) => {
+  setInvoiceDate(event.target.value);
+};
+
+const handleDateChange = (event) => {
+  setDate(event.target.value);
+};
   const topleftsideinput = [
-    {
+    {handleChange:handleReceiptNoChange,
       intputName: "receiptno",
       label: "Recipes No",
       type: "number",
+      value:receiptNo,
     },
-    {
+    {handleChange:handleInvoiceNoChange,
       intputName: "invoiceno",
       label: "Invoice Number",
       type: "number",
+      value:invoiceNo,
     },
-    {
+    {handleChange:handleInvoiceDateChange,
       intputName: "invoicedate",
       label: "Invoice Date",
       type: "date",
+      value:invoiceDate,
     },
-    {
+    {handleChange:handleDateChange,
       intputName: "data",
       label: "Date",
       type: "date",
+      value:date,
     },
     {
       intputName: "stateofsupply",
@@ -403,7 +458,39 @@ const toggleDrawer = (anchor, open) => (event) =>{
     setSelectedValue(event.target.value);
     console.log(event.target.value)
   };
+  const handleSelectedPartyChange=(event, newValue)=>{
+    setPartySelect(newValue)
+  }
+  const handlePhoneNumber=(e)=>{
+    console.log(e.target.value)
+    setPhoneNumber(e.target.value)
+   }
 
+  const addCreditData= async ()=>{
+    const newArray = await rows.map((item) => ({
+      product_id: item.id,
+      quantity: item.qty,
+      Price: item.rate,
+      discount: item.amountafterdescount,
+    }));
+    const creditdata={
+      party:partySelect,
+      billing_address:billingTextValue,
+      date:date,
+      invoice_date:invoiceDate,
+      invoice_no:invoiceNo,
+      total_amount:"",
+      payment_type:paymentSelect,
+      description:textValue,
+      product_details:newArray,
+    }
+    creditDataAddAPI().then((res)=>{
+      console.log(res)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  }
 
 
   return (
@@ -449,8 +536,8 @@ const toggleDrawer = (anchor, open) => (event) =>{
                     }}
                     id="custom-input-demo"
                     options={partyOptions}
-                    //   value={selectedProduct}
-                    //   onChange={handleSelectedProductChange}
+                    value={partySelect}
+                    onChange={handleSelectedPartyChange}
                     componentsProps={{
                       popper: {
                         modifiers: [
@@ -488,6 +575,7 @@ const toggleDrawer = (anchor, open) => (event) =>{
                   label="Phone No"
                   type="tel"
                   intputName="phoneno"
+                  handleChange={handlePhoneNumber}
                 />
               </div>
               <div
@@ -501,8 +589,8 @@ const toggleDrawer = (anchor, open) => (event) =>{
                 </label>
                 <textarea
                   id="textarea"
-                  value={textValue}
-                  onChange={handleTextChange}
+                  value={billingTextValue}
+                  onChange={handleBillingTextChange}
                   rows={5} // Set the number of visible rows
                   cols={30} // Set the number of visible columns
                 />
@@ -544,13 +632,13 @@ const toggleDrawer = (anchor, open) => (event) =>{
                 })}
                 </div>
                 <InputComponent
-                    handleChange={topleftsideinput[0].handleChange}
-                    state={topleftsideinput[0].state}
-                    label={topleftsideinput[0].label}
-                    type={topleftsideinput[0].type}
-                    intputName={topleftsideinput[0].intputName}
-                    inputOrSelect={topleftsideinput[0].inputOrSelect}
-                    options={topleftsideinput[0].options}
+                    handleChange={topleftsideinput[4].handleChange}
+                    state={topleftsideinput[4].state}
+                    label={topleftsideinput[4].label}
+                    type={topleftsideinput[4].type}
+                    intputName={topleftsideinput[4].intputName}
+                    inputOrSelect={topleftsideinput[4].inputOrSelect}
+                    options={topleftsideinput[4].options}
                     />
             </div>
           </div>
@@ -637,6 +725,8 @@ const toggleDrawer = (anchor, open) => (event) =>{
                   intputName="paymenttype"
                   label="Payment type"
                   inputOrSelect="select"
+                  handleChange={handlepaymenttype}
+
                   options={[
                     { value: "None", label: "None" },
                     { value: "Cash", label: "Cash" },
@@ -657,8 +747,8 @@ const toggleDrawer = (anchor, open) => (event) =>{
                 </label>
                 <textarea
                   id="descriptiontextarea"
-                  // value={textValue}
-                  // onChange={handleTextChange}
+                  value={textValue}
+                  onChange={handleTextChange}
                   rows={2} // Set the number of visible rows
                   cols={50} // Set the number of visible columns
                 />

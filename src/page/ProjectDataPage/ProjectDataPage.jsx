@@ -53,7 +53,7 @@ function ProjectDataPage() {
   useEffect(() => {
     quotationGetAPI({ id: location?.state })
       .then((data) => {
-        console.log("projectDataByIdAPI", data.data.responseData      );
+        // console.log("projectDataByIdAPI", data.data.responseData      );
         setQuotationGetData(data.data.responseData);
       })
       .catch((err) => {
@@ -857,7 +857,8 @@ const transformedData = data ? data.reduce((acc, item) => {
                       </td>
                       <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
                         
-                        <h6>{data.amount*data.quantity} </h6>
+                        {/* <h6>{(data.amount||0)*(data.quantity||0)} </h6> */}
+                        <h6>{(data.amount||0)}</h6>
                       </td>
                     </tr>
                   ))}

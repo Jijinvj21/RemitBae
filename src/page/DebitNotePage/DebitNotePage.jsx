@@ -42,7 +42,11 @@ function DebitNotePage() {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
   const [date, setDate] = useState("");
-  const [stateOfSupply, setStateOfSupply] = useState("");
+  // const [stateOfSupply, setStateOfSupply] = useState("");
+  const [paymentSelect, setPaymentSelect] = useState(0);
+  const [phoneNumber, setPhoneNumber] = useState(0);
+
+
 
   const partyDataGet=()=>{
     partyDataGetAPI()
@@ -65,7 +69,13 @@ function DebitNotePage() {
 useEffect(() => {
   partyDataGet()
 }, [])
+const handleTextChange = (event) => {
+  setTextValue(event.target.value);
+};
 
+const handlepaymenttype = (e) => {
+  setPaymentSelect(e.target.value);
+};
   const handleDrawerImageChange = (e) => {
     const file = e.target.files[0];
 
@@ -252,38 +262,45 @@ const toggleDrawer = (anchor, open) => (event) =>{
   setState({ ...state, [anchor]: open });
 };
 
-  const handlereceiptnoChange = (event) => {
-    setReceiptNo(event.target.value);
-  };
-  const handleinvoicenoChange = (event) => {
-    setInvoiceNo(event.target.value);
-  };
-  const handleinvoicedateChange = (event) => {
-    setInvoiceDate(event.target.value);
-  };
-  const handledataChange = (event) => {
-    setDate(event.target.value);
-  };
+const handleReceiptNoChange = (event) => {
+  setReceiptNo(event.target.value);
+};
+
+const handleInvoiceNoChange = (event) => {
+  setInvoiceNo(event.target.value);
+};
+
+const handleInvoiceDateChange = (event) => {
+  setInvoiceDate(event.target.value);
+};
+
+const handleDateChange = (event) => {
+  setDate(event.target.value);
+};
   const topleftsideinput = [
-    {
+    {handleChange:handleReceiptNoChange,
       intputName: "receiptno",
       label: "Recipes No",
       type: "number",
+      value:receiptNo,
     },
-    {
+    {handleChange:handleInvoiceNoChange,
       intputName: "invoiceno",
       label: "Invoice Number",
       type: "number",
+      value:invoiceNo,
     },
-    {
+    {handleChange:handleInvoiceDateChange,
       intputName: "invoicedate",
       label: "Invoice Date",
       type: "date",
+      value:invoiceDate,
     },
-    {
+    {handleChange:handleDateChange,
       intputName: "data",
       label: "Date",
       type: "date",
+      value:date,
     },
     // {
     //   intputName: "stateofsupply",
@@ -440,15 +457,24 @@ const toggleDrawer = (anchor, open) => (event) =>{
     console.log(event.target.value)
   };
 
-  const handleAddDebitNote=()=>{
+  const handleAddDebitNote= async()=>{
+    const newArray = await rows.map((item) => ({
+      product_id: item.id,
+      quantity: item.qty,
+      Price: item.rate,
+      discount: item.amountafterdescount,
+    }));
     const datatopass={
       customer:partySelect.value,
-      description:"",
-      payment_type:"",
+      description:textValue,
+      payment_type:paymentSelect,
       total_amount:"",
-      invoice_no:"",
-      date:"",
-      product_details:[],
+      invoice_no:invoiceNo,
+      recipes_no:receiptNo,
+      invoice_date:invoiceDate,
+      date:date,
+      phone:phoneNumber,
+      product_details:newArray,
     }
 
     debitDataAddAPI(datatopass).then((res)=>{
@@ -461,10 +487,13 @@ console.log(res)
 const handleSelectedPartyChange=(event, newValue)=>{
   setPartySelect(newValue)
 }
-
+ const handlePhoneNumber=(e)=>{
+  console.log(e.target.value)
+  setPhoneNumber(e.target.value)
+ }
   return (
     <div className="debitnotepage">
-      <h2>Creadit Note</h2>
+      <h2>Debit Note</h2>
       <div className="inner-section">
         <div
           style={{
@@ -505,7 +534,7 @@ const handleSelectedPartyChange=(event, newValue)=>{
                     }}
                     id="custom-input-demo"
                     options={partyOptions}
-                    //   value={selectedProduct}
+                      value={partySelect}
                       onChange={handleSelectedPartyChange}
                     componentsProps={{
                       popper: {
@@ -544,6 +573,7 @@ const handleSelectedPartyChange=(event, newValue)=>{
                   label="Phone No"
                   type="tel"
                   intputName="phoneno"
+                  handleChange={handlePhoneNumber}
                 />
               </div>
             
@@ -677,6 +707,7 @@ const handleSelectedPartyChange=(event, newValue)=>{
                   intputName="paymenttype"
                   label="Payment type"
                   inputOrSelect="select"
+                  handleChange={handlepaymenttype}
                   options={[
                     { value: "None", label: "None" },
                     { value: "Cash", label: "Cash" },
@@ -697,8 +728,8 @@ const handleSelectedPartyChange=(event, newValue)=>{
                 </label>
                 <textarea
                   id="descriptiontextarea"
-                  // value={textValue}
-                  // onChange={handleTextChange}
+                  value={textValue}
+                  onChange={handleTextChange}
                   rows={2} // Set the number of visible rows
                   cols={50} // Set the number of visible columns
                 />
