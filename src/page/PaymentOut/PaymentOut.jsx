@@ -9,6 +9,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import "./PaymentOut.scss";
 import { useEffect, useState } from "react";
@@ -34,6 +35,8 @@ function PaymentOut() {
   const [recived, setRecived] = useState("");
   const [ReceptNo, setReceptNo] = useState("");
   const [paymentData, setPaymenData] = useState([]);
+  const [isDesabled, setIsDesabled] = useState(true);
+
 
   const getpaymentDataGetAPI = () => {
     paymentDataGetAPI({ payment_mode: "OUT", project_id: 1 })
@@ -124,6 +127,8 @@ function PaymentOut() {
     },
   ];
   const handleSave = () => {
+    setIsDesabled(false)
+
     const data = {
       date: date,
       payment_type: parseInt(paymentSelect),
@@ -151,9 +156,11 @@ function PaymentOut() {
         setRecived("");
         setTextValue("");
         setTextValue("");
+        setIsDesabled(true)
       })
       .catch((err) => {
         console.log(err);
+        setIsDesabled(true)
       });
   };
 
@@ -545,11 +552,18 @@ function PaymentOut() {
               marginRight: 2,
               textTransform: "none",
               bgcolor: "var(--black-button)",
+              '&:disabled': {
+                bgcolor: "var(--black-button)",
+                color: 'white', 
+              },
             }}
             onClick={() => handleSave()}
+            disabled={!isDesabled}
+
           >
-            Save
-          </Button>
+            {isDesabled? "Save":
+            <CircularProgress style={{color:"white",marginBottom:"15px",marginTop:"15px"}} size={20} />
+          }</Button>
         </div>
       </div>
       <div className="table">

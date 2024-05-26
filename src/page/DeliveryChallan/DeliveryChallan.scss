@@ -60,4 +60,9 @@ letter-spacing: 0.00938em;
         }
     }
   }
+  .offscreen {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+  }
 }

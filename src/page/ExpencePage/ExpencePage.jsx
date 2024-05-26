@@ -2,6 +2,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  CircularProgress,
   FormControlLabel,
   Modal,
   Switch,
@@ -53,6 +54,8 @@ function ExpencePage() {
   const [tableRows, setTableRows] = useState([]); // State to hold table rows
   const [totalValues, setTotalValues] = useState(0);
   const [isChecked, setIsChecked] = useState(false);
+  const [isDesabled, setIsDesabled] = useState(true);
+
 
   
   const handleCheckboxChange = (event) => {
@@ -641,6 +644,8 @@ function ExpencePage() {
   };
 
   const handleExpenseAdd = async () => {
+    setIsDesabled(false)
+
     // Transform the rows array
     const newArray = rows.map((item) => ({
       product_id: item.id,
@@ -681,10 +686,12 @@ function ExpencePage() {
         setRows([])
         setDescription("")
         setIsChecked(false)
+        setIsDesabled(true)
       })
       .catch((err) => {
         console.log(err);
         alert("Expense data Problem")
+        setIsDesabled(true)
 
       });
   };
@@ -924,11 +931,17 @@ function ExpencePage() {
               marginRight: 2,
               textTransform: "none",
               bgcolor: "var(--black-button)",
+              '&:disabled': {
+                bgcolor: "var(--black-button)",
+                color: 'white', 
+              },
             }}
             onClick={handleExpenseAdd}
+            disabled={!isDesabled}
           >
-            Save
-          </Button>
+           {isDesabled? "Save":
+            <CircularProgress style={{color:"white",marginBottom:"15px",marginTop:"15px"}} size={20} />
+          }</Button>
         </div>
       </div>
 

@@ -123,4 +123,9 @@ width: 98.5%;
     .css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper{
         max-height: calc(5% - 96px) !important;
      }
+     .offscreen {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+      }
 }

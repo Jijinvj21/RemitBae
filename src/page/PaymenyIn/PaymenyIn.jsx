@@ -39,6 +39,8 @@ function PaymenyIn() {
   const [ReceptNo, setReceptNo] = useState("");
   const [paymentData, setPaymenData] = useState([]);
   const [loader, setLoader]=useState(false)
+  const [isDesabled, setIsDesabled] = useState(true);
+
 
   const getpaymentDataGetAPI = () => {
     setLoader(true)
@@ -127,6 +129,8 @@ function PaymenyIn() {
     },
   ];
   const handleSave = () => {
+    setIsDesabled(false)
+
     const data = {
       date: date,
       payment_type: parseInt(paymentSelect),
@@ -153,9 +157,13 @@ function PaymenyIn() {
         setPartySelect(0);
         setRecived("");
         setTextValue("");
+        setIsDesabled(true)
+
       })
       .catch((err) => {
         console.log(err);
+        setIsDesabled(true)
+
       });
   };
   
@@ -537,11 +545,18 @@ function PaymenyIn() {
               marginRight: 2,
               textTransform: "none",
               bgcolor: "var(--black-button)",
+              '&:disabled': {
+                bgcolor: "var(--black-button)",
+                color: 'white', 
+              },
             }}
             onClick={() => handleSave()}
+            disabled={!isDesabled}
+
           >
-            Save
-          </Button>
+            {isDesabled? "Save":
+            <CircularProgress style={{color:"white",marginBottom:"15px",marginTop:"15px"}} size={20} />
+          }</Button>
         </div>
       </div>
       <div className="table">

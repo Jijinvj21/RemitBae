@@ -57,4 +57,9 @@ padding-bottom: 8px;
                 }
             }
     }
+    .offscreen {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+      }
 }

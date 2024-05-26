@@ -1,12 +1,14 @@
-import { Autocomplete, Box, Button, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, CircularProgress, Typography } from "@mui/material";
 import "./CreditNotePage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import { useEffect, useState } from "react";
 import ImageAdd from "../../assets/sideBar/ImageAdd.svg";
 // import { AiOutlineFileAdd } from "react-icons/ai";
 import TransactionTable from "../../components/TransactionTable/TransactionTable";
-import { categeryGetAPI, creditDataAddAPI, gstOptionsGetAPI, partyDataGetAPI, productAddAPI, productGetAPI, projectGetAPI, unitsDataGetAPI } from "../../service/api/admin";
+import { categeryGetAPI, creditDataAddAPI, gstOptionsGetAPI, partyDataGetAPI, productAddAPI, productGetAPI, projectGetAPI, stateDataGetAPI, unitsDataGetAPI } from "../../service/api/admin";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 function CreditNotePage() {
   const [partyOptions, setPartytOptions] = useState([]);
@@ -45,14 +47,35 @@ function CreditNotePage() {
   const [invoiceDate, setInvoiceDate] = useState("");
   const [date, setDate] = useState("");
     const [stateOfSupply, setStateOfSupply] = useState("");
+    const [stateOPtions, setStateOPtions] = useState();
 
     const [paymentSelect, setPaymentSelect] = useState(0);
+    const [imgCredit, setImgCredit] = useState(null);
+    const [isChecked, setIsChecked] = useState(false);
+    const [roundOff, setRoundOff] = useState(0);
+    const [isDesabled, setIsDesabled] = useState(true);
 
+    const handlepdfgenerate = () => {
+      const pdfpagedata = document.querySelector("#pagedatatoshow");
+      const pdf = new jsPDF("p", "pt", "a4", true);
+      pdf.html(pdfpagedata, {
+        callback: () => {
+          const blobURL = pdf.output("bloburl");
+          window.open(blobURL, "_blank");
+        },
+      });
+    };
+    const handleImageChange = (e) => {
+      const file = e.target.files[0];
+      setImgCredit(file);
+    };
     const handlepaymenttype = (e) => {
       setPaymentSelect(e.target.value);
     };
 
-
+    const handleCheckboxChange = (event) => {
+      setIsChecked(event.target.checked);
+    }
   const handleDrawerImageChange = (e) => {
     const file = e.target.files[0];
 
@@ -83,6 +106,49 @@ function CreditNotePage() {
     console.log(event.target.value)
   };
 
+  useEffect(() => {
+    const updatedRows = rows.map((row) => {
+      const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
+      const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
+  
+      const totalWithoutTax = quantity * rate;
+  
+      const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
+  
+      let taxAppliedamount = 0; // Initializing taxAppliedamount variable
+      if (row.taxAppliedamount) {
+        taxAppliedamount =
+          parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
+      } else if (row.taxApplied?.value) {
+        taxAppliedamount =
+          parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
+      } else if (row.taxApplied) {
+        taxAppliedamount =
+          parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
+      }
+  
+      const total = (
+        (totalWithTax * taxAppliedamount) / 100 +
+        totalWithTax
+      ).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
+  
+      return {
+        ...row,
+        total: total,
+      };
+    });
+  
+    const grandTotal = updatedRows.reduce(
+      (sum, row) => sum + parseFloat(row.total),
+      0
+    ); // Summing up all row totals
+    const roundedGrandTotal = Math.round(grandTotal); // Rounding grandTotal to the nearest integer
+  
+    isChecked
+      ? setRoundOff((grandTotal - roundedGrandTotal).toFixed(2))
+      : setRoundOff(0);
+    isChecked ? setTotalValues(roundedGrandTotal) : setTotalValues(grandTotal);
+  }, [rows, isChecked]); // Update when rows or isChecked change
 
   const handleDrawerAddProducts = () => {
     const formData = new FormData();
@@ -238,6 +304,16 @@ function CreditNotePage() {
   setProductOptions(options);
 };
 useEffect(() => {
+  stateDataGetAPI().then((data)=>{
+    console.log("stateData",data.data.responseData)
+    const stateData = data.data.responseData.map((entry) => ({
+      value: entry.id,
+      label: entry.name,
+    }));
+    setStateOPtions(stateData)
+  }).catch((err)=>{
+console.log(err)
+  })
   partyDataGet()
   fetchData();
   setProductOptions([{ value: -2, label: "Add" }])
@@ -279,6 +355,11 @@ const handleInvoiceDateChange = (event) => {
 const handleDateChange = (event) => {
   setDate(event.target.value);
 };
+
+const handleStateOfSupplyChange = (e) => {
+  console.log("firste.target.value",e.target.value)
+  setStateOfSupply(e.target.value);
+};
   const topleftsideinput = [
     {handleChange:handleReceiptNoChange,
       intputName: "receiptno",
@@ -305,15 +386,12 @@ const handleDateChange = (event) => {
       value:date,
     },
     {
-      intputName: "stateofsupply",
+      handleChange: handleStateOfSupplyChange,
+      intputName: "statusofsupply",
       label: "State of supply",
       inputOrSelect: "select",
-      options: [
-        { value: "option1", label: "Option 1" },
-        { value: "option2", label: "Option 2" },
-        { value: "option3", label: "Option 3" },
-        { value: "Account", label: "Account" },
-      ],
+      options: stateOPtions,
+      value: stateOfSupply,
     },
   ];
   const handleDrawerChange = (e) => {
@@ -467,6 +545,7 @@ const handleDateChange = (event) => {
    }
 
    const addCreditData = async () => {
+    setIsDesabled(false)
     const newArray = await rows.map((item) => ({
         product_id: item.id,
         quantity: item.qty,
@@ -484,6 +563,7 @@ const handleDateChange = (event) => {
         total_amount: "",
         payment_type: paymentSelect,
         description: textValue,
+        state_id: stateOfSupply,
         product_details: newArray,
     };
 
@@ -497,7 +577,11 @@ const handleDateChange = (event) => {
     formData.append('total_amount', creditdata.total_amount);
     formData.append('payment_type', creditdata.payment_type);
     formData.append('description', creditdata.description);
+    formData.append('state_id', creditdata.state_id);
+    formData.append('phone', phoneNumber);
+    formData.append('image', imgCredit);
 
+    
     // Append product details
         formData.append(`product_details`, JSON.stringify(creditdata.product_details));
      
@@ -505,8 +589,18 @@ const handleDateChange = (event) => {
     creditDataAddAPI(formData).then((res) => {
         console.log(res);
         alert("creditnote added")
+        setPhoneNumber("");
+        setReceiptNo("");
+        setInvoiceNo("");
+        setInvoiceDate("");
+        setDate("");
+        setRows([]);
+        setTextValue("");
+        setBillingTextValue("")
+        setIsDesabled(true)
     }).catch((err) => {
         console.log(err);
+        setIsDesabled(true)
     });
 };
 
@@ -594,6 +688,7 @@ const handleDateChange = (event) => {
                   label="Phone No"
                   type="tel"
                   intputName="phoneno"
+                  value={phoneNumber}
                   handleChange={handlePhoneNumber}
                 />
               </div>
@@ -616,40 +711,38 @@ const handleDateChange = (event) => {
               </div>
             </div>
             <div className="left" style={{display:"flex",flexDirection:"column",gap:10}}>
-              <div style={{display:"flex", gap:10}}>
-
-              {topleftsideinput.slice(0,2).map((input, index) => {
-                return (
-                  <InputComponent
-                    key={index}
-                    handleChange={input.handleChange}
-                    state={input.state}
-                    label={input.label}
-                    type={input.type}
-                    intputName={input.intputName}
-                    inputOrSelect={input.inputOrSelect}
-                    options={input.options}
-                    />
-                  );
-                })}
-                </div>
-                <div style={{display:"flex", gap:10}}>
-
-              {topleftsideinput.slice(2,4).map((input, index) => {
-                return (
-                  <InputComponent
-                    key={index}
-                    handleChange={input.handleChange}
-                    state={input.state}
-                    label={input.label}
-                    type={input.type}
-                    intputName={input.intputName}
-                    inputOrSelect={input.inputOrSelect}
-                    options={input.options}
-                    />
-                  );
-                })}
-                </div>
+            <div style={{display:"flex", gap:10}}>
+  {topleftsideinput.slice(0,2).map((input, index) => {
+    return (
+      <InputComponent
+        key={index}
+        handleChange={input.handleChange}
+        label={input.label}
+        type={input.type}
+        intputName={input.intputName}
+        inputOrSelect={input.inputOrSelect}
+        options={input.options}
+        value={input.value} // Add this line to pass the value prop
+      />
+    );
+  })}
+</div>
+<div style={{display:"flex", gap:10}}>
+  {topleftsideinput.slice(2,4).map((input, index) => {
+    return (
+      <InputComponent
+        key={index}
+        handleChange={input.handleChange}
+        label={input.label}
+        type={input.type}
+        intputName={input.intputName}
+        inputOrSelect={input.inputOrSelect}
+        options={input.options}
+        value={input.value} // Add this line to pass the value prop
+      />
+    );
+  })}
+</div>
                 <InputComponent
                     handleChange={topleftsideinput[4].handleChange}
                     state={topleftsideinput[4].state}
@@ -796,7 +889,7 @@ const handleDateChange = (event) => {
                 <input
                   type="file"
                   hidden
-                  // onChange={handleImageChange}
+                  onChange={handleImageChange}
                 />
               </Button>
             </div>
@@ -809,19 +902,34 @@ const handleDateChange = (event) => {
                 gap: 1,
               }}
             >
-              <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                <InputComponent type="checkbox" />
-                <InputComponent
-                  label="Round off"
-                  type="number"
-                  intputName="roundoff"
-                />
-                <InputComponent
-                  label="total"
-                  type="number"
-                  intputName="total"
-                />
-              </div>
+               <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 5,
+            }}
+          >
+            <InputComponent
+              type="checkbox"
+              handleChange={handleCheckboxChange}
+            />
+            <InputComponent
+              label="Round off"
+              type="number"
+              intputName="roundoff"
+              value={roundOff}
+              disabled="disabled"
+              // handleChange={handleRoundOffChange}
+            />
+            <InputComponent
+              label="total"
+              type="number"
+              intputName="total"
+              value={totalValues}
+              disabled="disabled"
+              // handleChange={handleTotalChange}
+            />
+          </div>
               {/* <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
                 <InputComponent type="checkbox" />
                 <InputComponent
@@ -856,6 +964,7 @@ const handleDateChange = (event) => {
               textTransform: "none",
               bgcolor: "var(--black-button)",
             }}
+            onClick={handlepdfgenerate}
           >
             Print
           </Button>
@@ -867,11 +976,18 @@ const handleDateChange = (event) => {
               marginRight: 2,
               textTransform: "none",
               bgcolor: "var(--black-button)",
+              '&:disabled': {
+                bgcolor: "var(--black-button)",
+                color: 'white', 
+              },
+              
             }}
             onClick={addCreditData}
+            disabled={!isDesabled}
           >
-            Save
-          </Button>
+           {isDesabled? "Save":
+            <CircularProgress style={{color:"white",marginBottom:"15px",marginTop:"15px"}} size={20} />
+          }</Button>
         </div>
       </div>
       <AddProductDrawer
@@ -886,6 +1002,448 @@ const handleDateChange = (event) => {
         toggle={toggle}
         
       />
+      <div  id="pagedatatoshow"className="offscreen" style={{ margin: "8px", width: "580px" ,  }}>
+        <h6 style={{ textAlign: "center", marginBottom: "10px" }}>
+          Tax Invoice
+        </h6>
+        <div style={{ border: "1px solid" }}>
+          <div className="topsection" style={{ display: "flex" }}>
+            <div
+              className="left"
+              style={{ display: "flex", flexDirection: "column", width: "50%" }}
+            >
+              <div style={{ display: "flex", borderBottom: "1px solid" }}>
+                <div style={{ width: "100px", height: "100px" }}>
+                  <img src="https://res.cloudinary.com/dczou8g32/image/upload/v1714668042/DEV/jw8j76cgw2ogtokyoisi.png" alt="img" width={90} height={90}/>
+                </div>
+                <div className="address" >
+                  <h6>BILTREE</h6>
+                  <h6>54/3175</h6>
+                  <h6>MANGHAT ARCADE</h6>
+                  <h6>KALOOR-KADAVANTHRA ROAD</h6>
+                  <h6>KADAVANTHRA,ERNAKULAM</h6>
+                  <h6>GSTIN/UIN:32AAVFB8613K1Z3</h6>
+                  <h6>State Name:Kerala, Code : 32</h6>
+                  <h6>E-Mail:info@biltree.in</h6>
+                </div>
+              </div>
+              <div style={{ borderBottom: "1px solid", marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px" }}>
+                <h6>Consignee (Ship to)</h6>
+                 {/* <h5>{clientData?.label}</h5>
+                <h6>{clientData?.address1}</h6>
+                 <h6>{clientData?.address2}</h6> 
+                <h6>{clientData?.phonenumber}</h6>  */}
+
+                <h6 style={{ display: "flex", gap: "20px",marginBottom:"3px" }}>
+                  <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
+                </h6>
+                
+              </div>
+              <div style={{ marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px"}}>
+              {/* <h5>{clientData?.label}</h5>
+                <h6>{clientData?.address1}</h6>
+                 <h6>{clientData?.address2}</h6> 
+                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6 style={{ display: "flex", gap: "20px", }}>
+                  <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
+                </h6>
+                
+              </div>
+            </div>
+            <div className="right" style={{ width: "50%" }}>
+              <table style={{ borderCollapse: "collapse", width: "100%" }}>
+                <thead style={{ borderBottom: "1px solid black" }}>
+                  <tr>
+                    <td
+                      style={{ borderLeft: "1px solid black", padding: "8px" }}
+                    >
+                      <h6>Invoice No</h6>
+                      {/* <h6>{ generateRandom6Digit(new Date())}</h6> */}
+                      <h6>{invoiceNo}</h6>
+                    </td>
+                    <td
+                      style={{
+                        borderBottom: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      <h6>Date</h6>
+                     {date&& <h6>{new Date(date)?.toLocaleDateString()}</h6>}
+                    </td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td
+                      style={{ borderLeft: "1px solid black", padding: "8px" }}
+                    >
+                      
+                      <h6>Delivery Note</h6>
+                    </td>
+                    <td
+                      style={{
+                        borderBottom: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Mode/Terms of Payment</h6>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        borderTop: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Reference No.& Date</h6>
+                    </td>
+                    <td
+                      style={{
+                        borderBottom: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Other References</h6>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        borderTop: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Buyer's Order No</h6>
+                    </td>
+                    <td
+                      style={{
+                        borderBottom: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Date</h6>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        borderTop: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Dispatch Doc No</h6>
+                    </td>
+                    <td
+                      style={{
+                        borderBottom: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Delivery Note Date</h6>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        borderTop: "1px solid black",
+                        borderLeft: "1px solid black",
+                        borderBottom: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Dispatch throught</h6>
+                    </td>
+                    <td
+                      style={{
+                        borderBottom: "1px solid black",
+                        borderLeft: "1px solid black",
+                        padding: "8px",
+                      }}
+                    >
+                      
+                      <h6>Destination</h6>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{ borderLeft: "1px solid black", padding: "8px" }}
+                    >
+                      <h6 style={{ marginBottom: "75px" }}>
+                        Terms of Delivery
+                      </h6>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="middlesection">
+          <table style={{ borderCollapse: "collapse", width: "100%" }}>
+              <thead
+                style={{
+                  borderBottom: "1px solid black",
+                  borderTop: "1px solid black",
+                }}
+              >
+                <tr>
+                  <th>
+                    
+                    <h6>Sl.No</h6>
+                  </th>
+                  <th style={{ borderLeft: "1px solid black" }}>
+                    
+                    <h6>
+                      Description of <br /> Goods and Services
+                    </h6>
+                  </th>
+                  <th style={{ borderLeft: "1px solid black" }}>
+                    
+                    <h6>HSN/SAC</h6>
+                  </th>
+                  <th style={{ borderLeft: "1px solid black" }}>
+                    
+                    <h6>Quantity</h6>
+                  </th>
+                  <th style={{ borderLeft: "1px solid black" }}>
+                    
+                    <h6>Rate</h6>
+                  </th>
+                  <th style={{ borderLeft: "1px solid black" }}>
+                    
+                    <h6>Per</h6>
+                  </th>
+                  <th style={{ borderLeft: "1px solid black" }}>
+                    
+                    <h6>Amount</h6>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((data, index) => {
+                   console.log("firstdata",data)
+                  return(
+                    <tr key={index} style={{borderBottom: "1px solid black",}}>
+                      <td style={{paddingLeft:"3px",paddingBottom:"5px"}}>
+                        
+                        <h6>{index+1}</h6>
+                      </td>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
+                        
+                        <h6>{data.name}</h6>
+                      </td>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
+                        
+                        <h6> </h6>
+                      </td>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
+                        
+                        <h6>{data.qty}</h6>
+                      </td>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
+                        
+                        <h6> {data.rate}</h6>
+                      </td>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
+                        
+                        <h6> {data.unit}</h6>
+                      </td>
+                      <td style={{ borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"5px" }}>
+                        
+                        <h6>{((data.rate||0)*(data.qty)||0)}</h6>
+                      </td>
+                    </tr>
+                  )})}
+                
+                {/* <tr
+                  style={{
+                    borderTop: "1px solid black",
+                    borderBottom: "1px solid black",
+                  }}
+                >
+                  <td> </td>
+                  <td
+                    style={{ textAlign: "end", borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"1px" }}
+                  >
+                    
+                    <h6> Total</h6> 
+                  </td>
+                  <td
+                    style={{ textAlign: "end", borderLeft: "1px solid black" }}
+                  >
+                    
+                  </td>
+                  <td
+                    style={{ textAlign: "end", borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"1px" }}
+                  >
+                    
+                     <h6>{pdfData?.product_info?.length} Nos</h6> 
+                  </td>
+                  <td
+                    style={{ textAlign: "end", borderLeft: "1px solid black" }}
+                  ></td>
+                  <td
+                    style={{ textAlign: "end", borderLeft: "1px solid black" }}
+                  ></td>
+                  <td
+                    style={{ textAlign: "end", borderLeft: "1px solid black",paddingLeft:"3px",paddingBottom:"1px" }}
+                  >
+                    
+                     <h6> {subtotal}</h6> 
+                  </td>
+                </tr> */}
+              </tbody>
+            </table> 
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "10px",
+              marginLeft:"2px"
+            }}
+          >
+            <h6>Amount Chargeable (in words)</h6>
+            <h6>E.&.O.E</h6>
+          </div>
+          <h6 style={{ marginTop: "5px" }}>
+            INR Sixteen lakh Twenty Eight Thousand Six Hundred Fifty One Only
+          </h6>
+
+          <table
+  style={{
+    borderCollapse: "collapse",
+    width: "100%",
+    marginTop: "10px",
+  }}
+>
+  <thead
+    style={{
+      borderBottom: "1px solid black",
+      borderTop: "1px solid black",
+    }}
+  >
+    <tr>
+      <th style={{ borderLeft: "1px solid black" }} rowSpan="2">
+        <h6> HSN/SAC</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black" }} rowSpan="2">
+        <h6> Taxable Value</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black",borderBottom: "1px solid black",borderRight: "1px solid black" }} colSpan="2">
+        <h6> CGST</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black",borderBottom: "1px solid black" }} colSpan="2">
+        <h6> SGST/UTGST</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black" }}>
+        <h6> Total Tax Amount</h6>
+      </th>
+    </tr>
+    <tr>
+      <th style={{ borderLeft: "1px solid black" }}>
+        <h6> Rate</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black" }}>
+        <h6> Amount</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black" }}>
+        <h6> Rate</h6>
+      </th>
+      <th style={{ borderLeft: "1px solid black",borderRight: "1px solid black" }}>
+        <h6> Amount</h6>
+      </th>
+    </tr>
+    
+  </thead>
+  <tbody style={{ borderBottom: "1px solid black"}}>
+  {/* {transformedData?.map(item => (
+    <tr key={item?.hsn}>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6> {item?.hsn}</h6>
+      </td>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6> {item?.total.toFixed(2)}</h6>
+      </td>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6> {item?.cgstRate}</h6>
+      </td>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6> {item?.cgstAmount.toFixed(2)}</h6>
+      </td>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6> {item?.sgstRate}</h6>
+      </td>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6> {item?.sgstAmount.toFixed(2)}</h6>
+      </td>
+      <td style={{ borderLeft: "1px solid black" }}>
+        <h6>{ (item?.total+item?.sgstAmount+item?.cgstAmount).toFixed(2)}</h6>
+      </td>
+    </tr>
+            ))} */}
+
+  </tbody>
+</table>
+
+
+          <div style={{ display: "flex", gap: "10px", marginTop: "5px",marginLeft:"2px" }}>
+            
+            <h6>Tax Amount (in words)</h6>
+            <h6>
+              INR Sixteen lakh Twenty Eight Thousand Six Hundred Fifty One Only
+            </h6>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",justifyContent:"end", marginTop: "5px",marginLeft:"50%",fontSize:"12px"}}>
+            <h6>Company's bank details</h6>
+            <div style={{display:"flex",gap:"16.4px"}}>
+              <h6>A/c Holder Name</h6>
+              <h6>: BILTREE</h6>
+            </div>
+            <div style={{display:"flex",gap:"38px"}}>
+              <h6>Bank Name</h6>
+              <h6>: ICICI BANK CA - 785236984125</h6>
+            </div>
+            <div style={{display:"flex",gap:"56.6px"}}>
+              <h6>A/c No</h6>
+              <h6>: 785236984125</h6>
+            </div>
+            <div style={{display:"flex",gap:"12.4px"}}>
+              <h6>Branch & IFS Code</h6>
+              <h6>: PANAMPILLY MAGAR & ICIC0002483</h6>
+            </div>
+            <h6>SWIFT Code</h6>
+          </div>
+          <div style={{display:'flex'}}>
+            <div className="leftsection" style={{width:"50%",marginLeft:"2px",marginBottom:"3px"}}>
+<h6 style={{borderBottom:"1px solid black",width:"60px"}}>Declaration</h6>
+
+<h6>we seclare that this invoice shows the actual price of the goods described and that all particulars are true and currect</h6>
+            </div>
+            <div className="rightsection" style={{width:"50%",textAlign:"end",borderTop:"1px solid black",borderLeft:"1px solid black"}}>
+<h6 style={{marginBottom:"23px",marginRight:"5px"}}>for BILTREEE</h6>
+              <h6 style={{marginRight:"5px"}}>Authorised Signatory</h6>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

@@ -53,7 +53,7 @@ function ProjectDataPage() {
   useEffect(() => {
     quotationGetAPI({ id: location?.state })
       .then((data) => {
-        // console.log("projectDataByIdAPI", data.data.responseData      );
+        console.log("projectDataByIdAPI", data.data.responseData      );
         setQuotationGetData(data.data.responseData);
       })
       .catch((err) => {
@@ -234,62 +234,6 @@ for (let i = 0; i < items.length; i += chunkSize) {
 }
 const subtotal = pdfData?.product_info?.reduce((acc, curr) => acc + (curr.amount * curr.quantity), 0);
 
-// const calculateTax = (tots, rate) => {
-//   const taxAmounts = tots.map(tot => {
-//     const total = parseFloat(tot);
-//     return total * (rate / 100);
-//   });
-
-//   const totalTaxAmount = taxAmounts.reduce((acc, amount) => acc + amount, 0);
-
-//   return {
-//     cgstRate: rate / 2,
-//     cgstAmount: totalTaxAmount / 2,
-//     sgstRate: rate / 2,
-//     sgstAmount: totalTaxAmount / 2
-//   };
-// };
-
-
-// const transformedData = quotationGetData.map(quotation => {
-//   console.log("quotation",quotation[0])
-//   return quotation.map(product => {
-//     return product.product_info.reduce((acc, item) => {
-//       const existingItem = acc.find(elem => elem.hsn === item.hsn);
-//       if (existingItem) {
-//         existingItem.tot += parseFloat(item.amount);
-//       } else {
-//         const taxRatePercentage = item.tax_rate ? parseFloat(item.tax_rate.percentage.replace("%", "")) : 0;
-//         const { cgstRate, cgstAmount, sgstRate, sgstAmount } = calculateTax(
-//           product.product_info.filter(d => d.hsn === item.hsn).map(d => d.amount),
-//           taxRatePercentage
-//         );
-//         acc.push({
-//           hsn: item.hsn,
-//           tot: parseFloat(item.amount),
-//           cgstRate,
-//           cgstAmount,
-//           sgstRate,
-//           sgstAmount
-//         });
-//       }
-//       return acc;
-//     }, []);
-//   });
-// });
-
-// const transformedData = quotationGetData?.map(quotation => {
-//   console.log("quotation",quotation);
-//   return quotation?.product_info?.map(product => {
-//     console.log("product",product);
-//     return product?.reduce((acc, item) => {
-//       // Your processing logic here
-//       // const existingItem = acc?.find(elem => elem.hsn === item.hsn);
-//       return acc;
-//     }, []);
-//   });
-// });
- 
 const data = quotationGetData?.flatMap(quotation => quotation?.product_info || []);
 
 const calculateTax = (total, rate) => {
