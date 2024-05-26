@@ -138,6 +138,8 @@ function PaymentOut() {
     paymentInAPI(data)
       .then((data) => {
         console.log(data);
+        alert("Payment added")
+
         getpaymentDataGetAPI();
         const currentDate = new Date();
         const random6Digit = generateRandom6Digit(currentDate);
