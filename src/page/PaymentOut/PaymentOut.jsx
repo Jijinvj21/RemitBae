@@ -525,7 +525,7 @@ function PaymentOut() {
         </div>
         <hr />
         <div style={{ display: "flex", justifyContent: "end" }}>
-          <Button
+          {/* <Button
             variant="contained"
             sx={{
               height: 40,
@@ -536,7 +536,7 @@ function PaymentOut() {
             }}
           >
             Print
-          </Button>
+          </Button> */}
           <Button
             variant="contained"
             sx={{

@@ -36,7 +36,7 @@ function ExpencePage() {
   const [total, setTotal] = useState(0);
   const [checked, setChecked] = useState(false);
   const [expenseOPtions, setExpenseOPtions] = useState([]);
-  const [selectedExpence, setSelectedExpence] = useState({});
+  const [selectedExpence, setSelectedExpence] = useState(null);
   const [selectedParty, setSelectedParty] = useState({});
 
   const [open, setOpen] = useState(false);
@@ -304,13 +304,13 @@ function ExpencePage() {
       label: "Expense No",
       type: "text",
       handleChange: handleExpenceNoChange,
-      // value: challanNo,
+      value: expenceNo,
     },
     {
       handleChange: handleInvoiceDateChange,
       label: "Invoice Date",
       type: "date",
-      // value: invoiceDate,
+      value: invoiceDate,
     },
   ];
 
@@ -374,12 +374,15 @@ function ExpencePage() {
     if (e.target.value === "-2") {
       handleOpen();
     }
-    const selectedOptionObject = expenseOPtions.find(
-      (option) => option.value == e.target.value
-    );
-    console.log("event.target", e.target.value, selectedOptionObject);
+    // const selectedOptionObject = expenseOPtions.find(
+    //   (option) => option.value == e.target.value
+    // );
+    // console.log("event.target", e.target.value, selectedOptionObject);
 
-    setSelectedExpence({ selectedOptionObject });
+    // setSelectedExpence({ selectedOptionObject });
+
+    const selectedOption = expenseOPtions.find(option => option.value === event.target.value);
+    setSelectedExpence(selectedOption);
   };
 
   const handlePartyName = (e) => {
@@ -672,9 +675,17 @@ function ExpencePage() {
     expensesDataAddAPI(formData)
       .then((data) => {
         console.log(data);
+        alert("Expense data added")
+        setExpenceNo("")
+        setInvoiceDate("")
+        setRows([])
+        setDescription("")
+        setIsChecked(false)
       })
       .catch((err) => {
         console.log(err);
+        alert("Expense data Problem")
+
       });
   };
 
@@ -710,7 +721,7 @@ function ExpencePage() {
               handleChange={handleExpencename}
               // intputName={input.intputName}
               inputOrSelect="select"
-              // value={input.value}
+  // value={selectedExpence ? selectedExpence.value : ''}
               options={expenseOPtions}
             />
             <InputComponent

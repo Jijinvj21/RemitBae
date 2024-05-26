@@ -42,7 +42,7 @@ function PaymenyIn() {
 
   const getpaymentDataGetAPI = () => {
     setLoader(true)
-    paymentDataGetAPI({ payment_mode: "IN", project_id: 2 })
+    paymentDataGetAPI({ payment_mode: "IN", project_id: 1 })
       .then((data) => {
         setLoader(false)
 
@@ -131,7 +131,7 @@ function PaymenyIn() {
       date: date,
       payment_type: parseInt(paymentSelect),
       party_id: partySelect,
-      project_id: 2,
+      project_id: 1,
       amount: parseInt(recived),
       payment_mode: "IN",
       description: textValue,
@@ -517,7 +517,7 @@ function PaymenyIn() {
         </div>
         <hr />
         <div style={{ display: "flex", justifyContent: "end" }}>
-          <Button
+          {/* <Button
             variant="contained"
             sx={{
               height: 40,
@@ -528,7 +528,7 @@ function PaymenyIn() {
             }}
           >
             Print
-          </Button>
+          </Button> */}
           <Button
             variant="contained"
             sx={{

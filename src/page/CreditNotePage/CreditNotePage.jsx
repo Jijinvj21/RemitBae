@@ -822,14 +822,14 @@ const handleDateChange = (event) => {
                   intputName="total"
                 />
               </div>
-              <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
+              {/* <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
                 <InputComponent type="checkbox" />
                 <InputComponent
                   label="Paid amount"
                   type="number"
                   intputName="paidamount"
                 />
-              </div>
+              </div> */}
 
               {/* <div
                 style={{

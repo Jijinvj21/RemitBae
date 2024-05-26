@@ -364,3 +364,14 @@ export const deliveryChallanAddAPI = async (deliveryChallanData) => {
     throw error.response.data;
   }
 }
+
+export const stateDataGetAPI = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/master/state/list`);
+    console.log(response)
+    return response
+  } catch (error) {
+    console.error(error);
+    throw error.response.data;
+  }
+}

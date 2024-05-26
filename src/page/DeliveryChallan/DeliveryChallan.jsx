@@ -13,6 +13,7 @@ import {
   productAddAPI,
   productGetAPI,
   projectGetAPI,
+  stateDataGetAPI,
   unitsDataGetAPI,
 } from "../../service/api/admin";
 import AddProductDrawer from "../../components/AddProductDrawer/AddProductDrawer";
@@ -55,10 +56,70 @@ const [imgDelivery, setImgDelivery] = useState(null);
 const [roundOff, setRoundOff] = useState(0);
 const [total, setTotal] = useState(0);
 const [partySelect, setPartySelect] = useState(0);
+const [stateOPtions, setStateOPtions] = useState();
+const [isChecked, setIsChecked] = useState(false);
+
+  
+const handleCheckboxChange = (event) => {
+  setIsChecked(event.target.checked);
+};
 
 
 useEffect(() => {
- 
+  const updatedRows = rows.map((row) => {
+    const quantity = parseInt(row.qty) || 0; // Parsing quantity to integer, defaulting to 0 if NaN
+    const rate = parseInt(row.rate) || 0; // Parsing rate to integer, defaulting to 0 if NaN
+
+    const totalWithoutTax = quantity * rate;
+
+    const totalWithTax = totalWithoutTax - (row.amountafterdescount || 0); // Subtracting discount amount from totalWithoutTax
+
+    let taxAppliedamount = 0; // Initializing taxAppliedamount variable
+    if (row.taxAppliedamount) {
+      taxAppliedamount =
+        parseFloat(row.taxAppliedamount.replace("%", "")) || 0; // Parsing taxAppliedamount to float, defaulting to 0 if NaN
+    } else if (row.taxApplied?.value) {
+      taxAppliedamount =
+        parseFloat(row.taxApplied.value.replace("%", "")) || 0; // Parsing taxApplied.value to float, defaulting to 0 if NaN
+    } else if (row.taxApplied) {
+      taxAppliedamount =
+        parseFloat(row.taxApplied.split("@")[1].replace("%", "")) || 0; // Parsing taxApplied to float, defaulting to 0 if NaN
+    }
+
+    const total = (
+      (totalWithTax * taxAppliedamount) / 100 +
+      totalWithTax
+    ).toFixed(2); // Calculating total with tax and rounding to 2 decimal places
+
+    return {
+      ...row,
+      total: total,
+    };
+  });
+
+  const grandTotal = updatedRows.reduce(
+    (sum, row) => sum + parseFloat(row.total),
+    0
+  ); // Summing up all row totals
+  const roundedGrandTotal = Math.round(grandTotal); // Rounding grandTotal to the nearest integer
+
+  isChecked
+    ? setRoundOff((grandTotal - roundedGrandTotal).toFixed(2))
+    : setRoundOff(0);
+  isChecked ? setTotalValues(roundedGrandTotal) : setTotalValues(grandTotal);
+}, [rows, isChecked]); // Update when rows or isChecked change
+
+useEffect(() => {
+  stateDataGetAPI().then((data)=>{
+    console.log("stateData",data.data.responseData)
+    const stateData = data.data.responseData.map((entry) => ({
+      value: entry.id,
+      label: entry.name,
+    }));
+    setStateOPtions(stateData)
+  }).catch((err)=>{
+console.log(err)
+  })
 
   partyDataGetAPI()
   .then((data) => {
@@ -90,13 +151,7 @@ const handleImageChange = (e) => {
   setImgDelivery(file);
 };
 
-const handleRoundOffChange = (e) => {
-  setRoundOff(e.target.value);
-};
 
-const handleTotalChange = (e) => {
-  setTotal(e.target.value);
-};
 
 
   const handleDrawerImageChange = (e) => {
@@ -420,6 +475,7 @@ const handleTotalChange = (e) => {
   };
 
   const handleStateOfSupplyChange = (e) => {
+    console.log("firste.target.value",e.target.value)
     setStateOfSupply(e.target.value);
   };
 
@@ -448,7 +504,7 @@ const handleTotalChange = (e) => {
       intputName: "statusofsupply",
       label: "State of supply",
       inputOrSelect: "select",
-      options: [1, 2, 3],
+      options: stateOPtions,
       value: stateOfSupply,
     },
   ];
@@ -466,7 +522,7 @@ const handleTotalChange = (e) => {
         due_date: dueDate,
         date: invoiceDate,
         challan_no: challanNo,
-        state_id: "",
+        state_id: stateOfSupply,
         party_id: partySelect,
         description: description,
         products: newArray
@@ -481,8 +537,9 @@ const handleTotalChange = (e) => {
     formData.append('party_id', data.party_id);
     formData.append('description', data.description);
 
-    // Since products is an array, you need to iterate and append each product
         formData.append(`products`, JSON.stringify(data.products));
+        formData.append(`image`,imgDelivery );
+
 
     // Log the FormData entries (for debugging purposes)
     // for (let pair of formData.entries()) {
@@ -492,9 +549,17 @@ const handleTotalChange = (e) => {
     // If you want to use the FormData with an API call, uncomment the following:
     deliveryChallanAddAPI(formData).then((res) => {
         console.log(res);
-        alert("challan added")
+        alert("Delivery Challan added")
+        setPartySelect()
+        setChallanNo("")
+        setInvoiceDate("")
+        setDueDate("")
+        setRows([])
+        setDescription("")
+        setStateOfSupply({})
     }).catch((err) => {
         console.log(err);
+        alert("Delivery Challan adding Problem ")
     });
 };
 
@@ -523,7 +588,7 @@ const handleTotalChange = (e) => {
               }}
               id="custom-input-demo"
               options={partyOptions}
-              //   value={selectedProduct}
+                // value={partySelect}
               onChange={handleSetParty}
               componentsProps={{
                 popper: {
@@ -690,29 +755,34 @@ const handleTotalChange = (e) => {
     </Button>
   </div>
   <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 5,
-      width: "40%",
-    }}
-  >
-    <InputComponent type="checkbox" />
-    <InputComponent
-      label="Round off"
-      type="number"
-      intputName="roundoff"
-      value={roundOff}
-      onChange={handleRoundOffChange}
-    />
-    <InputComponent
-      label="total"
-      type="number"
-      intputName="total"
-      value={total}
-      onChange={handleTotalChange}
-    />
-  </div>
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 5,
+              width: "40%",
+            }}
+          >
+            <InputComponent
+              type="checkbox"
+              handleChange={handleCheckboxChange}
+            />
+            <InputComponent
+              label="Round off"
+              type="number"
+              intputName="roundoff"
+              value={roundOff}
+              disabled="disabled"
+              // handleChange={handleRoundOffChange}
+            />
+            <InputComponent
+              label="total"
+              type="number"
+              intputName="total"
+              value={totalValues}
+              disabled="disabled"
+              // handleChange={handleTotalChange}
+            />
+          </div>
 </div>
 <hr />
         <div style={{ display: "flex", justifyContent: "end" }}>
