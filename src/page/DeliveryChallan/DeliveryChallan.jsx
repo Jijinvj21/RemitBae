@@ -7,6 +7,7 @@ import SalesTable from "../../components/SalesTable/SalesTable";
 
 import {
   categeryGetAPI,
+  deliveryChallanAddAPI,
   gstOptionsGetAPI,
   partyDataGetAPI,
   productAddAPI,
@@ -57,9 +58,7 @@ const [partySelect, setPartySelect] = useState(0);
 
 
 useEffect(() => {
-  const now = new Date();
  
-  setInvoiceDate(now.toLocaleDateString());
 
   partyDataGetAPI()
   .then((data) => {
@@ -435,7 +434,7 @@ const handleTotalChange = (e) => {
     {
       handleChange: handleInvoiceDateChange,
       label: "Invoice Date",
-      type: "text",
+      type: "date",
       value: invoiceDate,
     },
     {
@@ -454,33 +453,51 @@ const handleTotalChange = (e) => {
     },
   ];
 
-  const deliveryChallanAdd= async()=>{
+  const deliveryChallanAdd = async () => {
     const newArray = await rows.map((item) => ({
-      product_id: item.id,
-      quantity: item.qty,
-      Price: item.qty * item.rate,
-      discount: parseFloat(item?.descountvalue||0),
-      tax_rate:{id:item.taxId||1}
-
+        product_id: item.id,
+        quantity: item.qty,
+        Price: item.qty * item.rate,
+        discount: parseFloat(item?.descountvalue || 0),
+        tax_rate_id: (item.taxId || 1 )
     }));
-    const data={
-      due_date:dueDate,
-      date:invoiceDate,
-      challan_no:challanNo,
-      state_id:"",
-      party_id:partySelect,
-      description:description,
-      products:newArray
 
-    }
-    console.log(data)
-//     deliveryChallanAddAPI(data).then((res)=>{
-// console.log(res)
-//     })
-//     .catch((err)=>{
-// console.log(err)
-//     })
-  }
+    const data = {
+        due_date: dueDate,
+        date: invoiceDate,
+        challan_no: challanNo,
+        state_id: "",
+        party_id: partySelect,
+        description: description,
+        products: newArray
+    };
+
+    // Convert the data object to FormData
+    const formData = new FormData();
+    formData.append('due_date', data.due_date);
+    formData.append('date', data.date);
+    formData.append('challan_no', data.challan_no);
+    formData.append('state_id', data.state_id);
+    formData.append('party_id', data.party_id);
+    formData.append('description', data.description);
+
+    // Since products is an array, you need to iterate and append each product
+        formData.append(`products`, JSON.stringify(data.products));
+
+    // Log the FormData entries (for debugging purposes)
+    // for (let pair of formData.entries()) {
+    //     console.log(pair[0] + ': ' + pair[1]);
+    // }
+
+    // If you want to use the FormData with an API call, uncomment the following:
+    deliveryChallanAddAPI(formData).then((res) => {
+        console.log(res);
+        alert("challan added")
+    }).catch((err) => {
+        console.log(err);
+    });
+};
+
 
   return (
     <div className="deliverychallan-page">

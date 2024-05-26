@@ -466,33 +466,50 @@ const handleDateChange = (event) => {
     setPhoneNumber(e.target.value)
    }
 
-  const addCreditData= async ()=>{
+   const addCreditData = async () => {
     const newArray = await rows.map((item) => ({
-      product_id: item.id,
-      quantity: item.qty,
-      Price: item.qty * item.rate,
-      discount: parseFloat(item?.descountvalue||0),
-      tax_rate:{id:item.taxId||1}
-
+        product_id: item.id,
+        quantity: item.qty,
+        Price: item.qty * item.rate,
+        discount: parseFloat(item?.descountvalue || 0),
+        tax_rate_id: (item.taxId || 1) 
     }));
-    const creditdata={
-      party:partySelect,
-      billing_address:billingTextValue,
-      date:date,
-      invoice_date:invoiceDate,
-      invoice_no:invoiceNo,
-      total_amount:"",
-      payment_type:paymentSelect,
-      description:textValue,
-      product_details:newArray,
-    }
-    creditDataAddAPI().then((res)=>{
-      console.log(res)
-    })
-    .catch((err)=>{
-      console.log(err)
-    })
-  }
+
+    const creditdata = {
+        party: partySelect.value,
+        billing_address: billingTextValue,
+        date: date,
+        invoice_date: invoiceDate,
+        invoice_no: invoiceNo,
+        total_amount: "",
+        payment_type: paymentSelect,
+        description: textValue,
+        product_details: newArray,
+    };
+
+    // Convert creditdata object to FormData
+    const formData = new FormData();
+    formData.append('party', creditdata.party);
+    formData.append('billing_address', creditdata.billing_address);
+    formData.append('date', creditdata.date);
+    formData.append('invoice_date', creditdata.invoice_date);
+    formData.append('invoice_no', creditdata.invoice_no);
+    formData.append('total_amount', creditdata.total_amount);
+    formData.append('payment_type', creditdata.payment_type);
+    formData.append('description', creditdata.description);
+
+    // Append product details
+        formData.append(`product_details`, JSON.stringify(creditdata.product_details));
+     
+    // Send the FormData using the API function
+    creditDataAddAPI(formData).then((res) => {
+        console.log(res);
+        alert("creditnote added")
+    }).catch((err) => {
+        console.log(err);
+    });
+};
+
 
 
   return (
@@ -851,6 +868,7 @@ const handleDateChange = (event) => {
               textTransform: "none",
               bgcolor: "var(--black-button)",
             }}
+            onClick={addCreditData}
           >
             Save
           </Button>

@@ -40,7 +40,7 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
-
+ 
 function SalesPage() {
   const selectRef = useRef(null);
   const [productOptions, setProductOptions] = useState([]);
@@ -73,7 +73,7 @@ function SalesPage() {
     right: false,
   });
   const [projectValue, setProjectValue] = useState("");
-  const [categoryValue, setCategoryValue] = useState("");
+  // const [categoryValue, setCategoryValue] = useState("");
   const [img, setImg] = useState(null);
   const [taxOptions, setTaxOptions] = useState([]);
 
@@ -324,6 +324,7 @@ function SalesPage() {
     console.log(rows);
     createVoucherAPI(salesVoucher)
       .then((data) => {
+        alert("Bill created")
         console.log(data);
         setSelectedOption({})
         setSelectedCustomer({})
@@ -385,10 +386,10 @@ function SalesPage() {
     console.log(event.target.value);
   };
 
-  const handleSelectCatogary = (event) => {
-    setCategoryValue(event.target.value);
-    console.log(event.target.value);
-  };
+  // const handleSelectCatogary = (event) => {
+  //   setCategoryValue(event.target.value);
+  //   console.log(event.target.value);
+  // };
 
   const handleDrawerAddProducts = () => {
     const formData = new FormData();
@@ -400,7 +401,7 @@ function SalesPage() {
     formData.append("unit", selectedValue);
     formData.append("projectid", parseInt(projectValue));
     formData.append("is_master_product", toggle);
-    formData.append("category_id", categoryValue);
+    // formData.append("category_id", categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append("tax_rate", taxRateValue.id);
     formData.append("image", img);
@@ -491,16 +492,16 @@ function SalesPage() {
       inputOrSelect: "select",
       options: projectOptions,
     },
-    {
-      handleChange: handleSelectCatogary,
-      intputName: "categery",
-      label: "Categerys",
-      // type: "text",
-      // value:selectedValue,
+    // {
+    //   handleChange: handleSelectCatogary,
+    //   intputName: "categery",
+    //   label: "Categerys",
+    //   // type: "text",
+    //   // value:selectedValue,
 
-      inputOrSelect: "select",
-      options: categoryOptions,
-    },
+    //   inputOrSelect: "select",
+    //   options: categoryOptions,
+    // },
   ];
   return (
     <div className="sales-table-container">

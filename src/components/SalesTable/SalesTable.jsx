@@ -342,20 +342,34 @@ export default function FullFeaturedCrudGrid({
           setRows(updatedRows);
         };
     
-        const calc = () => {
-          const taxValue = params.row.taxApplied
+        // const calc = () => {
+        //   const taxValue = params.row.taxApplied
+        //     ? params.row.taxAppliedamount
+        //       ? parseFloat(params.row.taxAppliedamount)
+        //       : parseFloat(params.row.taxApplied.split(" ")[1])
+        //     : 0;
+    
+        //   const totalVal = ((params.row.qty||0) * (params.row.rate||0));
+        //   const totalDiscount = totalVal - (params.row.amountafterdescount || 0);
+        //   const taxApplied = ((totalDiscount * taxValue) / 100);
+    
+        //   return taxApplied;
+        // }
+        const calc=()=>{
+          const taxvalue=( params.row.taxApplied
             ? params.row.taxAppliedamount
-              ? parseFloat(params.row.taxAppliedamount)
-              : parseFloat(params.row.taxApplied.split(" ")[1])
-            : 0;
-    
-          const totalVal = (params.row.qty * params.row.rate);
-          const totalDiscount = totalVal - (params.row.amountafterdescount || 0);
-          const taxApplied = ((totalDiscount * taxValue) / 100);
-    
-          return taxApplied;
+              ? parseInt(params.row.taxAppliedamount?.replace("%", " "))
+              : parseFloat(
+                  params.row?.taxApplied?.split("@")[1].replace("%", "")
+                )
+            : parseInt(params.row.taxAppliedamount?.replace("%", " ")) )
+            const totalval=(params.row.qty*params.row.rate)
+const totaldis=(totalval- ((params.row.quantity||0) * (params.row.rate||0))-(params.row.amountafterdescount ||0))
+            const taxApplied= ((totaldis*taxvalue) / 100);
+
+            return taxApplied;
+
         }
-    
         return (
           <div style={{ width: "100%", display: "flex" }}>
             <select
@@ -397,7 +411,7 @@ export default function FullFeaturedCrudGrid({
                 background: "white",
               }}
               type="text"
-              value={calc()||0}
+              value={calc()}
               disabled
             />
           </div>
