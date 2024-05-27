@@ -47,6 +47,8 @@ export default function FullFeaturedCrudGrid({
         unit: selectedProductData.unit,
         unit_id: selectedProductData.unit_id,
         hsn:selectedProductData.hsn,
+        
+tax_id:selectedProductData.tax_id,
 
         rate: selectedProductData.rate,
         taxApplied: ` ${selectedProductData.tax_rate?.name} ${selectedProductData.tax_rate?.percentage}`,

@@ -606,6 +606,7 @@ getDataFromAPI()
         handleUpdateData={handleUpdateData}
         imagePreview={imagePreview}
         setImagePreview={setImagePreview}
+        setImg={setImg}
         // setToggle={setToggle}
         // toggle={toggle}
         

@@ -524,7 +524,7 @@ partyDataGet()
     };
 
     // console.log(salesVoucher);
-    console.log(rows);
+    console.log("createPurchaseAPI",rows);
     createPurchaseAPI(salesVoucher)
       .then((data) => {
         console.log(data);

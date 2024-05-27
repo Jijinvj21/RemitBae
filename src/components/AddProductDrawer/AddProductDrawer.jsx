@@ -23,7 +23,8 @@ function AddProductDrawer({
   updatetrue,
   handleUpdateData,
   imagePreview,
-  setImagePreview
+  setImagePreview,
+  setImg
   // setToggle,
   // toggle,
 }) {
@@ -68,7 +69,7 @@ function AddProductDrawer({
           
 
 
-        {imagePreview? <Chip onDelete={()=>setImagePreview(null)} avatar={<img src={imagePreview}  width={100} height={100}  />} style={{marginTop:"15px",marginLeft:"10px"}} />:
+        {imagePreview? <Chip onDelete={()=>{setImagePreview(null);setImg(null);}} avatar={<img src={imagePreview}  width={100} height={100}  />} style={{marginTop:"15px",marginLeft:"10px"}} size="medium" />:
 
           <Button
             disableRipple
