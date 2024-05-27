@@ -508,10 +508,11 @@ partyDataGet()
     const newArray = await rows.map((item) => ({
       product_id: item.id,
       quantity: item.qty,
-      Price: item.qty * item.rate,
-      discount: parseFloat(item?.descountvalue||0),
-      tax_rate:{id:item.taxId||1}
+      Price:  item.rate,
+      unit:item.unit_id,
 
+      discount: parseFloat(item?.descountvalue||0),
+      tax_rate:{id:item?.taxId?item?.taxId:item?.tax_id}
     }));
     const salesVoucher = {
       credit_sale: false,
@@ -940,7 +941,7 @@ partyDataGet()
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", my: 1 }}>
             <p>Change to Return:</p>
-            <p>&#8377;{totalValues - inputData}</p>
+            <p>&#8377;{inputData-totalValues}</p>
           </Box>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>

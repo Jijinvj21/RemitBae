@@ -347,7 +347,7 @@ const transformedData = groupByHSN(rows);
     const newArray = await rows.map((item) => ({
       product_id: item.id,
       quantity: item.qty,
-      Price: item.qty * item.rate,
+      Price:item.rate,
       unit:item.unit_id,
       discount: parseFloat(item?.descountvalue||0),
       tax_rate:{id:item?.taxId?item?.taxId:item?.tax_id}
