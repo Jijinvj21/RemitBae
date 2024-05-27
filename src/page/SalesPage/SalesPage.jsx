@@ -83,49 +83,30 @@ const [clientData,setclientData]= useState({});
 const [isDesabled, setIsDesabled] = useState(true);
 
 
-// const data = selectedProductDetails?.flatMap(selected => selected || []);
-const data =[]
+const groupByHSN = (data) => {
+  const groupedData = data.reduce((acc, curr) => {
+    console.log("firstcurr.taxRate",(parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0))
+    if (!acc[curr.hsn]) {
+      acc[curr.hsn] = {
+        hsn: curr.hsn,
+        total: 0,
+        cgstRate: (parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 2,
+        sgstRate: (parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 2,
+        cgstAmount: 0,
+        sgstAmount: 0
+      };
+    }
+    const totalValue = curr.qty * curr.rate;
+    acc[curr.hsn].total += totalValue;
+    acc[curr.hsn].cgstAmount += (totalValue * ((parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 100)) / 2;
+    acc[curr.hsn].sgstAmount += (totalValue * ((parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 100)) / 2;
+    return acc;
+  }, {});
 
-
-const calculateTax = (total, rate) => {
-  const subtotal = parseFloat(total);
-  const taxAmount = subtotal * (rate / 100);
-  
-  return {
-    cgstRate: rate / 2,
-    cgstAmount: taxAmount / 2,
-    sgstRate: rate / 2,
-    sgstAmount: taxAmount / 2
-  };
+  return Object.values(groupedData);
 };
 
-
-// Check if data is defined before using reduce
-const transformedData = data ? data.reduce((acc, item) => {
-  const existingItemIndex = acc.findIndex(elem => elem.hsn === item.hsn);
-  if (existingItemIndex !== -1) {
-    const existingItem = acc[existingItemIndex];
-    existingItem.total += parseFloat(item.amount);
-    // Calculate tax for the product
-    const tax = calculateTax(item.amount, parseFloat(item.tax_rate.percentage));
-    existingItem.cgstAmount += tax.cgstAmount;
-    existingItem.sgstAmount += tax.sgstAmount;
-  } else {
-    const { cgstRate, cgstAmount, sgstRate, sgstAmount } = calculateTax(
-      item.amount,
-      parseFloat(item.tax_rate.percentage)
-    );
-    acc.push({
-      hsn: item.hsn,
-      total: parseFloat(item.amount),
-      cgstRate,
-      cgstAmount,
-      sgstRate,
-      sgstAmount
-    });
-  }
-  return acc;
-}, []) : [];
+const transformedData = groupByHSN(rows);
 
   const getTaxOptionsFormAPI = () => {
     gstOptionsGetAPI()

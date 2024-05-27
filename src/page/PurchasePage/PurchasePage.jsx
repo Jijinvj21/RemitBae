@@ -98,7 +98,30 @@ function PurchasePage() {
   const [isDesabled, setIsDesabled] = useState(true);
   const [clientData,setclientData]= useState({});
 
-
+  const groupByHSN = (data) => {
+    const groupedData = data.reduce((acc, curr) => {
+      console.log("firstcurr.taxRate",(parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0))
+      if (!acc[curr.hsn]) {
+        acc[curr.hsn] = {
+          hsn: curr.hsn,
+          total: 0,
+          cgstRate: (parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 2,
+          sgstRate: (parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 2,
+          cgstAmount: 0,
+          sgstAmount: 0
+        };
+      }
+      const totalValue = curr.qty * curr.rate;
+      acc[curr.hsn].total += totalValue;
+      acc[curr.hsn].cgstAmount += (totalValue * ((parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 100)) / 2;
+      acc[curr.hsn].sgstAmount += (totalValue * ((parseInt(curr.taxApplied?.split("@")[1].replace("%", ""))||0) / 100)) / 2;
+      return acc;
+    }, {});
+  
+    return Object.values(groupedData);
+  };
+  
+  const transformedData = groupByHSN(rows);
 
   const getTaxOptionsFormAPI = () => {
     gstOptionsGetAPI().then((data) => {
@@ -1381,7 +1404,7 @@ partyDataGet()
     
   </thead>
   <tbody style={{ borderBottom: "1px solid black"}}>
-  {/* {transformedData?.map(item => (
+  {transformedData?.map(item => (
     <tr key={item?.hsn}>
       <td style={{ borderLeft: "1px solid black" }}>
         <h6> {item?.hsn}</h6>
@@ -1405,7 +1428,7 @@ partyDataGet()
         <h6>{ (item?.total+item?.sgstAmount+item?.cgstAmount).toFixed(2)}</h6>
       </td>
     </tr>
-            ))} */}
+            ))}
 
   </tbody>
 </table>
