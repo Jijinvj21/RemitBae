@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Avatar, Box, Button, Chip, Grid, Typography } from "@mui/material";
 import Drawer from "@mui/material/Drawer";
 import InputComponent from "../InputComponent/InputComponent";
 import "./AddProductDrawer.scss";
@@ -22,6 +22,8 @@ function AddProductDrawer({
   handleSelectChange,
   updatetrue,
   handleUpdateData,
+  imagePreview,
+  setImagePreview
   // setToggle,
   // toggle,
 }) {
@@ -63,7 +65,10 @@ function AddProductDrawer({
               </Grid>
             );
           })}
-         
+          
+
+
+        {imagePreview? <Chip onDelete={()=>setImagePreview(null)} avatar={<img src={imagePreview}  width={100} height={100}  />} style={{marginTop:"15px",marginLeft:"10px"}} />:
 
           <Button
             disableRipple
@@ -83,7 +88,7 @@ function AddProductDrawer({
               Upload product image
             </Typography>
             <input type="file" hidden onChange={handleImageChange} />
-          </Button>
+          </Button>}
         </Grid>
         { updatetrue ?<Button
           type="submit"

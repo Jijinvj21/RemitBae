@@ -20,6 +20,8 @@ const [projectOptions,setProjectOptions]=useState([])
 // const [categoryOptions,setCategoryOptions]=useState([])
 const [loader, setLoader]=useState(false)
 
+const [imagePreview,setImagePreview]=useState(null)
+
 
 
 
@@ -186,6 +188,14 @@ const getClientOptionsFormAPI = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader(); // FileReader object to read the file
+      reader.onloadend = () => {
+        // When reading is done, update the component state with the image data URL
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file); // Read the file as a data URL
+    }
 
     setImg(file);
   };
@@ -536,7 +546,9 @@ getDataFromAPI()
       </Box>
     ) : (
       // Map through the array and render product cards
-      myArray?.map((data, index) => (
+      myArray?.map((data, index) => {
+        console.log("index",data)
+        return(
         <Box
           key={index}
           sx={{
@@ -550,14 +562,14 @@ getDataFromAPI()
             handleUpdate={handleUpdate}
             handleDelete={(e) => handleDelete(e, data.id)}
             heading={data.name}
-            image={data.img}
+            image={data.Image}
             qty={data.quantity}
             unit={data.unit}
             rate={data.rate}
             amount={data.amount}
           />
         </Box>
-      ))
+      )})
     )
   }
 </Box>
@@ -592,6 +604,8 @@ getDataFromAPI()
         handleAdd={handleAdd}
         updatetrue={updatetrue}
         handleUpdateData={handleUpdateData}
+        imagePreview={imagePreview}
+        setImagePreview={setImagePreview}
         // setToggle={setToggle}
         // toggle={toggle}
         

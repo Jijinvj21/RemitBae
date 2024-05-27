@@ -10,6 +10,7 @@ function ProductInputCard({
   rate,
   handleDelete,
   handleUpdate,
+  image
 }) {
   const userUpdate = {
     heading,
@@ -37,7 +38,13 @@ function ProductInputCard({
       }}
     >
       <Box sx={{ display: "flex",justifyContent:"space-around", alignItems: "center",width:"20%" }}>
-        <img src={ImageAdd} alt="add" />
+        {
+          image?<img src={`https://drive.google.com/thumbnail?id=${image}&sz=w30`} alt="" />:<img src={ImageAdd} alt="add" />
+        }
+
+        
+
+
       </Box>
       <Box sx={{ height: "auto", width: "100%" }}>
         <Box
