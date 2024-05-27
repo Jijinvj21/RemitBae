@@ -11,7 +11,6 @@ import QuotationGeneratorPage from "./page/QuotationGeneratorPage/QuotationGener
 import StockJournalPage from "./page/StockJournalPage/StockJournalPage";
 import SalesPage from "./page/SalesPage/SalesPage";
 import PurchasePage from "./page/PurchasePage/PurchasePage";
-// import ProjectPage from "./page/ProjectPage/ProjectPage";
 import PaymenyIn from "./page/PaymenyIn/PaymenyIn";
 import CreditNotePage from "./page/CreditNotePage/CreditNotePage";
 import ProjectDataPage from "./page/ProjectDataPage/ProjectDataPage";
