@@ -315,7 +315,7 @@ const transformedData = groupByHSN(rows);
         const selectedProductData = products.find(
           (product) => product.name === newValue?.label
         );
-        console.log(selectedProductData);
+        console.log("selectedProductData",selectedProductData);
         setSelectedProductDetails(selectedProductData);
         console.log(selectedProductData);
         // Add selected product to the table rows
@@ -326,7 +326,7 @@ const transformedData = groupByHSN(rows);
           unit: selectedProductData.unit, // Assuming selectedProductData has a unit property
           price: selectedProductData.price, // Assuming selectedProductData has a price property
           discount: 0, // Assuming default discount is 0
-          taxApplied: 0, // Assuming default tax applied is 0
+          taxApplied:selectedProductData.tax_rate, // Assuming default tax applied is 0
           total: selectedProductData.price, // Assuming total is initially equal to price
         };
         setSelectedProduct()
@@ -343,13 +343,15 @@ const transformedData = groupByHSN(rows);
   const handleAddVoucher = async () => {
     setIsDesabled(false)
 
+    console.log("salesVoucher",rows);
     const newArray = await rows.map((item) => ({
       product_id: item.id,
       quantity: item.qty,
       Price: item.qty * item.rate,
+      unit:item.unit_id,
       discount: parseFloat(item?.descountvalue||0),
-      tax_rate:{id:item.taxId||1}
-
+      tax_rate:{id:item?.taxId?item?.taxId:item?.tax_id}
+      
     }));
     const salesVoucher = {
       credit_sale: false,
@@ -361,7 +363,6 @@ const transformedData = groupByHSN(rows);
     };
 
     console.log(salesVoucher);
-    console.log(rows);
     createVoucherAPI(salesVoucher)
       .then((data) => {
         alert("Bill created")
@@ -748,7 +749,7 @@ const transformedData = groupByHSN(rows);
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", my: 1 }}>
             <p>Change to Return:</p>
-            <p>&#8377;{totalValues - inputData}</p>
+            <p>&#8377;{inputData - totalValues}</p>
           </Box>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
