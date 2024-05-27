@@ -25,7 +25,7 @@ function App() {
       <Routes>
         {/* Root layout */}
         <Route element={<Layout />}>
-          <Route path="/admin" element={<RigthSideLayout />}>
+          <Route path="admin" element={<RigthSideLayout />}>
           
           {/* <Route path="projects" element={<ProjectsPage/>} /> */}
           <Route path="employees" element={<EmployesPage/>} />
