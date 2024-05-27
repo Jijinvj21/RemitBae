@@ -27,6 +27,7 @@ import { renderToString } from "react-dom/server";
 // import ExpenceTable from "../../components/ExpenceTable/ExpenceTable";
 import SalesTable from "../../components/SalesTable/SalesTable";
 
+
 function ExpencePage() {
   const [rows, setRows] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null); // State to hold selected products
@@ -55,6 +56,7 @@ function ExpencePage() {
   const [totalValues, setTotalValues] = useState(0);
   const [isChecked, setIsChecked] = useState(false);
   const [isDesabled, setIsDesabled] = useState(true);
+  
 
 
   
@@ -154,12 +156,12 @@ function ExpencePage() {
       value: `option${index + 1}`,
       label: name,
     }));
-    options.unshift({ value: -2, label: "Add" });
+    // options.unshift({ value: -2, label: "Add" });
     setProductOptions(options);
   };
   useEffect(() => {
     fetchData();
-    setProductOptions([{ value: -2, label: "Add" }]);
+    // setProductOptions([{ value: -2, label: "Add" }]);
   }, []);
 
   const handlepaymenttype = (e) => {

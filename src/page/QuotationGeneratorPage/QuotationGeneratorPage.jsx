@@ -247,6 +247,7 @@ function QuotationGeneratorPage() {
     }
     setState2({ ...state2, [anchor]: open });
   };
+
   const handleAccessoryChange = (event) => {
     const selectedOptionObject = productsOptions.find(
       (option) => option.value == event.target.value
@@ -256,7 +257,7 @@ function QuotationGeneratorPage() {
       console.log(
         "event.target",
         event.target.value.value,
-        selectedOptionObject
+        selectedOptionObject.value
       );
       console.log(selectedOptionObject.value == -2);
       toggleDrawer2("right", true)();
@@ -385,11 +386,8 @@ function QuotationGeneratorPage() {
         console.log("productGetAPI:", data);
         // setTaxOptions(data);
 
-        const filteredData = data.responseData.filter(
-          (entry) => entry.is_master_product === true
-        );
         // Transform data and set it to state
-        const productsData = filteredData.map((entry) => ({
+        const productsData = data.responseData.map((entry) => ({
           value: entry.id,
           label: entry.name,
           unit: entry.unit,
@@ -489,75 +487,19 @@ function QuotationGeneratorPage() {
     });
     // handleAddData()
   };
-  // const handleAddData = () => {
-  //   console.log("firsttest");
-  //   const productDatas = {
-  //     ...leftInputs,
-  //     accessorieslist: accessoriesList,
-  //     product: `${selectedProduct.selectedOptionObject?.value}`,
-  //     productname: selectedProduct.selectedOptionObject?.label,
-  //     productunit: selectedProduct.selectedOptionObject?.unit,
-  //     category:`${areaOfWorkCategorySelected?.value}`,
-  //     categoryName:areaOfWorkCategorySelected?.label
-  //   };
-  //   console.log("handleAddData", selectedProduct);
-  //   setProductData([...productData, productDatas]);
-  // };
   const handleAddData = () => {
     console.log("firsttest");
-  
-    const newProduct = {
+    const productDatas = {
       ...leftInputs,
       accessorieslist: accessoriesList,
       product: `${selectedProduct.selectedOptionObject?.value}`,
       productname: selectedProduct.selectedOptionObject?.label,
       productunit: selectedProduct.selectedOptionObject?.unit,
+      category:`${areaOfWorkCategorySelected?.value}`
     };
-  
-    const newCategory = {
-      categoryId: `${areaOfWorkCategorySelected?.value}`,
-      categoryName: areaOfWorkCategorySelected?.label,
-      products: [newProduct],
-    };
-  
     console.log("handleAddData", selectedProduct);
-  
-    setProductData((prevData) => {
-      // Check if the category already exists
-      const categoryIndex = prevData.findIndex(
-        (category) => category.categoryId === newCategory.categoryId
-      );
-  
-      if (categoryIndex > -1) {
-        // Category exists, add the new product to this category
-        const updatedCategory = {
-          ...prevData[categoryIndex],
-          products: [...prevData[categoryIndex].products, newProduct],
-        };
-  
-        console.log([
-          ...prevData.slice(0, categoryIndex),
-          updatedCategory,
-          ...prevData.slice(categoryIndex + 1),
-        ])
-        return [
-          ...prevData.slice(0, categoryIndex),
-          updatedCategory,
-          ...prevData.slice(categoryIndex + 1),
-        ];
-      } else {
-        // Category doesn't exist, add the new category
-        console.log([...prevData, newCategory])
-        return [...prevData, newCategory];
-      }
-    });
+    setProductData([...productData, productDatas]);
   };
-  
-  useEffect(() => {
-    console.log('Updated productData:', productData);
-  }, [productData]);
-
-
   const handlerightIputsChange = (e) => {
     const { name, value } = e.target;
     console.log("first", name, value);
@@ -634,12 +576,12 @@ function QuotationGeneratorPage() {
     if (selectedAccessory.selectedOptionObject?.value !== "") {
       const accessory = {
         accessories: `${selectedAccessory.selectedOptionObject?.value}`,
-        name: selectedAccessory.selectedOptionObject?.label,
+        name: selectedAccessory.selectedOptionObject.label,
         quantity: quantity,
-        price: `${selectedAccessory.selectedOptionObject?.amount}`,
-        unit: selectedAccessory.selectedOptionObject?.unit,
-        image: selectedAccessory.selectedOptionObject?.image,
-        unit_id: selectedAccessory.selectedOptionObject?.unit_id,
+        price: `${selectedAccessory.selectedOptionObject.amount}`,
+        unit: selectedAccessory.selectedOptionObject.unit,
+        image: selectedAccessory.selectedOptionObject.image,
+        unit_id: selectedAccessory.selectedOptionObject.unit_id,
       };
       console.log("accessory", [...accessoriesList, accessory]);
       setAccessoriesList([...accessoriesList, accessory]);
@@ -1682,7 +1624,7 @@ function QuotationGeneratorPage() {
                   </Grid>
 
                   {/* Map over accessorieslist of the current product */}
-                  {product?.accessorieslist?.map((accessory, accessoryIndex) => (
+                  {product.accessorieslist.map((accessory, accessoryIndex) => (
                     <Grid
                       md={4}
                       item
@@ -1783,332 +1725,293 @@ function QuotationGeneratorPage() {
           toggle={toggle2}/>
       </div>
 
-      {/* i need to add table in the one  */}
       <table
-  className="offscreen"
-  id="ALLPRODUCTtable"
-  style={{ backgroundColor: "white" }}
->
-  <thead>
-    <tr style={{ textAlign: "center", backgroundColor: "#FFFF00" }}>
-      <th style={{ width: "100px", paddingBottom: "5px", paddingTop: "5px" }}>
-        AREA OF WORK
-      </th>
-      <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>
-        SPECIFICATION
-      </th>
-      <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>
-        AMOUNT
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    {productData.map((category, categoryIndex) => (
-      <React.Fragment key={categoryIndex}>
-        {category.products.map((product, productIndex) => (
-          <React.Fragment key={productIndex}>
-            <tr>
-              {productIndex === 0 && (
-                <td
-                  style={{ textAlign: "center" }}
-                  rowSpan={category.products.length}
+        className="offscreen"
+        id="ALLPRODUCTtable"
+        style={{ backgroundColor: "white" }}
+      >
+        <thead></thead>
+        <tbody>
+          {productData.map((item, index) => (
+            <React.Fragment key={index}>
+              <tr style={{ textAlign: "center", backgroundColor: "#FFFF00" }}>
+                <th
+                  style={{
+                    width: "100px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
                 >
-                  {category.categoryName}
+                  AREA OF WORK
+                </th>
+                <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>
+                  SPECIFICATION
+                </th>
+                <th style={{ paddingBottom: "5px", paddingTop: "5px" }}>
+                  AMOUNT
+                </th>
+              </tr>
+              <tr>
+                <td style={{ textAlign: "center" }} rowspan="4">
+                  {item.productname}
                 </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.description}
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.amount}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  hardware
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.hardware}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  installation
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.installation}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  accessories
+                </td>
+                <td
+                  style={{
+                    paddingLeft: "5px",
+                    paddingRight: "5px",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {item.accessories}
+                </td>
+              </tr>
+
+              <tr>
+                <td
+                  style={{
+                    backgroundColor: "#00B050",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                    paddingRight: "5px",
+                    fontWeight: "800",
+                    textAlign: "right ",
+                  }}
+                  colspan="2"
+                >
+                  {" "}
+                  TOTAL{" "}
+                </td>
+                <th
+                  style={{
+                    backgroundColor: "#00B050",
+                    paddingBottom: "5px",
+                    paddingTop: "5px",
+                    paddingRight: "5px",
+                    fontWeight: "800",
+                    textAlign: "right ",
+                  }}
+                >
+                  {parseInt(item.amount || 0) +
+                    parseInt(item.hardware || 0) +
+                    parseInt(item.installation || 0) +
+                    parseInt(item.accessories || 0)}
+                </th>
+              </tr>
+
+              <tr>
+                <td colSpan="12"> </td>
+              </tr>
+
+              {item.accessorieslist[0] && (
+                <>
+                  <tr>
+                    <td
+                      style={{
+                        backgroundColor: "#00B0F0",
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                      colSpan="12"
+                    >
+                      {" "}
+                      ACCESSORIES LIST OF {item.productname.toUpperCase()}{" "}
+                    </td>
+                  </tr>
+                  <tr style={{ backgroundColor: "#FFFF00" }}>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                    >
+                      {" "}
+                      SL NO{" "}
+                    </td>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                    >
+                      SPECIFICATION{" "}
+                    </td>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        fontWeight: "800",
+                        textAlign: "center ",
+                      }}
+                    >
+                      {" "}
+                      IMAGE{" "}
+                    </td>
+                  </tr>
+                </>
               )}
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                {product.productname}
-              </td>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                {product.amount}
-              </td>
-            </tr>
-            <tr>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                {product.description}
-              </td>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              ></td>
-            </tr>
-            <tr>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                hardware
-              </td>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                {product.hardware}
-              </td>
-            </tr>
-            <tr>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                installation
-              </td>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                {product.installation}
-              </td>
-            </tr>
-            <tr>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                accessories
-              </td>
-              <td
-                style={{
-                  paddingLeft: "5px",
-                  paddingRight: "5px",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                }}
-              >
-                {product.accessories}
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style={{
-                  backgroundColor: "#00B050",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                  paddingRight: "5px",
-                  fontWeight: "800",
-                  textAlign: "right ",
-                }}
-                colSpan="2"
-              >
-                {" "}
-                TOTAL{" "}
-              </td>
-              <th
-                style={{
-                  backgroundColor: "#00B050",
-                  paddingBottom: "5px",
-                  paddingTop: "5px",
-                  paddingRight: "5px",
-                  fontWeight: "800",
-                  textAlign: "right ",
-                }}
-              >
-                {parseInt(product?.amount || 0) +
-                  parseInt(product?.hardware || 0) +
-                  parseInt(product?.installation || 0) +
-                  parseInt(product?.accessories || 0)}
-              </th>
-            </tr>
-
-            <tr>
-              <td colSpan="12"> </td>
-            </tr>
-
-            {product.accessorieslist[0] && (
-              <>
-                <tr>
-                  <td
-                    style={{
-                      backgroundColor: "#00B0F0",
-                      paddingBottom: "5px",
-                      paddingTop: "5px",
-                      fontWeight: "800",
-                      textAlign: "center ",
-                    }}
-                    colSpan="12"
-                  >
-                    {" "}
-                    ACCESSORIES LIST OF {category.categoryName?.toUpperCase()}{" "}
-                  </td>
-                </tr>
-                <tr style={{ backgroundColor: "#FFFF00" }}>
-                  <td
-                    style={{
-                      paddingBottom: "5px",
-                      paddingTop: "5px",
-                      fontWeight: "800",
-                      textAlign: "center ",
-                    }}
-                  >
-                    {" "}
-                    SL NO{" "}
-                  </td>
-                  <td
-                    style={{
-                      paddingBottom: "5px",
-                      paddingTop: "5px",
-                      fontWeight: "800",
-                      textAlign: "center ",
-                    }}
-                  >
-                    SPECIFICATION{" "}
-                  </td>
-                  <td
-                    style={{
-                      paddingBottom: "5px",
-                      paddingTop: "5px",
-                      fontWeight: "800",
-                      textAlign: "center ",
-                    }}
-                  >
-                    {" "}
-                    IMAGE{" "}
-                  </td>
-                </tr>
-              </>
-            )}
-            {product.accessorieslist.map((accessory, i) => {
-              console.log("accessory", accessory);
-              return (
-                <tr key={`${categoryIndex}-${productIndex}-${i}`}>
-                  <td
-                    style={{
-                      paddingBottom: "5px",
-                      paddingTop: "5px",
-                      textAlign: "center",
-                    }}
-                  >
-                    {i + 1}
-                  </td>
-                  <td
-                    style={{
-                      paddingLeft: "5px",
-                      paddingRight: "5px",
-                      paddingBottom: "5px",
-                      paddingTop: "5px",
-                    }}
-                  >
-                    {accessory.name}
-                  </td>
-                  <td
-                    style={{
-                      paddingLeft: "30px",
-                      paddingRight: "10px",
-                      paddingBottom: "20px",
-                      paddingTop: "20px",
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {" "}
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png"
-                      alt="image"
-                      width={50}
-                      height={50}
-                    />{" "}
-                  </td>
-                </tr>
-              );
-            })}
-          </React.Fragment>
-        ))}
-      </React.Fragment>
-    ))}
-    <tr>
-      <td
-        style={{
-          backgroundColor: "#FF0000",
-          paddingBottom: "5px",
-          paddingTop: "5px",
-          paddingRight: "10px",
-          fontWeight: "800",
-          textAlign: "right ",
-          color: "white",
-          border: "1px solid black",
-        }}
-        colSpan="2"
-      >
-        {" "}
-        GRAND TOTAL{" "}
-      </td>
-      <th
-        style={{
-          backgroundColor: "#FF0000",
-          paddingBottom: "5px",
-          paddingTop: "5px",
-          paddingRight: "10px",
-          fontWeight: "800",
-          textAlign: "right ",
-          color: "white",
-          border: "1px solid black",
-        }}
-      >
-        {productData.reduce(
-          (grandTotal, category) =>
-            grandTotal +
-            category.products.reduce(
-              (categoryTotal, product) =>
-                categoryTotal +
-                parseInt(product?.amount || 0) +
-                parseInt(product?.hardware || 0) +
-                parseInt(product?.installation || 0) +
-                parseInt(product?.accessories || 0),
-              0
-            ),
-          0
-        )}
-      </th>
-    </tr>
-  </tbody>
-</table>
-
+              {item.accessorieslist.map((accessory, i) => {
+                console.log("accessory", accessory);
+                return (
+                  <tr key={`${index}-${i}`}>
+                    <td
+                      style={{
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                        textAlign: "center",
+                      }}
+                    >
+                      {index + 1}
+                    </td>
+                    <td
+                      style={{
+                        paddingLeft: "5px",
+                        paddingRight: "5px",
+                        paddingBottom: "5px",
+                        paddingTop: "5px",
+                      }}
+                    >
+                      {accessory.name}
+                    </td>
+                    <td
+                      style={{
+                        paddingLeft: "30px",
+                        paddingRight: "10px",
+                        paddingBottom: "20px",
+                        paddingTop: "20px",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {" "}
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/255px-Flag_of_India.svg.png"
+                        alt="image"
+                        width={50}
+                        height={50}
+                      />{" "}
+                    </td>
+                  </tr>
+                );
+              })}
+            </React.Fragment>
+          ))}
+          <tr>
+            <td
+              style={{
+                backgroundColor: "#FF0000",
+                paddingBottom: "5px",
+                paddingTop: "5px",
+                paddingRight: "10px",
+                fontWeight: "800",
+                textAlign: "right ",
+                color: "white",
+                border: "1px solid black",
+              }}
+              colspan="2"
+            >
+              {" "}
+              GRAND TOTAL{" "}
+            </td>
+            <th
+              style={{
+                backgroundColor: "#FF0000",
+                paddingBottom: "5px",
+                paddingTop: "5px",
+                paddingRight: "10px",
+                fontWeight: "800",
+                textAlign: "right ",
+                color: "white",
+                border: "1px solid black",
+              }}
+            >
+              {grandTotal}
+            </th>
+          </tr>
+        </tbody>
+      </table>
 
       <div>
         <table

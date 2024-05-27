@@ -293,11 +293,13 @@ const transformedData = data ? data.reduce((acc, item) => {
           </div>
           <div className="data_show_card">
             <p>Purchase / Expence</p>
-            <h6>{projectData?.total_expenses || 0}</h6>
+            {/* <h6>{projectData?.total_expenses || 0}</h6> */}
+            <h6>{quotationGetData?.find((quotation) => quotation.approved)?projectData?.total_expenses || 0:0}</h6>
           </div>
           <div className="data_show_card">
             <p>Margin</p>
-            <h6>{totalAmount}</h6> {/* Display total amount */}
+            {/* <h6>{totalAmount}</h6> Display total amount */}
+            <h6>{quotationGetData?.find((quotation) => quotation.approved)?totalAmount:0}</h6>
           </div>
         </div>
         <div

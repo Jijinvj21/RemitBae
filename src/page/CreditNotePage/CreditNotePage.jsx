@@ -54,6 +54,8 @@ function CreditNotePage() {
     const [isChecked, setIsChecked] = useState(false);
     const [roundOff, setRoundOff] = useState(0);
     const [isDesabled, setIsDesabled] = useState(true);
+    const [clientData,setclientData]= useState({});
+
 
     const handlepdfgenerate = () => {
       const pdfpagedata = document.querySelector("#pagedatatoshow");
@@ -160,7 +162,7 @@ function CreditNotePage() {
     formData.append('unit', selectedValue);
     formData.append('projectid', parseInt(projectValue));
     formData.append('is_master_product', toggle);
-    formData.append('category_id', categoryValue);
+    // formData.append('category_id', categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append('tax_rate', taxRateValue.id);
     formData.append('image', img);
@@ -280,8 +282,11 @@ function CreditNotePage() {
       const partyData = data.responseData.map((entry) => ({
         value: entry.id,
         label: entry.name,
+        address1:entry.address1,
+        address2:entry.address2,
+        phonenumber:entry.phonenumber,
       }));
-      console.log(partyData);
+      console.log("partyData",partyData);
       setPartytOptions(partyData);
     })
     .catch((err) => {
@@ -469,18 +474,18 @@ const handleStateOfSupplyChange = (e) => {
       
       
     },
-    {
-      handleChange: handleSelectCatogary,
-      intputName: "categery",
-      label: "Categerys",
-      // type: "text",
-      // value:selectedValue,
+    // {
+    //   handleChange: handleSelectCatogary,
+    //   intputName: "categery",
+    //   label: "Categerys",
+    //   // type: "text",
+    //   // value:selectedValue,
 
-      inputOrSelect:"select",
-      options: categoryOptions,
+    //   inputOrSelect:"select",
+    //   options: categoryOptions,
       
       
-    },
+    // },
     
   ];
 
@@ -537,6 +542,8 @@ const handleStateOfSupplyChange = (e) => {
     console.log(event.target.value)
   };
   const handleSelectedPartyChange=(event, newValue)=>{
+  console.log("firstnewValue",newValue)
+    setclientData(newValue)
     setPartySelect(newValue)
   }
   const handlePhoneNumber=(e)=>{
@@ -577,7 +584,7 @@ const handleStateOfSupplyChange = (e) => {
     formData.append('total_amount', creditdata.total_amount);
     formData.append('payment_type', creditdata.payment_type);
     formData.append('description', creditdata.description);
-    formData.append('state_id', creditdata.state_id);
+    formData.append('state', creditdata.state_id);
     formData.append('phone', phoneNumber);
     formData.append('image', imgCredit);
 
@@ -1029,10 +1036,10 @@ const handleStateOfSupplyChange = (e) => {
               </div>
               <div style={{ borderBottom: "1px solid", marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px" }}>
                 <h6>Consignee (Ship to)</h6>
-                 {/* <h5>{clientData?.label}</h5>
+                 <h5>{clientData?.label}</h5>
                 <h6>{clientData?.address1}</h6>
                  <h6>{clientData?.address2}</h6> 
-                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6>{clientData?.phonenumber}</h6> 
 
                 <h6 style={{ display: "flex", gap: "20px",marginBottom:"3px" }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
@@ -1040,10 +1047,10 @@ const handleStateOfSupplyChange = (e) => {
                 
               </div>
               <div style={{ marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px"}}>
-              {/* <h5>{clientData?.label}</h5>
+              <h5>{clientData?.label}</h5>
                 <h6>{clientData?.address1}</h6>
                  <h6>{clientData?.address2}</h6> 
-                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6>{clientData?.phonenumber}</h6> 
                 <h6 style={{ display: "flex", gap: "20px", }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
                 </h6>

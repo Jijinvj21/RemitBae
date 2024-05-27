@@ -96,6 +96,7 @@ function PurchasePage() {
   const [img, setImg] = useState(null);
   const [taxOptions,setTaxOptions]=useState([])
   const [isDesabled, setIsDesabled] = useState(true);
+  const [clientData,setclientData]= useState({});
 
 
 
@@ -302,6 +303,11 @@ partyDataGet()
       setOpen(true);
     } else {
       setOpen(false);
+      const selectedOptionObject = clientOptions.find(
+        (option) => option.value == e.target.value
+      );
+      console.log("firstselectedOptionObject",selectedOptionObject)
+      setclientData(selectedOptionObject)
       setSelectedParty(e.target.value);
       // Handle selection of other options
     }
@@ -672,18 +678,18 @@ partyDataGet()
       
       
     },
-    {
-      handleChange: handleSelectCatogary,
-      intputName: "categery",
-      label: "Categerys",
-      // type: "text",
-      // value:selectedValue,
+    // {
+    //   handleChange: handleSelectCatogary,
+    //   intputName: "categery",
+    //   label: "Categerys",
+    //   // type: "text",
+    //   // value:selectedValue,
 
-      inputOrSelect:"select",
-      options: categoryOptions,
+    //   inputOrSelect:"select",
+    //   options: categoryOptions,
       
       
-    },
+    // },
     
   ];
   const handlepdfgenerate = () => {
@@ -1032,10 +1038,10 @@ partyDataGet()
               </div>
               <div style={{ borderBottom: "1px solid", marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px" }}>
                 <h6>Consignee (Ship to)</h6>
-                 {/* <h5>{clientData?.label}</h5>
+                 <h5>{clientData?.label}</h5>
                 <h6>{clientData?.address1}</h6>
                  <h6>{clientData?.address2}</h6> 
-                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6>{clientData?.phonenumber}</h6> 
 
                 <h6 style={{ display: "flex", gap: "20px",marginBottom:"3px" }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
@@ -1043,10 +1049,10 @@ partyDataGet()
                 
               </div>
               <div style={{ marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px"}}>
-              {/* <h5>{clientData?.label}</h5>
+              <h5>{clientData?.label}</h5>
                 <h6>{clientData?.address1}</h6>
                  <h6>{clientData?.address2}</h6> 
-                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6>{clientData?.phonenumber}</h6> 
                 <h6 style={{ display: "flex", gap: "20px", }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
                 </h6>

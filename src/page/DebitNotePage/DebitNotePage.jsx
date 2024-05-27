@@ -51,6 +51,8 @@ function DebitNotePage() {
   const [roundOff, setRoundOff] = useState(0);
   const [isChecked, setIsChecked] = useState(false);
   const [isDesabled, setIsDesabled] = useState(true);
+  const [clientData,setclientData]= useState({});
+
 
 
   const handlepdfgenerate = () => {
@@ -129,6 +131,9 @@ function DebitNotePage() {
       const partyData = data.responseData.map((entry) => ({
         value: entry.id,
         label: entry.name,
+        address1:entry.address1,
+        address2:entry.address2,
+        phonenumber:entry.phonenumber,
       }));
       console.log(partyData);
       setPartytOptions(partyData);
@@ -188,7 +193,7 @@ const handlepaymenttype = (e) => {
     formData.append('unit', selectedValue);
     formData.append('projectid', parseInt(projectValue));
     formData.append('is_master_product', toggle);
-    formData.append('category_id', categoryValue);
+    // formData.append('category_id', categoryValue);
     // formData.append('gst', ((parseInt(ProductDrawerFormData.rate) * parseInt(ProductFormData.quantity)) * (taxRateValue.value?.replace("%", ""))) / 100);
     formData.append('tax_rate', taxRateValue.id);
     formData.append('image', img);
@@ -460,18 +465,18 @@ const handleDateChange = (event) => {
       
       
     },
-    {
-      handleChange: handleSelectCatogary,
-      intputName: "categery",
-      label: "Categerys",
-      // type: "text",
-      // value:selectedValue,
+    // {
+    //   handleChange: handleSelectCatogary,
+    //   intputName: "categery",
+    //   label: "Categerys",
+    //   // type: "text",
+    //   // value:selectedValue,
 
-      inputOrSelect:"select",
-      options: categoryOptions,
+    //   inputOrSelect:"select",
+    //   options: categoryOptions,
       
       
-    },
+    // },
     
   ];
 
@@ -595,6 +600,7 @@ const handleDateChange = (event) => {
 };
 
 const handleSelectedPartyChange=(event, newValue)=>{
+  setclientData(newValue)
   setPartySelect(newValue)
 }
  const handlePhoneNumber=(e)=>{
@@ -1009,10 +1015,10 @@ const handleSelectedPartyChange=(event, newValue)=>{
               </div>
               <div style={{ borderBottom: "1px solid", marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px" }}>
                 <h6>Consignee (Ship to)</h6>
-                 {/* <h5>{clientData?.label}</h5>
+                 <h5>{clientData?.label}</h5>
                 <h6>{clientData?.address1}</h6>
                  <h6>{clientData?.address2}</h6> 
-                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6>{clientData?.phonenumber}</h6> 
 
                 <h6 style={{ display: "flex", gap: "20px",marginBottom:"3px" }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
@@ -1020,10 +1026,10 @@ const handleSelectedPartyChange=(event, newValue)=>{
                 
               </div>
               <div style={{ marginLeft:"2px",display:"flex",flexDirection:"column",gap:"3px"}}>
-              {/* <h5>{clientData?.label}</h5>
+              <h5>{clientData?.label}</h5>
                 <h6>{clientData?.address1}</h6>
                  <h6>{clientData?.address2}</h6> 
-                <h6>{clientData?.phonenumber}</h6>  */}
+                <h6>{clientData?.phonenumber}</h6> 
                 <h6 style={{ display: "flex", gap: "20px", }}>
                   <span>GSTIN/UIN</span> <span>: 32AAFFC5911M2Z1</span>
                 </h6>
