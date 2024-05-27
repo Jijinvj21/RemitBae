@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Grid, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import "./StockJournalPage.scss";
 import InputComponent from "../../components/InputComponent/InputComponent";
 import ProductInputCard from "../../components/ProductInputCard/ProductDataCard";
@@ -14,6 +14,8 @@ import {
   stockJournalCreateAPI,
   unitsDataGetAPI,
 } from "../../service/api/admin";
+// import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import HighlightOffOutlinedIcon from '@mui/icons-material/HighlightOffOutlined';
 
 function StockJournalPage() {
   const navigate = useNavigate();
@@ -41,10 +43,22 @@ function StockJournalPage() {
   const [taxOptions, setTaxOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState("");
   const [productImage, setProductImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isDesabled, setIsDesabled] = useState(true);
+
+
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     // You can perform any validation or processing here
+    if (file) {
+      const reader = new FileReader(); // FileReader object to read the file
+      reader.onloadend = () => {
+        // When reading is done, update the component state with the image data URL
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file); // Read the file as a data URL
+    }
     setProductImage(file);
   };
 
@@ -200,11 +214,21 @@ function StockJournalPage() {
       value: createdProducts.amount,
     },
   ];
-  const handleDelete = (event) => {
-    event.stopPropagation(); // Prevent the click event from bubbling up to the main div
-    alert("You clicked delete!");
+  // const handleDelete = (event) => {
+  //   event.stopPropagation(); // Prevent the click event from bubbling up to the main div
+  //   alert("You clicked delete!");
+  //   // const updatedArray = myArray.filter((item, i) => i !== index);
+  //   // // Set the state with the updated array
+  //   // setMyArray(updatedArray);
+  // };
+  
+  const handleDelete = (index) => {
+    // Perform the deletion logic here using the index
+    const updatedArray = myArray.filter((item, i) => i !== index);
+    // Set the state with the updated array
+    setMyArray(updatedArray);
   };
-
+  
   // handle right input change
   const handleRightInputChange = (e) => {
     console.log("handleRightInputChange", e.target);
@@ -251,6 +275,8 @@ function StockJournalPage() {
   };
   // handle create button click
   const handleCreateProduct = async () => {
+    setIsDesabled(false)
+
     try {
       const newArray = myArray.map((item) => ({
         quantity: parseInt(item.qty),
@@ -287,7 +313,8 @@ function StockJournalPage() {
   
       const data = await stockJournalCreateAPI(formData);
       console.log("stockJournalCreateAPI", data);
-  
+      alert("Stock journal created")
+      setIsDesabled(true)
       // Reset states
       setCreatedProducts({
         productname: "",
@@ -301,6 +328,8 @@ function StockJournalPage() {
       setSelectedTax(0);
     } catch (error) {
       console.error("Error creating product:", error);
+      alert("Problem in stock journal created")
+      setIsDesabled(true)
     }
   };
   
@@ -466,6 +495,11 @@ function StockJournalPage() {
             </Box>
             {/* image array */}
             {/* <div className="image-add-box"> */}
+            
+           {imagePreview? <div   style={{ bgcolor: "var(--inputbg-color)",display:"flex",justifyContent:"center", flexDirection:"column-reverse",alignItems:"center",gap:"10px"}}>
+            <HighlightOffOutlinedIcon  onClick={()=>{setImagePreview(null);setProductImage(null)}} style={{color:"red"}}/>
+            <img src={imagePreview}  width={250}  />
+           </div>:
             <Button
               className="image-add-box"
               disableRipple
@@ -484,7 +518,7 @@ function StockJournalPage() {
                 Upload product image
               </Typography>
               <input type="file" hidden onChange={handleImageChange} />
-            </Button>
+            </Button>}
             {/* </div> */}
           </Box>
           <Button
@@ -499,12 +533,17 @@ function StockJournalPage() {
               "&:hover": {
                 background: "var(--button-hover)",
               },
+              '&:disabled': {
+                bgcolor: "var(--black-button)",
+                color: 'white', },
             }}
             onClick={handleCreateProduct}
+            disabled={!isDesabled}
           >
-            {" "}
-            Create
-          </Button>
+            
+            {isDesabled? "Create":
+            <CircularProgress style={{color:"white",marginBottom:"5px",marginTop:"5px"}} size={25} />
+          }</Button>
         </Box>
       </Box>
       <p className="added-item"> Added Items</p>
@@ -563,16 +602,16 @@ function StockJournalPage() {
                     // maxWidth: "15%", // Equivalent to flex-basis: 20%
                   }}
                 >
-                  <ProductInputCard
-                    // handleUpdate={handleUpdate}
-                    handleDelete={handleDelete}
-                    heading={data.productData.label}
-                    image={data.img}
-                    qty={data.qty}
-                    unit={data.productData.unit}
-                    rate={data.totalAmout}
-                    amount={data.amount}
-                  />
+              <ProductInputCard
+  handleDelete={() => handleDelete(index)} // Pass the index to the handleDelete function
+  heading={data.productData.label}
+  image={data.img}
+  qty={data.qty}
+  unit={data.productData.unit}
+  rate={data.totalAmout}
+  amount={data.amount}
+/>
+
                 </Box>
               );
             })
