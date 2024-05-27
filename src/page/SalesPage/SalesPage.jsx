@@ -82,6 +82,51 @@ function SalesPage() {
 const [clientData,setclientData]= useState({});
 const [isDesabled, setIsDesabled] = useState(true);
 
+
+// const data = selectedProductDetails?.flatMap(selected => selected || []);
+const data =[]
+
+
+const calculateTax = (total, rate) => {
+  const subtotal = parseFloat(total);
+  const taxAmount = subtotal * (rate / 100);
+  
+  return {
+    cgstRate: rate / 2,
+    cgstAmount: taxAmount / 2,
+    sgstRate: rate / 2,
+    sgstAmount: taxAmount / 2
+  };
+};
+
+
+// Check if data is defined before using reduce
+const transformedData = data ? data.reduce((acc, item) => {
+  const existingItemIndex = acc.findIndex(elem => elem.hsn === item.hsn);
+  if (existingItemIndex !== -1) {
+    const existingItem = acc[existingItemIndex];
+    existingItem.total += parseFloat(item.amount);
+    // Calculate tax for the product
+    const tax = calculateTax(item.amount, parseFloat(item.tax_rate.percentage));
+    existingItem.cgstAmount += tax.cgstAmount;
+    existingItem.sgstAmount += tax.sgstAmount;
+  } else {
+    const { cgstRate, cgstAmount, sgstRate, sgstAmount } = calculateTax(
+      item.amount,
+      parseFloat(item.tax_rate.percentage)
+    );
+    acc.push({
+      hsn: item.hsn,
+      total: parseFloat(item.amount),
+      cgstRate,
+      cgstAmount,
+      sgstRate,
+      sgstAmount
+    });
+  }
+  return acc;
+}, []) : [];
+
   const getTaxOptionsFormAPI = () => {
     gstOptionsGetAPI()
       .then((data) => {
@@ -1160,7 +1205,7 @@ const [isDesabled, setIsDesabled] = useState(true);
     
   </thead>
   <tbody style={{ borderBottom: "1px solid black"}}>
-  {/* {transformedData?.map(item => (
+  {transformedData?.map(item => (
     <tr key={item?.hsn}>
       <td style={{ borderLeft: "1px solid black" }}>
         <h6> {item?.hsn}</h6>
@@ -1184,7 +1229,7 @@ const [isDesabled, setIsDesabled] = useState(true);
         <h6>{ (item?.total+item?.sgstAmount+item?.cgstAmount).toFixed(2)}</h6>
       </td>
     </tr>
-            ))} */}
+            ))}
 
   </tbody>
 </table>

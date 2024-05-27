@@ -559,7 +559,7 @@ const handleDateChange = (event) => {
 
     // Convert datatopass object to FormData
     const formData = new FormData();
-    formData.append('customer', datatopass.customer);
+    formData.append('party', datatopass.customer);
     formData.append('description', datatopass.description);
     formData.append('payment_type', datatopass.payment_type);
     formData.append('total_amount', datatopass.total_amount);

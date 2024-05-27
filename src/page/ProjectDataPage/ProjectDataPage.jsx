@@ -235,6 +235,7 @@ for (let i = 0; i < items.length; i += chunkSize) {
 const subtotal = pdfData?.product_info?.reduce((acc, curr) => acc + (curr.amount * curr.quantity), 0);
 
 const data = quotationGetData?.flatMap(quotation => quotation?.product_info || []);
+// console.log("dataquotationGetData",data)
 
 const calculateTax = (total, rate) => {
   const subtotal = parseFloat(total);
@@ -251,6 +252,7 @@ const calculateTax = (total, rate) => {
 
 // Check if data is defined before using reduce
 const transformedData = data ? data.reduce((acc, item) => {
+  console.log("dataquotationGetData,",item)
   const existingItemIndex = acc.findIndex(elem => elem.hsn === item.hsn);
   if (existingItemIndex !== -1) {
     const existingItem = acc[existingItemIndex];
