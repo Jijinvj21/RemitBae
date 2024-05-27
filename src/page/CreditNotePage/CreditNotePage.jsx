@@ -315,6 +315,7 @@ useEffect(() => {
       value: entry.id,
       label: entry.name,
     }));
+    stateData.unshift({ value: -2, label: "Select" })
     setStateOPtions(stateData)
   }).catch((err)=>{
 console.log(err)
